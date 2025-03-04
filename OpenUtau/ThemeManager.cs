@@ -42,7 +42,7 @@ namespace OpenUtau.App {
         public static IPen BarNumberPen = new Pen(Brushes.White);
         public static IBrush FinalPitchBrush = Brushes.Gray;
         public static IPen FinalPitchPen = new Pen(Brushes.Gray);
-        public static IPen FinalPitchPenTransparent = new Pen(Brushes.White, 1);
+        public static IPen FinalPitchPenTransparent = new Pen(Brushes.White, 3);
         public static IBrush WhiteKeyBrush = Brushes.White;
         public static IBrush WhiteKeyNameBrush = Brushes.Black;
         public static IBrush CenterKeyBrush = Brushes.White;
@@ -143,7 +143,7 @@ namespace OpenUtau.App {
                 NoteBorderPenPressed = new Pen((IBrush)outVar!, 1);
             }
             if (resDict.TryGetResource("FinalPitchBrushTransparent", themeVariant, out outVar)) {
-                FinalPitchPenTransparent = new Pen((IBrush)outVar!, 1);
+                FinalPitchPenTransparent = new Pen((IBrush)outVar!, 3);
             }
             if (resDict.TryGetResource("TickLineBrushLow", themeVariant, out outVar)) {
                 TickLineBrushLow = (IBrush)outVar!;

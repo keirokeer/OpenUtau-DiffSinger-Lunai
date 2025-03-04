@@ -52,7 +52,9 @@ namespace OpenUtau.App {
 
         // Avalonia configuration, don't remove; also used by visual designer.
         public static AppBuilder BuildAvaloniaApp() {
-            FontManagerOptions fontOptions = new();
+            FontManagerOptions fontOptions = new() {
+                DefaultFamilyName = "Comic Sans MS"
+            };
             if (OS.IsLinux()) {
                 using Process process = Process.Start(new ProcessStartInfo("/usr/bin/fc-match")
                 {
