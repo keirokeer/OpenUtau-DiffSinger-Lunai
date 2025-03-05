@@ -126,6 +126,25 @@
                    Color="#1E88E5" />
   <SolidColorBrush x:Key="SelectedTrackCenterKeyBrush"
                    Color="#C8E5FC" />
+  <!--Note Colors-->
+  <SolidColorBrush x:Key="PinkNoteBrush"
+                   Color="{DynamicResource PinkNoteColor}" />
+  <SolidColorBrush x:Key="PinkNoteBorderBrush"
+                   Color="{DynamicResource PinkNoteBorderColor}" />
+  <SolidColorBrush x:Key="PinkNoteBorderBrushPressed"
+                   Color="{DynamicResource PinkNoteBorderColorPressed}" />
+  <SolidColorBrush x:Key="RedNoteBrush"
+                   Color="{DynamicResource RedNoteColor}" />
+  <SolidColorBrush x:Key="RedNoteBorderBrush"
+                   Color="{DynamicResource RedNoteBorderColor}" />
+  <SolidColorBrush x:Key="RedNoteBorderBrushPressed"
+                   Color="{DynamicResource RedNoteBorderColorPressed}" />
+  <SolidColorBrush x:Key="OrangeNoteBrush"
+                   Color="{DynamicResource OrangeNoteColor}" />
+  <SolidColorBrush x:Key="OrangeNoteBorderBrush"
+                   Color="{DynamicResource OrangeNoteBorderColor}" />
+  <SolidColorBrush x:Key="OrangeNoteBorderBrushPressed"
+                   Color="{DynamicResource OrangeNoteBorderColorPressed}" />
 
   <LinearGradientBrush x:Key="WhiteKeyBrush" StartPoint="0%,50%" EndPoint="100%,50%">
     <LinearGradientBrush.GradientStops>

@@ -206,20 +206,24 @@ namespace OpenUtau.App.Controls {
         private void RenderNoteBody(UNote note, NotesViewModel viewModel, DrawingContext context) {
             double leftTick = TickOffset - 480;
             double rightTick = TickOffset + Bounds.Width / TickWidth + 480;
-
             if (note.LeftBound >= rightTick || note.RightBound <= leftTick) {
                 return;
             }
+
             Point leftTop = viewModel.TickToneToPoint(note.position, note.tone);
             leftTop = leftTop.WithX(leftTop.X + 1).WithY(Math.Round(leftTop.Y));
             Size size = viewModel.TickToneToSize(note.duration, 1);
             size = size.WithWidth(size.Width - 1).WithHeight(Math.Floor(size.Height));
             Point rightBottom = new Point(leftTop.X + size.Width, leftTop.Y + size.Height);
+
             var brush = selectedNotes.Contains(note)
-                ? (note.Error ? ThemeManager.AccentBrush2Semi : ThemeManager.AccentBrush2)
-                : (note.Error ? ThemeManager.AccentBrush1NoteSemi : ThemeManager.AccentBrush1Note);
-            context.DrawRectangle(brush, ThemeManager.NoteBorderPen, new Rect(leftTop, rightBottom), 4, 4);
-            var borderPen = selectedNotes.Contains(note) ? ThemeManager.NoteBorderPenPressed : ThemeManager.NoteBorderPen;
+                ? ThemeManager.NoteColorPressed
+                : ThemeManager.NoteColor;
+
+            var borderPen = selectedNotes.Contains(note)
+                ? new Pen(ThemeManager.NoteBorderColorPressed, 1)
+                : new Pen(ThemeManager.NoteBorderColor, 1);
+
             context.DrawRectangle(brush, borderPen, new Rect(leftTop, rightBottom), 4, 4);
             if (TrackHeight < 10 || note.lyric.Length == 0) {
                 return;

@@ -37,6 +37,10 @@ namespace OpenUtau.App {
         public static IBrush AccentBrush3Semi = Brushes.Gray;
         public static IPen NoteBorderPen = new Pen(Brushes.White, 1);
         public static IPen NoteBorderPenPressed = new Pen(Brushes.White, 1);
+        public static IBrush NoteColor = Brushes.White;
+        public static IBrush NoteColorPressed = Brushes.Gray;
+        public static IBrush NoteBorderColor = Brushes.Black;
+        public static IBrush NoteBorderColorPressed = Brushes.Gray;
         public static IBrush TickLineBrushLow = Brushes.Black;
         public static IBrush BarNumberBrush = Brushes.Black;
         public static IPen BarNumberPen = new Pen(Brushes.White);
@@ -57,15 +61,15 @@ namespace OpenUtau.App {
         public static IBrush ExpActiveNameBrush = Brushes.White;
 
         public static List<TrackColor> TrackColors = new List<TrackColor>(){
-                new TrackColor("Pink", "#DC799D", "#DA5789", "#E19EBA", "#EBCFDC"),
-                new TrackColor("Red", "#F3383E", "#E61E25", "#E6454A", "#F3AAAD"),
-                new TrackColor("Orange", "#FF8A65", "#FF7043", "#FFAB91", "#FFD5C8"),
-                new TrackColor("Yellow", "#FBC13A", "#FBAB32", "#FDD13F", "#FFF4C0"),
-                new TrackColor("Light Green", "#CDDC39", "#C0CA33", "#DCE775", "#F2F7CE"),
-                new TrackColor("Green", "#66BB6A", "#43A047", "#A5D6A7", "#D2EBD3"),
-                new TrackColor("Light Blue", "#4FC3F7", "#29B6F6", "#81D4FA", "#C0EAFD"),
-                new TrackColor("Blue", "#7266EE", "#4435E6", "#B1ABFB", "#E4E2FD"),
-                new TrackColor("Purple", "#BA68C8", "#AB47BC", "#CE93D8", "#E7C9EC"),
+                new TrackColor("Pink", "#a86589", "#faa5d2", "#f08bc1", "#fcacd7"),
+                new TrackColor("Red", "#8c2024", "#eb5257", "#cc3338", "#fcacac"),
+                new TrackColor("Orange", "#d96f41", "#ff9d73", "#FFAB91", "#fcbfac"),
+                new TrackColor("Yellow", "#FBC13A", "#FBAB32", "#FDD13F", "#fce4ac"),
+                new TrackColor("Light Green", "#CDDC39", "#C0CA33", "#DCE775", "#f2fcac"),
+                new TrackColor("Green", "#66BB6A", "#43A047", "#A5D6A7", "#d1ebd5"),
+                new TrackColor("Light Blue", "#4FC3F7", "#29B6F6", "#81D4FA", "#d1e2eb"),
+                new TrackColor("Blue", "#4C4C7A", "#7271C9", "#7B79D9", "#ADACFC"),
+                new TrackColor("Purple", "#BA68C8", "#AB47BC", "#CE93D8", "#e7acfc"),
                 new TrackColor("Pink2", "#E91E63", "#C2185B", "#F06292", "#F8B1C9"),
                 new TrackColor("Red2", "#D32F2F", "#B71C1C", "#EF5350", "#F7A9A8"),
                 new TrackColor("Orange2", "#FF5722", "#E64A19", "#FF7043", "#FFB8A1"),
@@ -90,6 +94,7 @@ namespace OpenUtau.App {
                     IsDarkMode = b;
                 }
             }
+            UpdateTrackColors(Preferences.Default.TrackColor);
             if (resDict.TryGetResource("SystemControlForegroundBaseHighBrush", themeVariant, out outVar)) {
                 ForegroundBrush = (IBrush)outVar!;
             }
@@ -175,6 +180,10 @@ namespace OpenUtau.App {
                 resDict["SelectedTrackAccentDarkBrush"] = tcolor.AccentColorDark;
                 resDict["SelectedTrackCenterKeyBrush"] = tcolor.AccentColorCenterKey;
 
+                Preferences.Default.TrackColor = color;
+                Preferences.Save();
+
+                UpdateTrackColors(color);
                 SetKeyboardBrush();
             } catch { }
             MessageBus.Current.SendMessage(new ThemeChangedEvent());
@@ -267,6 +276,16 @@ namespace OpenUtau.App {
                     ExpShadowBrush = CenterKeyBrush;
                     ExpShadowNameBrush = CenterKeyNameBrush;
                 }
+            }
+        }
+
+        public static void UpdateTrackColors(string trackColorName) {
+            var trackColor = TrackColors.FirstOrDefault(tc => tc.Name == trackColorName);
+            if (trackColor != null) {
+                NoteColor = new SolidColorBrush(Color.Parse(trackColor.AccentColor.Color.ToString()));
+                NoteColorPressed = new SolidColorBrush(Color.Parse(trackColor.AccentColorLight.Color.ToString()));
+                NoteBorderColor = new SolidColorBrush(Color.Parse(trackColor.AccentColorDark.Color.ToString()));
+                NoteBorderColorPressed = new SolidColorBrush(Color.Parse(trackColor.AccentColorLight.Color.ToString()));
             }
         }
 
