@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -235,13 +235,12 @@ namespace OpenUtau.Core.DiffSinger{
             varianceInputs.Add(NamedOnnxValue.CreateFromTensor("retake",
                 new DenseTensor<bool>(retake, new int[] { retake.Length }, false)
                 .Reshape(new int[] { 1, totalFrames, numVariances })));
-            var steps = Preferences.Default.DiffSingerSteps;
-            if (dsConfig.useContinuousAcceleration) {
+            var stepsVariance = Preferences.Default.DiffSingerVarianceSteps;
+            if (singer.dsConfig.useContinuousAcceleration) {
                 varianceInputs.Add(NamedOnnxValue.CreateFromTensor("steps",
-                    new DenseTensor<long>(new long[] { steps }, new int[] { 1 }, false)));
+                    new DenseTensor<long>(new long[] { stepsVariance }, new int[] { 1 }, false)));
             } else {
-                // find a largest integer speedup that are less than 1000 / steps and is a factor of 1000
-                long speedup = Math.Max(1, 1000 / steps);
+                long speedup = Math.Max(1, 1000 / stepsVariance);
                 while (1000 % speedup != 0 && speedup > 1) {
                     speedup--;
                 }

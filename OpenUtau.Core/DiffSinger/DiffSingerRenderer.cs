@@ -104,7 +104,7 @@ namespace OpenUtau.Core.DiffSinger {
                         }
                     }
                     if (result.samples == null) {
-                        result.samples = InvokeDiffsinger(phrase, depth, steps, cancellation);
+                        result.samples = InvokeDiffsinger(phrase, depth, Preferences.Default.DiffSingerAcousticSteps, Preferences.Default.DiffSingerVarianceSteps, cancellation);
                         if (result.samples != null) {
                             var source = new WaveSource(0, 0, 0, 1);
                             source.SetSamples(result.samples);
@@ -125,7 +125,7 @@ namespace OpenUtau.Core.DiffSinger {
         leadingMs、positionMs、estimatedLengthMs: timeaxis layout in Ms, double
          */
 
-        float[] InvokeDiffsinger(RenderPhrase phrase, double depth, int steps, CancellationTokenSource cancellation) {
+        float[] InvokeDiffsinger(RenderPhrase phrase, double depth, int stepsAcoustic, int stepsVariance, CancellationTokenSource cancellation) {
             var singer = phrase.singer as DiffSingerSinger;
             //Check if dsconfig.yaml is correct
             if(String.IsNullOrEmpty(singer.dsConfig.vocoder) ||
@@ -248,23 +248,36 @@ namespace OpenUtau.Core.DiffSinger {
                         new DenseTensor<float>(new float[] {(float)depth}, new int[] { 1 }, false)));
                 }
                 acousticInputs.Add(NamedOnnxValue.CreateFromTensor("steps",
-                    new DenseTensor<long>(new long[] { steps }, new int[] { 1 }, false)));
+                    new DenseTensor<long>(new long[] { stepsAcoustic }, new int[] { 1 }, false)));
             } else {
                 long speedup;
                 if (singer.dsConfig.useVariableDepth) {
-                    long int64Depth = (long) Math.Round(depth * 1000);
-                    speedup = Math.Max(1, int64Depth / steps);
+                    long int64Depth = (long)Math.Round(depth * 1000);
+                    speedup = Math.Max(1, int64Depth / stepsAcoustic);
                     int64Depth = int64Depth / speedup * speedup;  // make sure depth can be divided by speedup
                     acousticInputs.Add(NamedOnnxValue.CreateFromTensor("depth",
                         new DenseTensor<long>(new long[] { int64Depth }, new int[] { 1 }, false)));
                 } else {
                     // find a largest integer speedup that are less than 1000 / steps and is a factor of 1000
-                    speedup = Math.Max(1, 1000 / steps);
+                    speedup = Math.Max(1, 1000 / stepsAcoustic);
                     while (1000 % speedup != 0 && speedup > 1) {
                         speedup--;
                     }
                 }
                 acousticInputs.Add(NamedOnnxValue.CreateFromTensor("speedup",
+                    new DenseTensor<long>(new long[] { speedup }, new int[] { 1 }, false)));
+            }
+
+            var varianceInputs = new List<NamedOnnxValue>();
+            if (singer.dsConfig.useContinuousAcceleration) {
+                varianceInputs.Add(NamedOnnxValue.CreateFromTensor("steps",
+                    new DenseTensor<long>(new long[] { stepsVariance }, new int[] { 1 }, false)));
+            } else {
+                long speedup = Math.Max(1, 1000 / stepsVariance);
+                while (1000 % speedup != 0 && speedup > 1) {
+                    speedup--;
+                }
+                varianceInputs.Add(NamedOnnxValue.CreateFromTensor("speedup",
                     new DenseTensor<long>(new long[] { speedup }, new int[] { 1 }, false)));
             }
             //Language id

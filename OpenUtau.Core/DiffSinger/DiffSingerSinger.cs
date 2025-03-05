@@ -209,6 +209,16 @@ namespace OpenUtau.Core.DiffSinger {
             return variancePredictor;
         }
 
+        public int AcousticSteps {
+            get => dsConfig.acousticSteps;
+            set => dsConfig.acousticSteps = value;
+        }
+
+        public int VarianceSteps {
+            get => dsConfig.varianceSteps;
+            set => dsConfig.varianceSteps = value;
+        }
+
         public int PhonemeTokenize(string phoneme){
             bool success = phonemeTokens.TryGetValue(phoneme, out int token);
             if(!success){

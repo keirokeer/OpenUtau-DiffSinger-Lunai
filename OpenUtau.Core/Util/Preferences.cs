@@ -144,6 +144,8 @@ namespace OpenUtau.Core.Util {
             public int OnnxGpu = 0;
             public double DiffSingerDepth = 1.0;
             public int DiffSingerSteps = 20;
+            public int DiffSingerAcousticSteps = 20;
+            public int DiffSingerVarianceSteps = 10;
             public bool DiffSingerTensorCache = true;
             public bool SkipRenderingMutedTracks = true;
             public string Language = string.Empty;

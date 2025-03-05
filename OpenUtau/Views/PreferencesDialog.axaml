@@ -266,6 +266,36 @@
             <ToggleSwitch IsChecked="{Binding DiffSingerTensorCache}" />
           </Grid>
         </StackPanel>
+        <StackPanel>
+        <TextBlock Text="DiffSinger Acoustic Render Steps" Margin="0,10,0,0"/>
+        <ComboBox SelectedIndex="{Binding DiffSingerAcousticSteps}">
+          <ComboBoxItem Content="2"/>
+          <ComboBoxItem Content="5"/>
+          <ComboBoxItem Content="10"/>
+          <ComboBoxItem Content="20"/>
+          <ComboBoxItem Content="30"/>
+          <ComboBoxItem Content="40"/>
+          <ComboBoxItem Content="50"/>
+          <ComboBoxItem Content="100"/>
+          <ComboBoxItem Content="200"/>
+          <ComboBoxItem Content="500"/>
+          <ComboBoxItem Content="1000"/>
+        </ComboBox>
+        <TextBlock Text="DiffSinger Variance Render Steps" Margin="0,10,0,0"/>
+        <ComboBox SelectedIndex="{Binding DiffSingerVarianceSteps}">
+          <ComboBoxItem Content="2"/>
+          <ComboBoxItem Content="5"/>
+          <ComboBoxItem Content="10"/>
+          <ComboBoxItem Content="20"/>
+          <ComboBoxItem Content="30"/>
+          <ComboBoxItem Content="40"/>
+          <ComboBoxItem Content="50"/>
+          <ComboBoxItem Content="100"/>
+          <ComboBoxItem Content="200"/>
+          <ComboBoxItem Content="500"/>
+          <ComboBoxItem Content="1000"/>
+        </ComboBox>
+        </StackPanel>
 
         <!-- Advanced -->
         <StackPanel>

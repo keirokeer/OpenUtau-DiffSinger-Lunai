@@ -42,6 +42,8 @@ namespace OpenUtau.App.ViewModels {
         public List<int> DiffSingerStepsOptions { get; } = new List<int> { 2, 5, 10, 20, 30, 40, 50, 100, 200, 500, 1000 };
         [Reactive] public double DiffSingerDepth { get; set; }
         [Reactive] public int DiffSingerSteps { get; set; }
+        [Reactive] public int DiffSingerAcousticSteps { get; set; }
+        [Reactive] public int DiffSingerVarianceSteps { get; set; }
         [Reactive] public bool DiffSingerTensorCache { get; set; }
         [Reactive] public bool SkipRenderingMutedTracks { get; set; }
         [Reactive] public bool HighThreads { get; set; }
@@ -143,6 +145,8 @@ namespace OpenUtau.App.ViewModels {
             OnnxGpu = OnnxGpuOptions.FirstOrDefault(x => x.deviceId == Preferences.Default.OnnxGpu, OnnxGpuOptions[0]);
             DiffSingerDepth = Preferences.Default.DiffSingerDepth * 100;
             DiffSingerSteps = Preferences.Default.DiffSingerSteps;
+            DiffSingerAcousticSteps = Preferences.Default.DiffSingerAcousticSteps;
+            DiffSingerVarianceSteps = Preferences.Default.DiffSingerVarianceSteps;
             DiffSingerTensorCache = Preferences.Default.DiffSingerTensorCache;
             SkipRenderingMutedTracks = Preferences.Default.SkipRenderingMutedTracks;
             Theme = Preferences.Default.Theme;
@@ -331,6 +335,16 @@ namespace OpenUtau.App.ViewModels {
             this.WhenAnyValue(vm => vm.DiffSingerSteps)
                 .Subscribe(index => {
                     Preferences.Default.DiffSingerSteps = index;
+                    Preferences.Save();
+                });
+            this.WhenAnyValue(vm => vm.DiffSingerAcousticSteps)
+                .Subscribe(steps => {
+                    Preferences.Default.DiffSingerAcousticSteps = steps;
+                    Preferences.Save();
+                });
+            this.WhenAnyValue(vm => vm.DiffSingerVarianceSteps)
+                .Subscribe(steps => {
+                    Preferences.Default.DiffSingerVarianceSteps = steps;
                     Preferences.Save();
                 });
             this.WhenAnyValue(vm => vm.DiffSingerDepth)

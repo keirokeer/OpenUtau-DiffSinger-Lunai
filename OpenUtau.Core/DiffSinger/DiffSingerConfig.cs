@@ -63,6 +63,8 @@ namespace OpenUtau.Core.DiffSinger {
         public int win_size = 2048;
         public int fft_size = 2048;
         public int num_mel_bins = 128;
+        public int acousticSteps = 20;
+        public int varianceSteps = 10;
         public double mel_fmin = 40;
         public double mel_fmax = 16000;
         public string mel_base = "10";  // or "e"
