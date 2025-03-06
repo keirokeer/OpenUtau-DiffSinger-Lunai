@@ -51,6 +51,27 @@
   </PropertyGroup>
   <ItemGroup>
     <AvaloniaResource Include="Assets\**" />
+    <AvaloniaResource Include="Colors\LightTheme.axaml" />
+    <AvaloniaResource Include="Colors\DarkTheme.axaml" />
+    <AvaloniaResource Include="Colors\MoonTheme.axaml" />
+    <AvaloniaResource Include="Colors\CherryTheme.axaml" />
+    <AvaloniaResource Include="Colors\WineTheme.axaml" />
+    <AvaloniaResource Include="Colors\BarbieTheme.axaml" />
+    <AvaloniaResource Include="Colors\PearlTheme.axaml" />
+    <AvaloniaResource Include="Colors\PurpleTheme.axaml" />
+    <AvaloniaResource Include="Colors\LilacTheme.axaml" />
+    <AvaloniaResource Include="Colors\OceanTheme.axaml" />
+    <AvaloniaResource Include="Colors\SkyTheme.axaml" />
+    <AvaloniaResource Include="Colors\TealTheme.axaml" />
+    <AvaloniaResource Include="Colors\MintTheme.axaml" />
+    <AvaloniaResource Include="Colors\OliveTheme.axaml" />
+    <AvaloniaResource Include="Colors\GoldTheme.axaml" />
+    <AvaloniaResource Include="Colors\CheeseTheme.axaml" />
+    <AvaloniaResource Include="Colors\PeachTheme.axaml" />
+    <AvaloniaResource Include="Colors\SilverTheme.axaml" />
+    <AvaloniaResource Include="Colors\CoconutTheme.axaml" />
+    <AvaloniaResource Include="Colors\LavenderTheme.axaml" />
+    <AvaloniaResource Include="Colors\CoffeeTheme.axaml" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Avalonia.Themes.Fluent" Version="11.2.4" />

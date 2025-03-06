@@ -27,6 +27,25 @@
       <ResourceInclude x:Key="strings-th-TH" Source="/Strings/Strings.th-TH.axaml"/>
       <ResourceInclude x:Key="themes-dark" Source="/Colors/DarkTheme.axaml"/>
       <ResourceInclude x:Key="themes-light" Source="/Colors/LightTheme.axaml"/>
+      <ResourceInclude x:Key="themes-moon" Source="/Colors/MoonTheme.axaml"/>
+      <ResourceInclude x:Key="themes-cherry" Source="/Colors/CherryTheme.axaml"/>
+      <ResourceInclude x:Key="themes-wine" Source="/Colors/WineTheme.axaml"/>
+      <ResourceInclude x:Key="themes-barbie" Source="/Colors/BarbieTheme.axaml"/>
+      <ResourceInclude x:Key="themes-pearl" Source="/Colors/PearlTheme.axaml"/>
+      <ResourceInclude x:Key="themes-purple" Source="/Colors/PurpleTheme.axaml"/>
+      <ResourceInclude x:Key="themes-lilac" Source="/Colors/LilacTheme.axaml"/>
+      <ResourceInclude x:Key="themes-ocean" Source="/Colors/OceanTheme.axaml"/>
+      <ResourceInclude x:Key="themes-sky" Source="/Colors/SkyTheme.axaml"/>
+      <ResourceInclude x:Key="themes-teal" Source="/Colors/TealTheme.axaml"/>
+      <ResourceInclude x:Key="themes-mint" Source="/Colors/MintTheme.axaml"/>
+      <ResourceInclude x:Key="themes-olive" Source="/Colors/OliveTheme.axaml"/>
+      <ResourceInclude x:Key="themes-gold" Source="/Colors/GoldTheme.axaml"/>
+      <ResourceInclude x:Key="themes-cheese" Source="/Colors/CheeseTheme.axaml"/>
+      <ResourceInclude x:Key="themes-peach" Source="/Colors/PeachTheme.axaml"/>
+      <ResourceInclude x:Key="themes-silver" Source="/Colors/SilverTheme.axaml"/>
+      <ResourceInclude x:Key="themes-coconut" Source="/Colors/CoconutTheme.axaml"/>
+      <ResourceInclude x:Key="themes-lavender" Source="/Colors/LavenderTheme.axaml"/>
+      <ResourceInclude x:Key="themes-coffee" Source="/Colors/CoffeeTheme.axaml"/>
       <ResourceDictionary.MergedDictionaries>
         <ResourceInclude Source="/Colors/Brushes.axaml"/>
       </ResourceDictionary.MergedDictionaries>

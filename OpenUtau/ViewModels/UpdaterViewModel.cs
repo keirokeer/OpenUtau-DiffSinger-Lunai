@@ -33,7 +33,7 @@ namespace OpenUtau.App.ViewModels {
 #pragma warning restore 0649
         }
         public string AppVersion => $"v{System.Reflection.Assembly.GetEntryAssembly()?.GetName().Version}";
-        public bool IsDarkMode => ThemeManager.IsDarkMode;
+        public bool IsDarkMode => ThemeManager.CurrentTheme == ThemeType.Dark;
         [Reactive] public string UpdaterStatus { get; set; }
         [Reactive] public bool UpdateAvailable { get; set; }
         [Reactive] public FontWeight UpdateButtonFontWeight { get; set; }

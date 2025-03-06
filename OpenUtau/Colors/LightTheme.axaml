@@ -1,8 +1,13 @@
 <ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:system="clr-namespace:System;assembly=mscorlib"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-  <system:Boolean x:Key="IsDarkMode">false</system:Boolean>
+  <system:Int32 x:Key="ThemeType">0</system:Int32>
 
+  <Color x:Key="BlueAccentColor">#7266EE</Color>
+  <Color x:Key="BlueAccentColorDark">#4435E6</Color>
+  <Color x:Key="BlueAccentColorLight">#B1ABFB</Color>
+  <Color x:Key="BlueAccentColorCenterKey">#E4E2FD</Color>
+  
   <Color x:Key="BackgroundColor">#FCFCFC</Color>
   <Color x:Key="BackgroundColorPointerOver">#F0F0F0</Color>
   <Color x:Key="BackgroundColorPressed">#E0E0E0</Color>
@@ -31,6 +36,7 @@
 
   <Color x:Key="NoteBorderColor">#000000</Color>
   <Color x:Key="NoteBorderColorPressed">#00FF00</Color>
+  <Color x:Key="FinalPitchColorTransparent">#CAFFFFFF</Color>
   
   <Color x:Key="TickLineColor">#C0C0CA</Color>
   <Color x:Key="BarNumberColor">#4F4F6E</Color>

@@ -1,17 +1,12 @@
 <ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:system="clr-namespace:System;assembly=mscorlib"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-  <system:Int32 x:Key="ThemeType">1</system:Int32>
+  <system:Int32 x:Key="ThemeType">20</system:Int32>
 
-  <Color x:Key="BlueAccentColor">#7266EE</Color>
-  <Color x:Key="BlueAccentColorDark">#4435E6</Color>
-  <Color x:Key="BlueAccentColorLight">#B1ABFB</Color>
-  <Color x:Key="BlueAccentColorCenterKey">#E4E2FD</Color>
-  
-  <Color x:Key="BackgroundColor">#262626</Color>
-  <Color x:Key="BackgroundColorPointerOver">#303030</Color>
-  <Color x:Key="BackgroundColorPressed">#303030</Color>
-  <Color x:Key="BackgroundColorDisabled">#262626</Color>
+  <Color x:Key="BackgroundColor">#262626</Color> <!-- Цвет фона 1 -->
+  <Color x:Key="BackgroundColorPointerOver">#303030</Color> <!-- / -->
+  <Color x:Key="BackgroundColorPressed">#303030</Color> <!-- / -->
+  <Color x:Key="BackgroundColorDisabled">#262626</Color> <!-- / -->
 
   <Color x:Key="ForegroundColor">#F0F0F0</Color>
   <Color x:Key="ForegroundColorPointerOver">#FCFCFC</Color>
@@ -30,27 +25,27 @@
   <Color x:Key="NeutralAccentColor">#FCFCFC</Color>
   <Color x:Key="NeutralAccentColorPointerOver">#FCFCFC</Color>
   <Color x:Key="AccentColor1">#E0E0E0</Color>
-  <Color x:Key="AccentColor1Note">#4C4C7A</Color>
-  <Color x:Key="AccentColor2">#7271C9</Color>
+  <Color x:Key="AccentColor1Note">#4C4C7A</Color> <!-- Цвет ноты -->
+  <Color x:Key="AccentColor2">#7271C9</Color> <!-- Цвет нажатой ноты -->
   <Color x:Key="AccentColor3">#FCFCFC</Color>
 
-  <Color x:Key="NoteBorderColor">#7B79D9</Color>
-  <Color x:Key="NoteBorderColorPressed">#ADACFC</Color>
+  <Color x:Key="NoteBorderColor">#7B79D9</Color> <!-- Цвет обводки ноты -->
+  <Color x:Key="NoteBorderColorPressed">#ADACFC</Color> <!-- Цвет обводки нажатой ноты -->
   <Color x:Key="FinalPitchColorTransparent">#CAFFFFFF</Color>
   
   <Color x:Key="TickLineColor">#111111</Color>
   <Color x:Key="BarNumberColor">#E0E0E0</Color>
   <Color x:Key="FinalPitchColor">#FFFFFF</Color>
-  <Color x:Key="TrackBackgroundAltColor">#303030</Color>
+  <Color x:Key="TrackBackgroundAltColor">#303030</Color> <!-- Цвет фона 2 (чуть светлее) -->
 
   <!--Keyboard Background-->
   <Color x:Key="WhiteKeyColorLeft">#CACACA</Color>
   <Color x:Key="WhiteKeyColorRight">#E0E0E0</Color>
-  <Color x:Key="WhiteKeyNameColor">#303030</Color>
+  <Color x:Key="WhiteKeyNameColor">#303030</Color> <!-- / -->
 
-  <Color x:Key="CenterKeyColorLeft">#A9A6CD</Color>
-  <Color x:Key="CenterKeyColorRight">#D3CFFF</Color>
-  <Color x:Key="CenterKeyNameColor">#4433FF</Color>
+  <Color x:Key="CenterKeyColorLeft">#A9A6CD</Color> <!-- Цвет градиента панели -->
+  <Color x:Key="CenterKeyColorRight">#D3CFFF</Color> <!-- Цвет градиента панели (чуть светлее) -->
+  <Color x:Key="CenterKeyNameColor">#4433FF</Color> <!-- Цвет текста градиента панели (он будет на белом фоне) -->
 
   <Color x:Key="BlackKeyColorLeft">Transparent</Color>
   <Color x:Key="BlackKeyColorRight">Transparent</Color>

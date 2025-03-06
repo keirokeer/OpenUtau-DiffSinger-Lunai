@@ -101,7 +101,7 @@ namespace OpenUtau.App.Controls {
                     break;
             }
             while (top < Bounds.Height) {
-                bool isAltTrack = IsAltTrack(track) ^ (ThemeManager.IsDarkMode && !IsKeyboard);
+                bool isAltTrack = IsAltTrack(track) ^ (ThemeManager.CurrentTheme == ThemeType.Dark && !IsKeyboard);
                 bool isCenterKey = IsKeyboard && IsCenterKey(track);
                 var brush = isCenterKey ? ThemeManager.CenterKeyBrush
                     : IsKeyboard ? (isAltTrack ? ThemeManager.BlackKeyBrush : ThemeManager.WhiteKeyBrush)

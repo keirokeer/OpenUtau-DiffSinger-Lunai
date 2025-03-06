@@ -11,7 +11,7 @@ namespace OpenUtau.App.Views {
     public partial class SplashWindow : Window {
         public SplashWindow() {
             InitializeComponent();
-            if (ThemeManager.IsDarkMode) {
+            if (ThemeManager.CurrentTheme == ThemeType.Dark) {
                 LogoTypeLight.IsVisible = false;
                 LogoTypeDark.IsVisible = true;
             } else {

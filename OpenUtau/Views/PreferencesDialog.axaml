@@ -190,6 +190,25 @@
           <ComboBox SelectedIndex="{Binding Theme}">
             <ComboBoxItem Content="{DynamicResource prefs.appearance.theme.light}"/>
             <ComboBoxItem Content="{DynamicResource prefs.appearance.theme.dark}"/>
+            <ComboBoxItem Content="{DynamicResource prefs.appearance.theme.moon}"/>
+            <ComboBoxItem Content="{DynamicResource prefs.appearance.theme.cherry}"/>
+            <ComboBoxItem Content="{DynamicResource prefs.appearance.theme.wine}"/>
+            <ComboBoxItem Content="{DynamicResource prefs.appearance.theme.barbie}"/>
+            <ComboBoxItem Content="{DynamicResource prefs.appearance.theme.pearl}"/>
+            <ComboBoxItem Content="{DynamicResource prefs.appearance.theme.purple}"/>
+            <ComboBoxItem Content="{DynamicResource prefs.appearance.theme.lilac}"/>
+            <ComboBoxItem Content="{DynamicResource prefs.appearance.theme.ocean}"/>
+            <ComboBoxItem Content="{DynamicResource prefs.appearance.theme.sky}"/>
+            <ComboBoxItem Content="{DynamicResource prefs.appearance.theme.teal}"/>
+            <ComboBoxItem Content="{DynamicResource prefs.appearance.theme.mint}"/>
+            <ComboBoxItem Content="{DynamicResource prefs.appearance.theme.olive}"/>
+            <ComboBoxItem Content="{DynamicResource prefs.appearance.theme.gold}"/>
+            <ComboBoxItem Content="{DynamicResource prefs.appearance.theme.cheese}"/>
+            <ComboBoxItem Content="{DynamicResource prefs.appearance.theme.peach}"/>
+            <ComboBoxItem Content="{DynamicResource prefs.appearance.theme.silver}"/>
+            <ComboBoxItem Content="{DynamicResource prefs.appearance.theme.coconut}"/>
+            <ComboBoxItem Content="{DynamicResource prefs.appearance.theme.lavender}"/>
+            <ComboBoxItem Content="{DynamicResource prefs.appearance.theme.coffee}"/>
           </ComboBox>
           <TextBlock Text="{DynamicResource prefs.appearance.degree}" Margin="0,10,0,0"/>
           <ComboBox SelectedIndex="{Binding DegreeStyle}">

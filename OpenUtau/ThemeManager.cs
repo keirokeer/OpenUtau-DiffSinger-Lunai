@@ -1,18 +1,45 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Markup.Xaml;
 using Avalonia.Media;
 using Avalonia.Styling;
 using OpenUtau.App.Controls;
 using OpenUtau.Core.Util;
+using Org.BouncyCastle.Utilities;
 using ReactiveUI;
 
 namespace OpenUtau.App {
     class ThemeChangedEvent { }
 
+    public enum ThemeType {
+        Light,
+        Dark,
+        Moon,
+        Cherry,
+        Wine,
+        Barbie,
+        Pearl,
+        Purple,
+        Lilac,
+        Ocean,
+        Sky,
+        Teal,
+        Mint,
+        Olive,
+        Gold,
+        Cheese,
+        Peach,
+        Silver,
+        Coconut,
+        Lavender,
+        Coffee
+    }
+
     class ThemeManager {
-        public static bool IsDarkMode = false;
+        public static ThemeType CurrentTheme = ThemeType.Light;
         public static IBrush ForegroundBrush = Brushes.Black;
         public static IBrush BackgroundBrush = Brushes.White;
         public static IBrush NeutralAccentBrush = Brushes.Gray;
@@ -64,7 +91,7 @@ namespace OpenUtau.App {
                 new TrackColor("Light Green", "#CDDC39", "#C0CA33", "#DCE775", "#F2F7CE"),
                 new TrackColor("Green", "#66BB6A", "#43A047", "#A5D6A7", "#D2EBD3"),
                 new TrackColor("Light Blue", "#4FC3F7", "#29B6F6", "#81D4FA", "#C0EAFD"),
-                new TrackColor("Blue", "#7266EE", "#4435E6", "#B1ABFB", "#E4E2FD"),
+                new TrackColor("Blue", "#7266EE", "#4435E6", "#B1ABFB", "#E4E2FD"), //main colors
                 new TrackColor("Purple", "#BA68C8", "#AB47BC", "#CE93D8", "#E7C9EC"),
                 new TrackColor("Pink2", "#E91E63", "#C2185B", "#F06292", "#F8B1C9"),
                 new TrackColor("Red2", "#D32F2F", "#B71C1C", "#EF5350", "#F7A9A8"),
@@ -83,11 +110,11 @@ namespace OpenUtau.App {
             }
             IResourceDictionary resDict = Application.Current.Resources;
             object? outVar;
-            IsDarkMode = false;
+            CurrentTheme = ThemeType.Dark;
             var themeVariant = ThemeVariant.Default;
-            if (resDict.TryGetResource("IsDarkMode", themeVariant, out outVar)) {
-                if (outVar is bool b) {
-                    IsDarkMode = b;
+            if (resDict.TryGetResource("ThemeType", themeVariant, out outVar)) {
+                if (outVar is int themeIndex) {
+                    CurrentTheme = (ThemeType)themeIndex;
                 }
             }
             if (resDict.TryGetResource("SystemControlForegroundBaseHighBrush", themeVariant, out outVar)) {
@@ -161,6 +188,48 @@ namespace OpenUtau.App {
             MessageBus.Current.SendMessage(new ThemeChangedEvent());
         }
 
+        public static void ChangeTheme(ThemeType themeType) {
+            if (Application.Current == null) {
+                return;
+            }
+
+            var themeResource = themeType switch {
+                ThemeType.Light => LoadResourceFromFile("/Colors/LightTheme.axaml"),
+                ThemeType.Dark => LoadResourceFromFile("/Colors/DarkTheme.axaml"),
+                ThemeType.Moon => LoadResourceFromFile("/Colors/MoonTheme.axaml"),
+                ThemeType.Cherry => LoadResourceFromFile("/Colors/CherryTheme.axaml"),
+                ThemeType.Wine => LoadResourceFromFile("/Colors/WineTheme.axaml"),
+                ThemeType.Barbie => LoadResourceFromFile("/Colors/BarbieTheme.axaml"),
+                ThemeType.Pearl => LoadResourceFromFile("/Colors/PearlTheme.axaml"),
+                ThemeType.Purple => LoadResourceFromFile("/Colors/PurpleTheme.axaml"),
+                ThemeType.Lilac => LoadResourceFromFile("/Colors/LilacTheme.axaml"),
+                ThemeType.Ocean => LoadResourceFromFile("/Colors/OceanTheme.axaml"),
+                ThemeType.Sky => LoadResourceFromFile("/Colors/SkyTheme.axaml"),
+                ThemeType.Teal => LoadResourceFromFile("/Colors/TealTheme.axaml"),
+                ThemeType.Mint => LoadResourceFromFile("/Colors/MintTheme.axaml"),
+                ThemeType.Olive => LoadResourceFromFile("/Colors/OliveTheme.axaml"),
+                ThemeType.Gold => LoadResourceFromFile("/Colors/GoldTheme.axaml"),
+                ThemeType.Cheese => LoadResourceFromFile("/Colors/CheeseTheme.axaml"),
+                ThemeType.Peach => LoadResourceFromFile("/Colors/PeachTheme.axaml"),
+                ThemeType.Silver => LoadResourceFromFile("/Colors/SilverTheme.axaml"),
+                ThemeType.Coconut => LoadResourceFromFile("/Colors/CoconutTheme.axaml"),
+                ThemeType.Lavender => LoadResourceFromFile("/Colors/LavenderTheme.axaml"),
+                ThemeType.Coffee => LoadResourceFromFile("/Colors/CoffeeTheme.axaml"),
+                _ => throw new ArgumentOutOfRangeException(nameof(themeType), themeType, null)
+            };
+
+            Application.Current.Resources.MergedDictionaries.Clear();
+            Application.Current.Resources.MergedDictionaries.Add(themeResource);
+
+            CurrentTheme = themeType;
+            LoadTheme();
+        }
+
+        private static ResourceDictionary LoadResourceFromFile(string path) {
+            var uri = new Uri($"avares://OpenUtau{path}", UriKind.Absolute);
+            return (ResourceDictionary)AvaloniaXamlLoader.Load(uri);
+        }
+
         public static void ChangePianorollColor(string color) {
             if (Application.Current == null) {
                 return;
@@ -188,7 +257,7 @@ namespace OpenUtau.App {
             var themeVariant = ThemeVariant.Default;
 
             if (Preferences.Default.UseTrackColor) {
-                if (IsDarkMode) {
+                if (CurrentTheme == ThemeType.Dark) {
                     if (resDict.TryGetResource("SelectedTrackAccentBrush", themeVariant, out outVar)) {
                         CenterKeyNameBrush = (IBrush)outVar!;
                         WhiteKeyBrush = (IBrush)outVar!;
@@ -252,7 +321,7 @@ namespace OpenUtau.App {
                 if (resDict.TryGetResource("BlackKeyNameBrush", themeVariant, out outVar)) {
                     BlackKeyNameBrush = (IBrush)outVar!;
                 }
-                if (!IsDarkMode) {
+                if (CurrentTheme == ThemeType.Dark) {
                     ExpBrush = WhiteKeyBrush;
                     ExpNameBrush = WhiteKeyNameBrush;
                     ExpActiveBrush = BlackKeyBrush;
