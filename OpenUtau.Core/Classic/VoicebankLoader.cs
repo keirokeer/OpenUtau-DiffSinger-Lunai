@@ -204,6 +204,7 @@ namespace OpenUtau.Classic {
                     subbank.Color ??= string.Empty;
                     subbank.Prefix ??= string.Empty;
                     subbank.Suffix ??= string.Empty;
+                    subbank.Order = subbank.Order;
                 }
                 bank.Subbanks.AddRange(bankConfig.Subbanks);
             }

@@ -75,6 +75,7 @@ namespace OpenUtau.Core.DiffSinger {
             subbanks.Clear();
             subbanks.AddRange(voicebank.Subbanks
                 .Select(subbank => new USubbank(subbank)));
+            subbanks = subbanks.OrderBy(s => s.Order).ToList();
 
             //Load diffsinger config of a voicebank
             string configPath = Path.Combine(Location, "dsconfig.yaml");

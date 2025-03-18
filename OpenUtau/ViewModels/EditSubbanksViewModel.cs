@@ -101,7 +101,7 @@ namespace OpenUtau.App.ViewModels {
                     }
                     subbanks.Add(subbank.subbank);
                 }
-                foreach (var key in colors.Keys.OrderBy(k => k)) {
+                foreach (var key in colors.Keys.OrderBy(k => colors[k].First().Order)) {
                     Colors.Add(new VoiceColor(key, colors[key]));
                 }
                 if (Colors.Count == 0) {
@@ -193,16 +193,22 @@ namespace OpenUtau.App.ViewModels {
 
         private Subbank[] ColorsToSubbanks() {
             var result = new List<Subbank>();
+            if (Singer == null) {
+                return result.ToArray();
+            }
+
             foreach (var color in Colors) {
                 var subbanks = new Dictionary<Tuple<string, string>, Subbank>();
                 var toneSets = new Dictionary<Tuple<string, string>, SortedSet<int>>();
                 foreach (var row in color.Rows) {
                     var key = Tuple.Create(row.Prefix, row.Suffix);
                     if (!subbanks.TryGetValue(key, out var subbank)) {
+                        var originalSubbank = Singer.Subbanks.FirstOrDefault(s => s.Prefix == row.Prefix && s.Suffix == row.Suffix);
                         subbank = new Subbank() {
                             Color = color.Name,
                             Prefix = row.Prefix,
                             Suffix = row.Suffix,
+                            Order = originalSubbank?.Order ?? 0
                         };
                         subbanks[key] = subbank;
                     }

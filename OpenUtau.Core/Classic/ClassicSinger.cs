@@ -95,7 +95,8 @@ namespace OpenUtau.Classic {
 
             subbanks.Clear();
             subbanks.AddRange(voicebank.Subbanks
-                .OrderByDescending(subbank => subbank.Prefix.Length + subbank.Suffix.Length)
+                .OrderBy(subbank => subbank.Order)
+                .ThenByDescending(subbank => subbank.Prefix.Length + subbank.Suffix.Length)
                 .Select(subbank => new USubbank(subbank)));
             var patterns = subbanks.Select(subbank => new Regex($"^{Regex.Escape(subbank.Prefix)}(.*){Regex.Escape(subbank.Suffix)}$"))
                 .ToList();
