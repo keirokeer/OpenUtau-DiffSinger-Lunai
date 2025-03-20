@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
 using System.Text;
 using OpenUtau.Classic;
 using OpenUtau.Core.Util;
@@ -228,7 +229,7 @@ namespace OpenUtau.Core.Ustx {
         public virtual string Sample { get; }
         public virtual string DefaultPhonemizer { get; }
         public virtual Encoding TextFileEncoding => Encoding.UTF8;
-        public virtual IList<USubbank> Subbanks { get; }
+        public virtual IList<USubbank> Subbanks { get; } = new List<USubbank>();
         public virtual IList<UOto> Otos => emptyOtos;
 
         public bool Found => found;
@@ -282,7 +283,16 @@ namespace OpenUtau.Core.Ustx {
             }
         }
 
-        public virtual void EnsureLoaded() { }
+        public virtual void EnsureLoaded() {
+            if (!loaded) {
+                var sortedSubbanks = Subbanks.OrderBy(subbank => subbank.subbank.Order).ToList();
+                Subbanks.Clear();
+                foreach (var subbank in sortedSubbanks) {
+                    Subbanks.Add(subbank);
+                }
+                loaded = true;
+            }
+        }
         public virtual void Reload() { }
         public virtual void Save() { }
         public virtual bool TryGetOto(string phoneme, out UOto oto) {

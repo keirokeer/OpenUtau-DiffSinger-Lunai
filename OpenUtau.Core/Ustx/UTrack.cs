@@ -188,7 +188,10 @@ namespace OpenUtau.Core.Ustx {
             if (project.expressions.TryGetValue(Format.Ustx.CLR, out var descriptor)) {
                 if (VoiceColorExp == null && Singer != null && Singer.Found && Singer.Loaded) {
                     VoiceColorExp = descriptor.Clone();
-                    var colors = Singer.Subbanks.Select(subbank => subbank.Color).ToHashSet();
+                    var colors = Singer.Subbanks
+                        .OrderBy(subbank => subbank.subbank.Order)
+                        .Select(subbank => subbank.Color)
+                        .ToHashSet();
                     VoiceColorExp.options = colors.OrderBy(c => c).ToArray();
                     VoiceColorExp.max = VoiceColorExp.options.Length - 1;
                 }

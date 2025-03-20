@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using DynamicData.Binding;
 using OpenUtau.App.ViewModels;
 using OpenUtau.Core;
 
@@ -15,6 +16,7 @@ namespace OpenUtau.App.Views {
         public EditSubbanksDialog() {
             InitializeComponent();
             DataContext = ViewModel = new EditSubbanksViewModel();
+            ViewModel.Colors = new ObservableCollectionExtended<VoiceColor>(ViewModel.Colors.OrderBy(c => c.Order));
         }
 
         void OnAdd(object sender, RoutedEventArgs e) {

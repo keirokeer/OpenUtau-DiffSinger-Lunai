@@ -13,9 +13,11 @@ using ReactiveUI.Fody.Helpers;
 namespace OpenUtau.App.ViewModels {
     class VoiceColor : ReactiveObject {
         [Reactive] public string Name { get; set; }
+        [Reactive] public int Order { get; set; }
         [Reactive] public ObservableCollectionExtended<VoiceColorRow> Rows { get; set; }
         public VoiceColor(string color, List<Subbank> subbanks) {
             Name = color;
+            Order = subbanks.FirstOrDefault()?.Order ?? 0;
             Rows = new ObservableCollectionExtended<VoiceColorRow>();
             for (int i = 107; i >= 24; --i) {
                 Rows.Add(new VoiceColorRow(i, string.Empty, string.Empty));
@@ -94,14 +96,14 @@ namespace OpenUtau.App.ViewModels {
             try {
                 Colors.Clear();
                 var colors = new Dictionary<string, List<Subbank>>();
-                foreach (var subbank in Singer.Subbanks) {
+                foreach (var subbank in Singer.Subbanks.OrderBy(s => s.subbank.Order)) {
                     if (!colors.TryGetValue(subbank.Color ?? string.Empty, out var subbanks)) {
                         subbanks = new List<Subbank>();
                         colors[subbank.Color ?? string.Empty] = subbanks;
                     }
                     subbanks.Add(subbank.subbank);
                 }
-                foreach (var key in colors.Keys.OrderBy(k => k)) {
+                foreach (var key in colors.Keys.OrderBy(k => colors[k].FirstOrDefault()?.Order ?? 0)) {
                     Colors.Add(new VoiceColor(key, colors[key]));
                 }
                 if (Colors.Count == 0) {

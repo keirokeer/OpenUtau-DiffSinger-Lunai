@@ -30,6 +30,11 @@ namespace OpenUtau.Classic {
         public string Suffix { get; set; } = string.Empty;
 
         /// <summary>
+        /// Order of the subbank for sorting.
+        /// </summary>
+        public int Order { get; set; } = 0;
+
+        /// <summary>
         /// Tone ranges. Each range specified as "C1-C4" or "C4".
         /// </summary>
         public string[] ToneRanges { get; set; }

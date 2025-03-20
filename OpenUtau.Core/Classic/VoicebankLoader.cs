@@ -221,6 +221,7 @@ namespace OpenUtau.Classic {
                     ToneRanges = new string[0],
                 });
             }
+            voicebank.Subbanks = voicebank.Subbanks.OrderBy(s => s.Order).ToList();
         }
 
         public static void LoadPrefixMap(Voicebank voicebank) {
