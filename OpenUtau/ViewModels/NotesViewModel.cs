@@ -593,7 +593,7 @@ namespace OpenUtau.App.ViewModels {
             /// </summary>
             SelectNote(note, true);
         }
-        public void SelectNote(UNote note, bool deselectExisting) {
+        public void SelectNote(UNote note, bool deselectExisting = true) {
             if (Part == null) {
                 return;
             }
