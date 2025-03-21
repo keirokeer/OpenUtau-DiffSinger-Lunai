@@ -216,10 +216,11 @@ namespace OpenUtau.App.Controls {
             size = size.WithWidth(size.Width - 1).WithHeight(Math.Floor(size.Height));
             Point rightBottom = new Point(leftTop.X + size.Width, leftTop.Y + size.Height);
             var brush = selectedNotes.Contains(note)
-                ? (note.Error ? ThemeManager.AccentBrush2Semi : ThemeManager.AccentBrush2)
-                : (note.Error ? ThemeManager.AccentBrush1NoteSemi : ThemeManager.AccentBrush1Note);
-            context.DrawRectangle(brush, ThemeManager.NoteBorderPen, new Rect(leftTop, rightBottom), 4, 4);
-            var borderPen = selectedNotes.Contains(note) ? ThemeManager.NoteBorderPenPressed : ThemeManager.NoteBorderPen;
+                ? (note.Error ? ThemeManager.NoteBrushPressed : ThemeManager.NoteBrushPressed)
+                : (note.Error ? ThemeManager.NoteBrushPressed : ThemeManager.NoteBrush);
+            var borderPen = selectedNotes.Contains(note)
+                ? ThemeManager.NoteBorderPenPressed
+                : ThemeManager.NoteBorderPen;
             context.DrawRectangle(brush, borderPen, new Rect(leftTop, rightBottom), 4, 4);
             if (TrackHeight < 10 || note.lyric.Length == 0) {
                 return;
