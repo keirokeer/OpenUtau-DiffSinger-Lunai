@@ -59,24 +59,24 @@ namespace OpenUtau.App {
         public static IBrush ExpActiveNameBrush = Brushes.White;
 
         public static List<TrackColor> TrackColors = new List<TrackColor>(){
-                new TrackColor("Flamingo", "#DC799D", "#DA5789", "#E19EBA", "#EBCFDC", "#A67487", "#9A4D69", "#CD8FA6", "#B36C86"), // note, note pressed, border, border pressed
-                new TrackColor("Cherry", "#F3383E", "#E61E25", "#E6454A", "#F3AAAD", "#8D272B", "#B3272C", "#C84448", "#E64E53"),
-                new TrackColor("Peach", "#FF8A65", "#FF7043", "#FFAB91", "#FFD5C8", "#FF8A65", "#E66741", "#FFAB91", "#FB9F82"),
-                new TrackColor("Banana", "#FBC13A", "#FBAB32", "#FDD13F", "#FFF4C0", "#F2BB3C", "#CD9629", "#FFD97F", "#E6B85C"),
-                new TrackColor("Light Green", "#CDDC39", "#C0CA33", "#DCE775", "#F2F7CE", "#CDDC39", "#C0CA33", "#DCE775", "#F2F7CE"),
-                new TrackColor("Green", "#66BB6A", "#43A047", "#A5D6A7", "#D2EBD3", "#CDDC39", "#C0CA33", "#DCE775", "#F2F7CE"),
-                new TrackColor("Light Blue", "#4FC3F7", "#29B6F6", "#81D4FA", "#C0EAFD", "#CDDC39", "#C0CA33", "#DCE775", "#F2F7CE"),
-                new TrackColor("Blue", "#7266EE", "#4435E6", "#B1ABFB", "#E4E2FD", "#4C4C7A", "#7B79D9", "#7271C9", "#ADACFC"),
-                new TrackColor("Purple", "#BA68C8", "#AB47BC", "#CE93D8", "#E7C9EC", "#CDDC39", "#C0CA33", "#DCE775", "#F2F7CE"),
-                new TrackColor("Barbie", "#E91E63", "#C2185B", "#F06292", "#F8B1C9", "#DA4674", "#B3245B", "#F486A9", "#DA5789"),
-                new TrackColor("Wine", "#D42F3D", "#B81C29", "#F14F5D", "#F8A9AF", "#71272E", "#9F232D", "#AE343E", "#C33A46"),
-                new TrackColor("Orange", "#FF5722", "#E64A19", "#FF7043", "#FFB8A1", "#E65427", "#C33C13", "#E66741", "#E1633D"),
-                new TrackColor("Gold", "#FF8F00", "#FF7F00", "#FFB300", "#FFE097", "#EC9A2F", "#C07326", "#FEB557", "#EA9B4D"),
-                new TrackColor("Light Green2", "#AFB42B", "#9E9D24", "#CDDC39", "#E6EE9C", "#CDDC39", "#C0CA33", "#DCE775", "#F2F7CE"),
-                new TrackColor("Green2", "#2E7D32", "#1B5E20", "#43A047", "#A1D0A3", "#CDDC39", "#C0CA33", "#DCE775", "#F2F7CE"),
-                new TrackColor("Light Blue2", "#1976D2", "#0D47A1", "#2196F3", "#90CBF9", "#CDDC39", "#C0CA33", "#DCE775", "#F2F7CE"),
-                new TrackColor("Blue2", "#5950BB", "#3529B3", "#8D88C8", "#CCCBE4", "#CDDC39", "#C0CA33", "#DCE775", "#F2F7CE"),
-                new TrackColor("Purple2", "#7B1FA2", "#4A148C", "#AB47BC", "#D5A3DE", "#CDDC39", "#C0CA33", "#DCE775", "#F2F7CE"),
+                new TrackColor("Flamingo", "#DC799D", "#DA5789", "#E19EBA", "#EBCFDC", "#80AF6B85", "#C2708E", "#D194AA", "#99AF6B85"), // note, note pressed, border, border pressed
+                new TrackColor("Cherry", "#F3383E", "#E61E25", "#E6454A", "#F3AAAD", "#809E2E32", "#B93136", "#B93136", "#999E2E32"),
+                new TrackColor("Peach", "#FF8A65", "#FF7043", "#FFAB91", "#FFD5C8", "#80F5683D", "#E07352", "#FFAB91", "#99F5683D"),
+                new TrackColor("Banana", "#FBC13A", "#FBAB32", "#FDD13F", "#FFF4C0", "#80FAC038", "#E6B34D", "#FFD97F", "#99FAC038"),
+                new TrackColor("Light Green", "#CDDC39", "#C0CA33", "#DCE775", "#F2F7CE", "#80CDDC39", "#C0CA33", "#DCE775", "#99F2F7CE"),
+                new TrackColor("Green", "#66BB6A", "#43A047", "#A5D6A7", "#D2EBD3", "#80CDDC39", "#C0CA33", "#DCE775", "#99F2F7CE"),
+                new TrackColor("Light Blue", "#4FC3F7", "#29B6F6", "#81D4FA", "#C0EAFD", "#80CDDC39", "#C0CA33", "#DCE775", "#99F2F7CE"),
+                new TrackColor("Blue", "#7266EE", "#4435E6", "#B1ABFB", "#E4E2FD", "#804A4A4A", "#707070", "#909090", "#99C9C9C9"),
+                new TrackColor("Purple", "#BA68C8", "#AB47BC", "#CE93D8", "#E7C9EC", "#80CDDC39", "#C0CA33", "#DCE775", "#99F2F7CE"),
+                new TrackColor("Barbie", "#E91E63", "#C2185B", "#F06292", "#F8B1C9", "#80DB5781", "#DA3E7A", "#F28CAD", "#99F6ACC3"),
+                new TrackColor("Wine", "#D42F3D", "#B81C29", "#F14F5D", "#F8A9AF", "#8071272E", "#9F232D", "#AE343E", "#99C33A46"),
+                new TrackColor("Orange", "#FF5722", "#E64A19", "#FF7043", "#FFB8A1", "#80E65427", "#C33C13", "#E66741", "#99E1633D"),
+                new TrackColor("Gold", "#FF8F00", "#FF7F00", "#FFB300", "#FFE097", "#80EC9A2F", "#C07326", "#FEB557", "#99EA9B4D"),
+                new TrackColor("Light Green2", "#AFB42B", "#9E9D24", "#CDDC39", "#E6EE9C", "#80CDDC39", "#C0CA33", "#DCE775", "#99F2F7CE"),
+                new TrackColor("Green2", "#2E7D32", "#1B5E20", "#43A047", "#A1D0A3", "#80CDDC39", "#C0CA33", "#DCE775", "#99F2F7CE"),
+                new TrackColor("Light Blue2", "#1976D2", "#0D47A1", "#2196F3", "#90CBF9", "#80CDDC39", "#C0CA33", "#DCE775", "#99F2F7CE"),
+                new TrackColor("Blue2", "#7266EE", "#4435E6", "#B1ABFB", "#E4E2FD", "#804C4C7A", "#7B79D9", "#7271C9", "#99ADACFC"),
+                new TrackColor("Purple2", "#7B1FA2", "#4A148C", "#AB47BC", "#D5A3DE", "#80CDDC39", "#C0CA33", "#DCE775", "#99F2F7CE"),
             };
 
         public static void LoadTheme() {
