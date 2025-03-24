@@ -37,6 +37,7 @@ namespace OpenUtau.App {
         public static IBrush AccentBrush3Semi = Brushes.Gray;
         public static IPen NoteBorderPen = new Pen(Brushes.White, 1);
         public static IPen NoteBorderPenPressed = new Pen(Brushes.White, 1);
+        public static IBrush NoteEmptyBrush = Brushes.White;
         public static IBrush NoteBrush = Brushes.White;
         public static IBrush NoteBrushPressed = Brushes.Gray;
         public static IBrush TickLineBrushLow = Brushes.Black;
@@ -59,24 +60,24 @@ namespace OpenUtau.App {
         public static IBrush ExpActiveNameBrush = Brushes.White;
 
         public static List<TrackColor> TrackColors = new List<TrackColor>(){
-                new TrackColor("Flamingo", "#DC799D", "#DA5789", "#E19EBA", "#EBCFDC", "#80AF6B85", "#C2708E", "#D194AA", "#99AF6B85"), // note, note pressed, border, border pressed
-                new TrackColor("Cherry", "#F3383E", "#E61E25", "#E6454A", "#F3AAAD", "#809E2E32", "#B93136", "#B93136", "#999E2E32"),
-                new TrackColor("Peach", "#FF8A65", "#FF7043", "#FFAB91", "#FFD5C8", "#80F5683D", "#E07352", "#FFAB91", "#99F5683D"),
-                new TrackColor("Banana", "#FBC13A", "#FBAB32", "#FDD13F", "#FFF4C0", "#80FAC038", "#E6B34D", "#FFD97F", "#99FAC038"),
-                new TrackColor("Light Green", "#CDDC39", "#C0CA33", "#DCE775", "#F2F7CE", "#80CDDC39", "#C0CA33", "#DCE775", "#99F2F7CE"),
-                new TrackColor("Green", "#66BB6A", "#43A047", "#A5D6A7", "#D2EBD3", "#80CDDC39", "#C0CA33", "#DCE775", "#99F2F7CE"),
-                new TrackColor("Light Blue", "#4FC3F7", "#29B6F6", "#81D4FA", "#C0EAFD", "#80CDDC39", "#C0CA33", "#DCE775", "#99F2F7CE"),
-                new TrackColor("Blue", "#7266EE", "#4435E6", "#B1ABFB", "#E4E2FD", "#804A4A4A", "#707070", "#909090", "#99C9C9C9"),
-                new TrackColor("Purple", "#BA68C8", "#AB47BC", "#CE93D8", "#E7C9EC", "#80CDDC39", "#C0CA33", "#DCE775", "#99F2F7CE"),
-                new TrackColor("Barbie", "#E91E63", "#C2185B", "#F06292", "#F8B1C9", "#80DB5781", "#DA3E7A", "#F28CAD", "#99F6ACC3"),
-                new TrackColor("Wine", "#D42F3D", "#B81C29", "#F14F5D", "#F8A9AF", "#8071272E", "#9F232D", "#AE343E", "#99C33A46"),
-                new TrackColor("Orange", "#FF5722", "#E64A19", "#FF7043", "#FFB8A1", "#80E65427", "#C33C13", "#E66741", "#99E1633D"),
-                new TrackColor("Gold", "#FF8F00", "#FF7F00", "#FFB300", "#FFE097", "#80EC9A2F", "#C07326", "#FEB557", "#99EA9B4D"),
-                new TrackColor("Light Green2", "#AFB42B", "#9E9D24", "#CDDC39", "#E6EE9C", "#80CDDC39", "#C0CA33", "#DCE775", "#99F2F7CE"),
-                new TrackColor("Green2", "#2E7D32", "#1B5E20", "#43A047", "#A1D0A3", "#80CDDC39", "#C0CA33", "#DCE775", "#99F2F7CE"),
-                new TrackColor("Light Blue2", "#1976D2", "#0D47A1", "#2196F3", "#90CBF9", "#80CDDC39", "#C0CA33", "#DCE775", "#99F2F7CE"),
-                new TrackColor("Blue2", "#7266EE", "#4435E6", "#B1ABFB", "#E4E2FD", "#804C4C7A", "#7B79D9", "#7271C9", "#99ADACFC"),
-                new TrackColor("Purple2", "#7B1FA2", "#4A148C", "#AB47BC", "#D5A3DE", "#80CDDC39", "#C0CA33", "#DCE775", "#99F2F7CE"),
+                new TrackColor("Flamingo", "#D491AA", "#E06C96", "#E8B0C6", "#EBCFDC", "#66AC7288", "#C2708E", "#D491AA", "#99AC7288", "#1AAC7288"), // note, note pressed, border, border pressed, note empty
+                new TrackColor("Cherry", "#D93A3F", "#C02A2F", "#D9454A", "#F5B7B9", "#669E2E32", "#AF3136", "#C02A2F", "#999E2E32", "#1A9E2E32"),
+                new TrackColor("Peach", "#FF8A65", "#FF7043", "#FFAB91", "#FFD5C8", "#70F5683D", "#E07352", "#FFAB91", "#99F5683D", "#1AF5683D"),
+                new TrackColor("Banana", "#FBC13A", "#FBAB32", "#FDD13F", "#FFF4C0", "#70FAC038", "#DFAD49", "#FFD97F", "#99FAC038", "#1AFAC038"),
+                new TrackColor("Olive", "#CDDC39", "#B0B931", "#DCE775", "#F2F7CE", "#70CDD926", "#99A12B", "#E8F764", "#99CDD926", "#1ACDD926"),
+                new TrackColor("Mint", "#66BB8A", "#43A06A", "#A5D6BA", "#D2EBDD", "#7033CC73", "#45A16B", "#4DCB82", "#9933CC73", "#1A33CC73"),
+                new TrackColor("Sky", "#80D9FF", "#3DC7F5", "#9EE3FA", "#C4EFFD", "#5980D9FF", "#4D99B3", "#9EE3FA", "#9980D9FF", "#1A80D9FF"),
+                new TrackColor("Blue", "#7266EE", "#4435E6", "#B1ABFB", "#E4E2FD", "#704C4C7A", "#50509B", "#7B79D9", "#994C4C7A", "#1A4C4C7A"),
+                new TrackColor("Purple", "#BA68C8", "#AB47BC", "#CE93D8", "#E7C9EC", "#70BA68C8", "#AB47BC", "#CE93D8", "#99BA68C8", "#1ABA68C8"),
+                new TrackColor("Barbie", "#E91E63", "#C2185B", "#F06292", "#F8B1C9", "#70DB5781", "#DA3E7A", "#F28CAD", "#99DB5781", "#1ADB5781"),
+                new TrackColor("Wine", "#AE3442", "#96212F", "#D25664", "#FAA8B1", "#666A252E", "#96212F", "#AE3442", "#996A252E", "#1A6A252E"),
+                new TrackColor("Orange", "#EE582B", "#C33C13", "#F06B42", "#FFC2B3", "#70E65427", "#C33C13", "#F06B42", "#99E65427", "#1AE65427"),
+                new TrackColor("Gold", "#FF8F00", "#FF7F00", "#FFB300", "#FFE097", "#70EC9A2F", "#C07326", "#FFAF4D", "#99EC9A2F", "#1AEC9A2F"),
+                new TrackColor("BRAT", "#C5E233", "#BAE61A", "#DBF075", "#F3FAD1", "#70BAE61A", "#8BAA0E", "#E1FF4D", "#99BAE61A", "#1AC4E61A"),
+                new TrackColor("Forest", "#2E7D32", "#1B5E20", "#43A047", "#A1D0A3", "#701B5E20", "#2E7D32", "#43A047", "#991B5E20", "#1A1B5E20"),
+                new TrackColor("Teal", "#0AC2C2", "#008080", "#2196F3", "#90CBF9", "#70008080", "#238B8B", "#14B8B8", "#99008080", "#1A008080"),
+                new TrackColor("Violet", "#7B1FA2", "#4A148C", "#AB47BC", "#D5A3DE", "#70CDDC39", "#C0CA33", "#DCE775", "#99F2F7CE", "#1AAF6B85"),
+                new TrackColor("Moon", "#707070", "#4A4A4A", "#909090", "#C9C9C9", "#704A4A4A", "#707070", "#909090", "#99C9C9C9", "#1AAF6B85"),
             };
 
         public static void LoadTheme() {
@@ -181,6 +182,7 @@ namespace OpenUtau.App {
                 NoteBorderPen = new Pen(tcolor.NoteBorderColor);
                 NoteBrushPressed = tcolor.NoteColorPressed;
                 NoteBorderPenPressed = new Pen(tcolor.NoteBorderColorPressed);
+                NoteEmptyBrush = tcolor.NoteColorEmpty;
 
                 SetKeyboardBrush();
             } catch { }
@@ -321,8 +323,9 @@ namespace OpenUtau.App {
         public SolidColorBrush NoteColorPressed { get; set; }
         public SolidColorBrush NoteBorderColor { get; set; }
         public SolidColorBrush NoteBorderColorPressed { get; set; }
+        public SolidColorBrush NoteColorEmpty { get; set; }
 
-        public TrackColor(string name, string accentColor, string darkColor, string lightColor, string centerKey, string noteColor, string noteColorPressed, string noteBorderColor, string noteBorderColorPressed) {
+        public TrackColor(string name, string accentColor, string darkColor, string lightColor, string centerKey, string noteColor, string noteColorPressed, string noteBorderColor, string noteBorderColorPressed, string noteColorEmpty) {
             Name = name;
             AccentColor = SolidColorBrush.Parse(accentColor);
             AccentColorDark = SolidColorBrush.Parse(darkColor);
@@ -334,6 +337,7 @@ namespace OpenUtau.App {
             NoteColorPressed = SolidColorBrush.Parse(noteColorPressed);
             NoteBorderColor = SolidColorBrush.Parse(noteBorderColor);
             NoteBorderColorPressed = SolidColorBrush.Parse(noteBorderColorPressed);
+            NoteColorEmpty = SolidColorBrush.Parse(noteColorEmpty);
         }
     }
 }
