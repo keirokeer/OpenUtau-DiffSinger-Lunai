@@ -134,7 +134,7 @@ namespace OpenUtau.Core.Util {
             public int Theme = 1;
             public bool PenPlusDefault = false;
             public int DegreeStyle;
-            public bool UseTrackColor = false;
+            public bool UseTrackColor = true;
             public bool ClearCacheOnQuit = false;
             public bool PreRender = false;
             public bool UseSolidPlaybackLine = false;
@@ -142,7 +142,7 @@ namespace OpenUtau.Core.Util {
             public string DefaultRenderer = string.Empty;
             public int WorldlineR = 0;
             public string OnnxRunner = string.Empty;
-            public int OnnxGpu = 0;
+            public int OnnxGpu = 1;
             public double DiffSingerDepth = 1.0;
             public int DiffSingerSteps = 20;
             public int DiffSingerStepsVariance = 20;
