@@ -76,7 +76,7 @@ namespace OpenUtau.App {
                 new TrackColor("BRAT", "#C5E233", "#BAE61A", "#DBF075", "#F3FAD1", "#70BAE61A", "#8BAA0E", "#E1FF4D", "#99BAE61A", "#1AC4E61A"),
                 new TrackColor("Forest", "#2E7D32", "#1B5E20", "#43A047", "#A1D0A3", "#701B5E20", "#2E7D32", "#43A047", "#991B5E20", "#1A1B5E20"),
                 new TrackColor("Teal", "#0AC2C2", "#008080", "#2196F3", "#90CBF9", "#70008080", "#238B8B", "#14B8B8", "#99008080", "#1A008080"),
-                new TrackColor("Violet", "#7B1FA2", "#4A148C", "#AB47BC", "#D5A3DE", "#70CDDC39", "#C0CA33", "#DCE775", "#99F2F7CE", "#1AAF6B85"),
+                new TrackColor("Violet", "#7B1FA2", "#4A148C", "#AB47BC", "#D5A3DE", "#704A148C", "#7B1FA2", "#AB47BC", "#994A148C", "#1A4A148C"),
                 new TrackColor("Moon", "#707070", "#4A4A4A", "#909090", "#C9C9C9", "#704A4A4A", "#707070", "#909090", "#99C9C9C9", "#1AAF6B85"),
             };
 
