@@ -64,4 +64,20 @@
     </Style>
   </Style>
 
+  <Style Selector="ToggleButton.toolbar:checked">
+      <Setter Property="Background" Value="{DynamicResource SelectedTrackAccentBrush}"/>
+  </Style>
+  <Style Selector="ToggleButton.toolbar:checked:pointerover">
+      <Setter Property="Background" Value="{DynamicResource SelectedTrackAccentLightBrush}"/>
+  </Style>
+  <Style Selector="ToggleButton.toolbar:checked:pressed">
+      <Setter Property="Background" Value="{DynamicResource SelectedTrackAccentDarkBrush}"/>
+  </Style>
+  <Style Selector="ToggleButton.toolbar:checked Path.filled">
+      <Setter Property="Fill" Value="{DynamicResource BackgroundBrushSemi}"/>
+  </Style>
+  <Style Selector="ToggleButton.toolbar:checked Path.stroked">
+      <Setter Property="Stroke" Value="{DynamicResource BackgroundBrushSemi}"/>
+  </Style>
+
 </Styles>

@@ -151,46 +151,56 @@
     </Style>
   </Style>
 
-  <Style Selector="ToggleButton.toolbar">
-    <Setter Property="BorderThickness" Value="0"/>
-    <Setter Property="FontSize" Value="12"/>
-    <Setter Property="Height" Value="20"/>
-    <Setter Property="Margin" Value="0,4"/>
-    <Setter Property="Padding" Value="4,0,4,2"/>
-    <Setter Property="HorizontalContentAlignment" Value="Center"/>
-    <Setter Property="VerticalContentAlignment" Value="Center"/>
-    <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundAltHighBrush}" />
+    <Style Selector="ToggleButton.toolbar">
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="Height" Value="20"/>
+        <Setter Property="Margin" Value="0,4"/>
+        <Setter Property="Padding" Value="4,0,4,2"/>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundAltHighBrush}" />
 
-    <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-      <Setter Property="Background" Value="{DynamicResource NeutralAccentBrush}" />
-    </Style>
-    <Style Selector="^:pressed  /template/ ContentPresenter#PART_ContentPresenter">
-      <Setter Property="Background" Value="{DynamicResource NeutralAccentBrushPointerOver}" />
-    </Style>
-    <Style Selector="^:checked /template/ ContentPresenter#PART_ContentPresenter">
-      <Setter Property="Background" Value="{DynamicResource NeutralAccentBrushSemi}" />
-    </Style>
-    <Style Selector="^:checked:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-      <Setter Property="Background" Value="{DynamicResource NeutralAccentBrush}" />
-    </Style>
-    <Style Selector="^:checked:pressed /template/ ContentPresenter#PART_ContentPresenter">
-      <Setter Property="Background" Value="{DynamicResource NeutralAccentBrushPointerOver}" />
+        <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource NeutralAccentBrush}" />
+        </Style>
+        <Style Selector="^:pressed  /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource NeutralAccentBrushPointerOver}" />
+        </Style>
+        <Style Selector="^:checked /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource NeutralAccentBrushSemi}" />
+        </Style>
+        <Style Selector="^:checked:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource NeutralAccentBrush}" />
+        </Style>
+        <Style Selector="^:checked:pressed /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource NeutralAccentBrushPointerOver}" />
+        </Style>
+
+        <Style Selector="^:checked Path.filled">
+            <Setter Property="Fill" Value="{DynamicResource BackgroundBrushSemi}" />
+        </Style>
+        <Style Selector="^:checked Ellipse.stroked">
+            <Setter Property="Stroke" Value="{DynamicResource BackgroundBrushSemi}" />
+        </Style>
+        <Style Selector="^:checked Path.stroked">
+            <Setter Property="Stroke" Value="{DynamicResource BackgroundBrushSemi}" />
+        </Style>
+
+        <Style Selector="^ Path.filled">
+            <Setter Property="Fill" Value="{DynamicResource SystemControlForegroundBaseHighBrush}" />
+        </Style>
+        <Style Selector="^ Ellipse.stroked">
+            <Setter Property="StrokeThickness" Value="1"/>
+            <Setter Property="Stroke" Value="{DynamicResource SystemControlForegroundBaseHighBrush}" />
+        </Style>
+        <Style Selector="^ Path.stroked">
+            <Setter Property="StrokeThickness" Value="1"/>
+            <Setter Property="Stroke" Value="{DynamicResource SystemControlForegroundBaseHighBrush}" />
+        </Style>
     </Style>
 
-    <Style Selector="^ Path.filled">
-      <Setter Property="Fill" Value="{DynamicResource SystemControlForegroundBaseHighBrush}" />
-    </Style>
-    <Style Selector="^ Ellipse.stroked">
-      <Setter Property="StrokeThickness" Value="1"/>
-      <Setter Property="Stroke" Value="{DynamicResource SystemControlForegroundBaseHighBrush}" />
-    </Style>
-    <Style Selector="^ Path.stroked">
-      <Setter Property="StrokeThickness" Value="1"/>
-      <Setter Property="Stroke" Value="{DynamicResource SystemControlForegroundBaseHighBrush}" />
-    </Style>
-  </Style>
-
-  <Style Selector="ToggleSwitch /template/ Border#SwitchKnobBounds">
+    <Style Selector="ToggleSwitch /template/ Border#SwitchKnobBounds">
     <Setter Property="Background" Value="{DynamicResource AccentBrush1Note}"/>
   </Style>
 
