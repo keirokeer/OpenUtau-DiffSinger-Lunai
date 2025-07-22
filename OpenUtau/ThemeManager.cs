@@ -24,6 +24,8 @@ namespace OpenUtau.App {
         public static IPen AccentPen1Thickness2 = new Pen(Brushes.White);
         public static IPen AccentPen1Thickness3 = new Pen(Brushes.White);
         public static IBrush AccentBrush1Semi = Brushes.Gray;
+        public static IBrush AccentBrush1Note = Brushes.White;
+        public static IBrush AccentBrush1NoteSemi = Brushes.Gray;
         public static IBrush AccentBrush2 = Brushes.Gray;
         public static IPen AccentPen2 = new Pen(Brushes.White);
         public static IPen AccentPen2Thickness2 = new Pen(Brushes.White);
@@ -33,11 +35,14 @@ namespace OpenUtau.App {
         public static IPen AccentPen3 = new Pen(Brushes.White);
         public static IPen AccentPen3Thick = new Pen(Brushes.White);
         public static IBrush AccentBrush3Semi = Brushes.Gray;
+        public static IPen NoteBorderPen = new Pen(Brushes.White, 1);
+        public static IPen NoteBorderPenPressed = new Pen(Brushes.White, 1);
         public static IBrush TickLineBrushLow = Brushes.Black;
         public static IBrush BarNumberBrush = Brushes.Black;
         public static IPen BarNumberPen = new Pen(Brushes.White);
         public static IBrush FinalPitchBrush = Brushes.Gray;
         public static IPen FinalPitchPen = new Pen(Brushes.Gray);
+        public static IPen FinalPitchPenTransparent = new Pen(Brushes.White, 1);
         public static IBrush RealCurveFillBrush = Brushes.Gray;
         public static IBrush RealCurveStrokeBrush = Brushes.Gray;
         public static IPen RealCurvePen = new Pen(Brushes.Gray, 1D, DashStyle.Dash);
@@ -55,14 +60,14 @@ namespace OpenUtau.App {
         public static IBrush ExpActiveNameBrush = Brushes.White;
 
         public static List<TrackColor> TrackColors = new List<TrackColor>(){
-                new TrackColor("Pink", "#F06292", "#EC407A", "#F48FB1", "#FAC7D8"),
-                new TrackColor("Red", "#EF5350", "#E53935", "#E57373", "#F2B9B9"),
+                new TrackColor("Pink", "#DC799D", "#DA5789", "#E19EBA", "#EBCFDC"),
+                new TrackColor("Red", "#F3383E", "#E61E25", "#E6454A", "#F3AAAD"),
                 new TrackColor("Orange", "#FF8A65", "#FF7043", "#FFAB91", "#FFD5C8"),
-                new TrackColor("Yellow", "#FBC02D", "#F9A825", "#FDD835", "#FEF1B6"),
+                new TrackColor("Yellow", "#FBC13A", "#FBAB32", "#FDD13F", "#FFF4C0"),
                 new TrackColor("Light Green", "#CDDC39", "#C0CA33", "#DCE775", "#F2F7CE"),
                 new TrackColor("Green", "#66BB6A", "#43A047", "#A5D6A7", "#D2EBD3"),
                 new TrackColor("Light Blue", "#4FC3F7", "#29B6F6", "#81D4FA", "#C0EAFD"),
-                new TrackColor("Blue", "#4EA6EA", "#1E88E5", "#90CAF9", "#C8E5FC"),
+                new TrackColor("Blue", "#7266EE", "#4435E6", "#B1ABFB", "#E4E2FD"),
                 new TrackColor("Purple", "#BA68C8", "#AB47BC", "#CE93D8", "#E7C9EC"),
                 new TrackColor("Pink2", "#E91E63", "#C2185B", "#F06292", "#F8B1C9"),
                 new TrackColor("Red2", "#D32F2F", "#B71C1C", "#EF5350", "#F7A9A8"),
@@ -71,7 +76,7 @@ namespace OpenUtau.App {
                 new TrackColor("Light Green2", "#AFB42B", "#9E9D24", "#CDDC39", "#E6EE9C"),
                 new TrackColor("Green2", "#2E7D32", "#1B5E20", "#43A047", "#A1D0A3"),
                 new TrackColor("Light Blue2", "#1976D2", "#0D47A1", "#2196F3", "#90CBF9"),
-                new TrackColor("Blue2", "#3949AB", "#283593", "#5C6BC0", "#AEB5E0"),
+                new TrackColor("Blue2", "#5950BB", "#3529B3", "#8D88C8", "#CCCBE4"),
                 new TrackColor("Purple2", "#7B1FA2", "#4A148C", "#AB47BC", "#D5A3DE"),
             };
 
@@ -111,6 +116,12 @@ namespace OpenUtau.App {
             if (resDict.TryGetResource("AccentBrush1Semi", themeVariant, out outVar)) {
                 AccentBrush1Semi = (IBrush)outVar!;
             }
+            if (resDict.TryGetResource("AccentBrush1Note", themeVariant, out outVar)) {
+                AccentBrush1Note = (IBrush)outVar!;
+            }
+            if (resDict.TryGetResource("AccentBrush1NoteSemi", themeVariant, out outVar)) {
+                AccentBrush1NoteSemi = (IBrush)outVar!;
+            }
             if (resDict.TryGetResource("AccentBrush2", themeVariant, out outVar)) {
                 AccentBrush2 = (IBrush)outVar!;
                 AccentPen2 = new Pen(AccentBrush2, 1);
@@ -127,6 +138,15 @@ namespace OpenUtau.App {
             }
             if (resDict.TryGetResource("AccentBrush3Semi", themeVariant, out outVar)) {
                 AccentBrush3Semi = (IBrush)outVar!;
+            }
+            if (resDict.TryGetResource("NoteBorderBrush", themeVariant, out outVar)) {
+                NoteBorderPen = new Pen((IBrush)outVar!, 1);
+            }
+            if (resDict.TryGetResource("NoteBorderBrushPressed", themeVariant, out outVar)) {
+                NoteBorderPenPressed = new Pen((IBrush)outVar!, 1);
+            }
+            if (resDict.TryGetResource("FinalPitchBrushTransparent", themeVariant, out outVar)) {
+                FinalPitchPenTransparent = new Pen((IBrush)outVar!, 1);
             }
             if (resDict.TryGetResource("TickLineBrushLow", themeVariant, out outVar)) {
                 TickLineBrushLow = (IBrush)outVar!;

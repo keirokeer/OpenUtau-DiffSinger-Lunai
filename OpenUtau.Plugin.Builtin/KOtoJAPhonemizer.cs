@@ -9,7 +9,7 @@ using WanaKanaNet;
 using static OpenUtau.Core.KoreanPhonemizerUtil;
 
 namespace OpenUtau.Plugin.Builtin {
-    [Phonemizer("KO to JA Phonemizer", "KO to JA", "Lotte V", language: "KO")]
+    [Phonemizer("KO to JA Phonemizer", "KO to JA", "Lotte V", language: "UTAU")]
     public class KOtoJAPhonemizer : BaseKoreanPhonemizer {
         /// <summary>
         /// Phonemizer for making Japanese banks sing in Korean.

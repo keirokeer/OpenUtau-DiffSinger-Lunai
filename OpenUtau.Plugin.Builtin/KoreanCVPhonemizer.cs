@@ -10,7 +10,7 @@ using Serilog;
 
 namespace OpenUtau.Plugin.Builtin {
     /// Phonemizer for 'KOR CV' ///
-    [Phonemizer("Korean CV Phonemizer", "KO CV", "EX3", language: "KO")]
+    [Phonemizer("Korean CV Phonemizer", "KO CV", "EX3", language: "UTAU")]
 
     public class KoreanCVPhonemizer : BaseKoreanPhonemizer {
 

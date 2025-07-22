@@ -13,7 +13,7 @@ using YamlDotNet.Core.Tokens;
 using System.Text.RegularExpressions;
 
 namespace OpenUtau.Plugin.Builtin {
-    [Phonemizer("Arpasing+ Phonemizer", "EN ARPA+", "Cadlaxa", language: "EN")]
+    [Phonemizer("Arpasing+ Phonemizer", "EN ARPA+", "Cadlaxa", language: "UTAU")]
     // Custom ARPAsing Phonemizer for OU
     // main focus of this Phonemizer is to bring fallbacks to existing available alias from
     // all ARPAsing banks

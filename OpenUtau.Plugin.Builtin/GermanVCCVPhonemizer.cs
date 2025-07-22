@@ -8,7 +8,7 @@ using OpenUtau.Core.Ustx;
 using Serilog;
 
 namespace OpenUtau.Plugin.Builtin {
-    [Phonemizer("German VCCV Phonemizer", "DE VCCV", "Lotte V", language: "DE")]
+    [Phonemizer("German VCCV Phonemizer", "DE VCCV", "Lotte V", language: "UTAU")]
     public class GermanVCCVPhonemizer : SyllableBasedPhonemizer {
         /// <summary>
         /// German VCCV phonemizer.
