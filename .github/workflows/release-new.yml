@@ -4,18 +4,18 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: "Version (0.0.0.0)"
+        description: "Version"
         required: true
         default: "0.0.0.0"
         type: string
       release:
         description: "Release"
         type: boolean
-        default: false
+        default: true
       beta:
         description: "Beta"
         type: boolean
-        default: true
+        default: false
 
 env:
   RELEASE_NAME: ${{ inputs.version }}${{ inputs.beta && ' Beta' || '' }}
@@ -147,23 +147,16 @@ jobs:
         run: |
           python appcast.py -v=${{ inputs.version }} -o=linux -r=${{ matrix.arch.name }} -f=OpenUtau-${{ matrix.arch.name }}.zip
 
-      # Upload artifacts
-      - name: Upload Artifacts
+      # Upload artifacts and appcast
+      - name: Upload Release Files
         uses: actions/upload-artifact@v4
         with:
-          name: OpenUtau-${{ matrix.arch.name }}
+          name: release-files-${{ matrix.arch.name }}
           path: |
             OpenUtau-${{ matrix.arch.name }}.zip
             OpenUtau-${{ matrix.arch.name }}.exe
             OpenUtau-${{ matrix.arch.name }}.dmg
-
-      # Upload appcast
-      - name: Upload Appcast Files
-        if: inputs.release
-        uses: actions/upload-artifact@v4
-        with:
-          name: appcast-files
-          path: appcast.*.xml
+            appcast.${{ matrix.arch.name }}*.xml
 
       # Create Release
       - name: Create GitHub Release
