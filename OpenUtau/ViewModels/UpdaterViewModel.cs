@@ -134,7 +134,7 @@ namespace OpenUtau.App.ViewModels {
 
         public void OnGithub() {
             try {
-                OS.OpenWeb("https://github.com/keirokeer/OpenUtau-DiffSinger-Lunai/wiki");
+                OS.OpenWeb("https://github.com/stakira/OpenUtau/wiki");
             } catch (Exception e) {
                 DocManager.Inst.ExecuteCmd(new ErrorMessageNotification(e));
             }
