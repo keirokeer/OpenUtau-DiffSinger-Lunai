@@ -13,7 +13,7 @@ using YamlDotNet.Core.Tokens;
 using System.Text.RegularExpressions;
 
 namespace OpenUtau.Plugin.Builtin {
-    [Phonemizer("Filipino Phonemizer", "FIL VCV & CVVC", "Cadlaxa", language: "FIL")]
+    [Phonemizer("Filipino Phonemizer", "FIL VCV & CVVC", "Cadlaxa", language: "UTAU")]
     public class FilipinoPhonemizer : SyllableBasedPhonemizer {
         private string[] vowels = {
         "a", "e", "i", "o", "u", "ay", "ey", "oy", "uy", "aw", "ew", "ow", "iw"
