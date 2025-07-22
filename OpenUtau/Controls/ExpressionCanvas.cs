@@ -119,7 +119,7 @@ namespace OpenUtau.App.Controls {
                 var lPen = ThemeManager.AccentPen1;
                 var lPen2 = ThemeManager.AccentPen1Thickness2;
                 var lPen3 = new Pen(ThemeManager.NeutralAccentBrush, 1, new DashStyle(new double[] { 4, 4 }, 0));
-                var brush = ThemeManager.AccentBrush1;
+                var brush = ThemeManager.AccentBrush1Note;
                 double x3 = Math.Round(viewModel.TickToneToPoint(leftTick, 0).X);
                 double x4 = Math.Round(viewModel.TickToneToPoint(rightTick, 0).X);
                 context.DrawLine(lPen3, new Point(x3, defaultHeight), new Point(x4, defaultHeight));

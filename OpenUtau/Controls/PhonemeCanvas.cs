@@ -70,7 +70,7 @@ namespace OpenUtau.App.Controls {
 
         public PhonemeCanvas() {
             ClipToBounds = true;
-            pointGeometry = new EllipseGeometry(new Rect(-2.5, -2.5, 5, 5));
+            pointGeometry = new EllipseGeometry(new Rect(0, 0, 0, 0));
             MessageBus.Current.Listen<NotesRefreshEvent>()
                 .Subscribe(_ => InvalidateVisual());
             MessageBus.Current.Listen<NotesSelectionEvent>()
@@ -111,7 +111,7 @@ namespace OpenUtau.App.Controls {
             double lastTextEndX = double.NegativeInfinity;
 
             const double y = 35.5;
-            const double height = 24;
+            const double height = 28;
             foreach (var phoneme in Part.phonemes) {
                 double leftBound = viewModel.Project.timeAxis.MsPosToTickPos(phoneme.PositionMs - phoneme.preutter) - Part.position;
                 double rightBound = phoneme.End;
@@ -133,8 +133,8 @@ namespace OpenUtau.App.Controls {
                     double x4 = viewModel.TickToneToPoint(timeAxis.MsPosToTickPos(posMs + phoneme.envelope.data[4].X) - Part.position, 0).X;
                     double y4 = (1 - phoneme.envelope.data[4].Y / 100) * height;
 
-                    var pen = selectedNotes.Contains(phoneme.Parent) ? ThemeManager.AccentPen2 : ThemeManager.AccentPen1;
-                    var brush = selectedNotes.Contains(phoneme.Parent) ? ThemeManager.AccentBrush2Semi : ThemeManager.AccentBrush1Semi;
+                    var pen = selectedNotes.Contains(phoneme.Parent) ? ThemeManager.AccentPen2 : ThemeManager.AccentPen2;
+                    var brush = selectedNotes.Contains(phoneme.Parent) ? ThemeManager.AccentBrush2Semi : ThemeManager.AccentBrush1NoteSemi;
 
                     var point0 = new Point(x0, y + y0);
                     var point1 = new Point(x1, y + y1);

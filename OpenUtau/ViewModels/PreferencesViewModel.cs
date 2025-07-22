@@ -40,9 +40,9 @@ namespace OpenUtau.App.ViewModels {
         [Reactive] public string OnnxRunner { get; set; }
         public List<GpuInfo> OnnxGpuOptions { get; set; }
         [Reactive] public GpuInfo OnnxGpu { get; set; }
-        public List<int> DiffSingerStepsOptions { get; } = new List<int> { 2, 5, 10, 20, 50, 100, 200, 500, 1000 };
-        public List<int> DiffSingerStepsVarianceOptions { get; } = new List<int> { 2, 5, 10, 20, 50, 100, 200, 500, 1000 };
-        public List<int> DiffSingerStepsPitchOptions { get; } = new List<int> { 2, 5, 10, 20, 50, 100, 200, 500, 1000 };
+        public List<int> DiffSingerStepsOptions { get; } = new List<int> { 2, 5, 10, 20, 30, 40, 50, 100, 200, 500, 1000 };
+        public List<int> DiffSingerStepsVarianceOptions { get; } = new List<int> { 2, 5, 10, 20, 30, 40, 50, 100, 200, 500, 1000 };
+        public List<int> DiffSingerStepsPitchOptions { get; } = new List<int> { 2, 5, 10, 20, 30, 40, 50, 100, 200, 500, 1000 };
         [Reactive] public double DiffSingerDepth { get; set; }
         [Reactive] public int DiffSingerSteps { get; set; }
         [Reactive] public int DiffSingerStepsVariance { get; set; }
