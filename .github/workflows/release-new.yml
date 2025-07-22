@@ -1,0 +1,177 @@
+name: Release Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version"
+        required: true
+        default: "0.0.0.0"
+        type: string
+      release:
+        description: "Release"
+        type: boolean
+        default: false
+      beta:
+        description: "Beta"
+        type: boolean
+        default: true
+
+env:
+  RELEASE_NAME: ${{ inputs.version }}${{ inputs.beta && ' Beta' || '' }}
+
+jobs:
+  build:
+    runs-on: ${{ matrix.arch.runs-on }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        arch:
+          - { name: win-x64, rid: win-x64, arch: x64, os: win, runs-on: windows-latest }
+          - { name: win-x86, rid: win-x86, arch: x86, os: win, runs-on: windows-latest }
+          - { name: win-arm64, rid: win-arm64, arch: arm64, os: win, runs-on: windows-latest }
+          - { name: osx-x64, rid: osx-x64, arch: x64, os: osx, runs-on: macos-13 }
+          - { name: osx-arm64, rid: osx-arm64, arch: arm64, os: osx, runs-on: macos-13 }
+          - { name: linux-x64, rid: linux-x64, arch: x64, os: linux, runs-on: ubuntu-latest }
+          - { name: linux-arm64, rid: linux-arm64, arch: arm64, os: linux, runs-on: ubuntu-latest }
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            6.0.x
+            8.0.x
+
+      - name: Setup Node.js (for DMG)
+        if: matrix.arch.os == 'osx'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Patch Version
+        uses: justalemon/VersionPatcher@v0.8
+        with:
+          version: ${{ inputs.version }}
+          csproj-files: "OpenUtau/*.csproj"
+
+      - name: Restore dependencies
+        run: dotnet restore OpenUtau -r ${{ matrix.arch.rid }}
+
+      - name: Publish
+        run: dotnet publish OpenUtau -c Release -r ${{ matrix.arch.rid }} --self-contained true -o bin/${{ matrix.arch.name }}
+
+      - name: Add OpenUtau.Plugins.Builtin
+        shell: pwsh
+        run: |
+          Copy-Item "OpenUtau.Plugin.Builtin\bin\Release\netstandard2.1\OpenUtau.Plugin.Builtin.dll" -Destination "bin\${{ matrix.arch.name }}\"
+
+      - name: Download DirectML (Windows)
+        if: matrix.arch.os == 'win'
+        shell: cmd
+        run: |
+          curl -L https://www.nuget.org/api/v2/package/Microsoft.AI.DirectML/1.12.1 -o Microsoft.AI.DirectML.nupkg
+          mkdir Microsoft.AI.DirectML
+          tar -xf Microsoft.AI.DirectML.nupkg -C Microsoft.AI.DirectML
+          copy /y Microsoft.AI.DirectML\bin\${{ matrix.arch.arch }}-win\DirectML.dll bin\${{ matrix.arch.name }}\
+
+      - name: Create Windows Installer
+        if: matrix.arch.os == 'win'
+        uses: joncloud/makensis-action@v4.1
+        with:
+          script-file: OpenUtau.nsi
+          arguments: "-DPRODUCT_VERSION=${{ inputs.version }} -DARCH=${{ matrix.arch.arch }}"
+
+      - name: Create macOS DMG
+        if: matrix.arch.os == 'osx'
+        run: |
+          dotnet msbuild OpenUtau -t:BundleApp -p:Configuration=Release -p:RuntimeIdentifier=${{ matrix.arch.rid }} -p:UseAppHost=true -p:OutputPath=../bin/${{ matrix.arch.name }}/
+          npm install -g create-dmg
+          cp OpenUtau/Assets/OpenUtau.icns bin/${{ matrix.arch.name }}/publish/OpenUtau.app/Contents/Resources/
+          create-dmg bin/${{ matrix.arch.name }}/publish/OpenUtau.app || true
+          mv *.dmg OpenUtau-${{ matrix.arch.name }}.dmg
+          codesign -fvs - OpenUtau-${{ matrix.arch.name }}.dmg
+
+      - name: Set Linux executable permissions
+        if: matrix.arch.os == 'linux'
+        run: chmod +x bin/${{ matrix.arch.name }}/OpenUtau
+
+      - name: Create base package
+        run: 7z a OpenUtau-${{ matrix.arch.name }}-base.zip ./bin/${{ matrix.arch.name }}/*
+
+      - name: Download Vocoder
+        uses: carlosperate/download-file-action@v1.0.3
+        with:
+          file-url: https://github.com/openvpi/vocoders/releases/download/nsf-hifigan-44.1k-hop512-128bin-2024.02/nsf_hifigan_44.1k_hop512_128bin_2024.02_logE.oudep
+          file-name: nsf_hifigan_44.1k_hop512_128bin_2024.02_logE.oudep
+          location: ./
+
+      - name: Extract Vocoder
+        run: 7z x -o"./bin/${{ matrix.arch.name }}/Dependencies/nsf_hifigan" ./nsf_hifigan_44.1k_hop512_128bin_2024.02_logE.oudep
+
+      - name: Create package with vocoder
+        run: 7z a OpenUtau-${{ matrix.arch.name }}-full.zip ./bin/${{ matrix.arch.name }}/*
+
+      - name: Generate Appcast (Windows)
+        if: matrix.arch.os == 'win' && inputs.release
+        shell: cmd
+        run: |
+          python appcast.py -v=${{ inputs.version }} -o=windows -r=${{ matrix.arch.name }}-base -f=OpenUtau-${{ matrix.arch.name }}-base.zip
+          python appcast.py -v=${{ inputs.version }} -o=windows -r=${{ matrix.arch.name }}-full -f=OpenUtau-${{ matrix.arch.name }}-full.zip
+          python appcast.py -v=${{ inputs.version }} -o=windows -r=${{ matrix.arch.name }}-installer -f=OpenUtau-${{ matrix.arch.name }}.exe
+
+      - name: Generate Appcast (macOS)
+        if: matrix.arch.os == 'osx' && inputs.release
+        run: |
+          python appcast.py -v=${{ inputs.version }} -o=macos -r=${{ matrix.arch.name }}-base -f=OpenUtau-${{ matrix.arch.name }}-base.zip
+          python appcast.py -v=${{ inputs.version }} -o=macos -r=${{ matrix.arch.name }}-full -f=OpenUtau-${{ matrix.arch.name }}-full.zip
+          python appcast.py -v=${{ inputs.version }} -o=macos -r=${{ matrix.arch.name }} -f=OpenUtau-${{ matrix.arch.name }}.dmg
+
+      - name: Generate Appcast (Linux)
+        if: matrix.arch.os == 'linux' && inputs.release
+        run: |
+          python appcast.py -v=${{ inputs.version }} -o=linux -r=${{ matrix.arch.name }}-base -f=OpenUtau-${{ matrix.arch.name }}-base.zip
+          python appcast.py -v=${{ inputs.version }} -o=linux -r=${{ matrix.arch.name }}-full -f=OpenUtau-${{ matrix.arch.name }}-full.zip
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: OpenUtau-${{ matrix.arch.name }}
+          path: |
+            OpenUtau-${{ matrix.arch.name }}-base.zip
+            OpenUtau-${{ matrix.arch.name }}-full.zip
+            OpenUtau-${{ matrix.arch.name }}.exe
+            OpenUtau-${{ matrix.arch.name }}.dmg
+
+      - name: Create GitHub Release
+        if: inputs.release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.version }}
+          name: ${{ env.RELEASE_NAME }}
+          prerelease: ${{ inputs.beta }}
+          files: |
+            OpenUtau-${{ matrix.arch.name }}-base.zip
+            OpenUtau-${{ matrix.arch.name }}-full.zip
+            OpenUtau-${{ matrix.arch.name }}.exe
+            OpenUtau-${{ matrix.arch.name }}.dmg
+            appcast.${{ matrix.arch.name }}*.xml
+          body: |
+            **OpenUtau ${{ env.RELEASE_NAME }}**
+
+            - **Base Version**: Core application only
+            - **Full Version**: Includes built-in vocoder
+
+            - **Windows**: 
+              - Installer: `.exe`
+              - Portable: `-base.zip` (core) / `-full.zip` (with vocoder)
+            - **macOS**: `.dmg`
+            - **Linux**: `-base.zip` / `-full.zip`
+
+            - macOS users: If you see "This app is damaged", run:
+              ```sh
+              xattr -rc /Applications/OpenUtau.app
+              ```
