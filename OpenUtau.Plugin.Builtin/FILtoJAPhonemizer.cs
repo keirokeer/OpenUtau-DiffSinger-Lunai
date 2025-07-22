@@ -6,7 +6,7 @@ using OpenUtau.Core.G2p;
 using WanaKanaNet;
 
 namespace OpenUtau.Plugin.Builtin {
-    [Phonemizer("Filipino to Japanese Phonemizer", "FIL to JA", "Cadlaxa", language: "FIL")]
+    [Phonemizer("Filipino to Japanese Phonemizer", "FIL to JA", "Cadlaxa", language: "UTAU")]
     public class FILtoJAPhonemizer : SyllableBasedPhonemizer {
         protected override string[] GetVowels() => vowels;
         private string[] vowels =
