@@ -19,6 +19,7 @@ on:
 
 env:
   RELEASE_NAME: ${{ inputs.version }}${{ inputs.beta && ' Beta' || '' }}
+  REPO_URL: "https://github.com/keirokeer/OpenUtau-DiffSinger-Lunai"
 
 jobs:
   build:
@@ -110,53 +111,26 @@ jobs:
         if: matrix.arch.os == 'linux'
         run: chmod +x bin/${{ matrix.arch.name }}/OpenUtau
 
-      # Create packages
-      - name: Create package
-        run: 7z a OpenUtau-${{ matrix.arch.name }}.zip ./bin/${{ matrix.arch.name }}/*
-
-      # Vocoder package (commented out for now)
-      # - name: Download Vocoder
-      #   uses: carlosperate/download-file-action@v1.0.3
-      #   with:
-      #     file-url: https://github.com/openvpi/vocoders/releases/download/nsf-hifigan-44.1k-hop512-128bin-2024.02/nsf_hifigan_44.1k_hop512_128bin_2024.02_logE.oudep
-      #     file-name: nsf_hifigan_44.1k_hop512_128bin_2024.02_logE.oudep
-      #     location: ./
-      # 
-      # - name: Create package with vocoder
-      #   run: |
-      #     mkdir -p full_package
-      #     cp -r bin/${{ matrix.arch.name }}/* full_package/
-      #     7z x -o"./full_package/Dependencies/nsf_hifigan" ./nsf_hifigan_44.1k_hop512_128bin_2024.02_logE.oudep
-      #     7z a OpenUtau-${{ matrix.arch.name }}+vocoder.zip ./full_package/*
+      # Create packages - гарантированно создаём ZIP для всех платформ
+      - name: Create portable package
+        run: |
+          7z a OpenUtau-${{ matrix.arch.name }}.zip ./bin/${{ matrix.arch.name }}/*
 
       # Appcast generation
-      - name: Generate Appcast (Windows)
-        if: matrix.arch.os == 'win' && inputs.release
-        shell: cmd
+      - name: Generate Appcast
+        if: inputs.release
         run: |
-          python appcast.py -v=${{ inputs.version }} -o=windows -r=${{ matrix.arch.name }} -f=OpenUtau-${{ matrix.arch.name }}.zip
-          python appcast.py -v=${{ inputs.version }} -o=windows -r=${{ matrix.arch.name }}_installer -f=OpenUtau-${{ matrix.arch.name }}.exe
+          python appcast.py -v=${{ inputs.version }} -o=${{ matrix.arch.os }} -r=${{ matrix.arch.name }} -f=OpenUtau-${{ matrix.arch.name }}.${{ matrix.arch.os == 'osx' && 'dmg' || matrix.arch.os == 'win' && 'exe' || 'zip' }}
+          python appcast.py -v=${{ inputs.version }} -o=${{ matrix.arch.os }} -r=${{ matrix.arch.name }}_portable -f=OpenUtau-${{ matrix.arch.name }}.zip
 
-      - name: Generate Appcast (macOS)
-        if: matrix.arch.os == 'osx' && inputs.release
-        run: |
-          python appcast.py -v=${{ inputs.version }} -o=macos -r=${{ matrix.arch.name }} -f=OpenUtau-${{ matrix.arch.name }}.dmg
-
-      - name: Generate Appcast (Linux)
-        if: matrix.arch.os == 'linux' && inputs.release
-        run: |
-          python appcast.py -v=${{ inputs.version }} -o=linux -r=${{ matrix.arch.name }} -f=OpenUtau-${{ matrix.arch.name }}.zip
-
-      # Upload artifacts and appcast
-      - name: Upload Release Files
+      # Upload all artifacts
+      - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: release-files-${{ matrix.arch.name }}
+          name: artifacts-${{ matrix.arch.name }}
           path: |
-            OpenUtau-${{ matrix.arch.name }}.zip
-            OpenUtau-${{ matrix.arch.name }}.exe
-            OpenUtau-${{ matrix.arch.name }}.dmg
-            appcast.${{ matrix.arch.name }}*.xml
+            OpenUtau-${{ matrix.arch.name }}.*
+            appcast.*.xml
 
       # Create Release
       - name: Create GitHub Release
@@ -167,29 +141,25 @@ jobs:
           name: ${{ env.RELEASE_NAME }}
           prerelease: ${{ inputs.beta }}
           files: |
-            OpenUtau-win-x64.exe
-            OpenUtau-win-x86.exe
-            OpenUtau-win-arm64.exe
-            OpenUtau-osx-x64.dmg
-            OpenUtau-osx-arm64.dmg
-            OpenUtau-linux-x64.zip
-            OpenUtau-linux-arm64.zip
+            OpenUtau-*.exe
+            OpenUtau-*.dmg
+            OpenUtau-*.zip
             appcast.*.xml
           body: |
             ### Download for your OS:
 
             **Windows**  
-            [Installer (64-bit)](https://github.com/keirokeer/OpenUtau-DiffSinger-Lunai/releases/download/${{ inputs.version }}/OpenUtau-win-x64.exe)  
-            [Installer (32-bit)](https://github.com/keirokeer/OpenUtau-DiffSinger-Lunai/releases/download/${{ inputs.version }}/OpenUtau-win-x86.exe)  
-            [Portable ZIP (64-bit)](https://github.com/keirokeer/OpenUtau-DiffSinger-Lunai/releases/download/${{ inputs.version }}/OpenUtau-win-x64.zip)
+            ▶ [Installer (64-bit)](${{ env.REPO_URL }}/releases/download/${{ inputs.version }}/OpenUtau-win-x64.exe)  
+            ▶ [Installer (32-bit)](${{ env.REPO_URL }}/releases/download/${{ inputs.version }}/OpenUtau-win-x86.exe)  
+            ▶ [Portable ZIP (64-bit)](${{ env.REPO_URL }}/releases/download/${{ inputs.version }}/OpenUtau-win-x64.zip)
 
             **macOS**  
-            [Intel Mac (.dmg)](https://github.com/keirokeer/OpenUtau-DiffSinger-Lunai/releases/download/${{ inputs.version }}/OpenUtau-osx-x64.dmg)  
-            [Apple Silicon (.dmg)](https://github.com/keirokeer/OpenUtau-DiffSinger-Lunai/releases/download/${{ inputs.version }}/OpenUtau-osx-arm64.dmg)
+            ▶ [Intel Mac (.dmg)](${{ env.REPO_URL }}/releases/download/${{ inputs.version }}/OpenUtau-osx-x64.dmg)  
+            ▶ [Apple Silicon (.dmg)](${{ env.REPO_URL }}/releases/download/${{ inputs.version }}/OpenUtau-osx-arm64.dmg)
 
             **Linux**  
-            [64-bit (.zip)](https://github.com/keirokeer/OpenUtau-DiffSinger-Lunai/releases/download/${{ inputs.version }}/OpenUtau-linux-x64.zip)  
-            [ARM64 (.zip)](https://github.com/keirokeer/OpenUtau-DiffSinger-Lunai/releases/download/${{ inputs.version }}/OpenUtau-linux-arm64.zip)
+            ▶ [64-bit (.zip)](${{ env.REPO_URL }}/releases/download/${{ inputs.version }}/OpenUtau-linux-x64.zip)  
+            ▶ [ARM64 (.zip)](${{ env.REPO_URL }}/releases/download/${{ inputs.version }}/OpenUtau-linux-arm64.zip)
 
             ### Notes
             - macOS users: If you see "This app is damaged", run:
