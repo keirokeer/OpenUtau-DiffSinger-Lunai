@@ -119,9 +119,10 @@ jobs:
       # Appcast generation
       - name: Generate Appcast
         if: inputs.release
+        shell: bash
         run: |
-          python appcast.py -v=${{ inputs.version }} -o=${{ matrix.arch.os }} -r=${{ matrix.arch.name }} -f=OpenUtau-${{ matrix.arch.name }}.${{ matrix.arch.os == 'osx' && 'dmg' || matrix.arch.os == 'win' && 'exe' || 'zip' }}
-          python appcast.py -v=${{ inputs.version }} -o=${{ matrix.arch.os }} -r=${{ matrix.arch.name }}_portable -f=OpenUtau-${{ matrix.arch.name }}.zip
+          python appcast.py -v "${{ inputs.version }}" -o "${{ matrix.arch.os }}" -r "${{ matrix.arch.name }}" -f "OpenUtau-${{ matrix.arch.name }}.${{ matrix.arch.os == 'osx' && 'dmg' || matrix.arch.os == 'win' && 'exe' || 'zip' }}"
+          python appcast.py -v "${{ inputs.version }}" -o "${{ matrix.arch.os }}" -r "${{ matrix.arch.name }}_portable" -f "OpenUtau-${{ matrix.arch.name }}.zip"
 
       # Upload all artifacts
       - name: Upload Artifacts
@@ -149,17 +150,17 @@ jobs:
             ### Download for your OS:
 
             **Windows**  
-            ▶ [Installer (64-bit)](${{ env.REPO_URL }}/releases/download/${{ inputs.version }}/OpenUtau-win-x64.exe)  
-            ▶ [Installer (32-bit)](${{ env.REPO_URL }}/releases/download/${{ inputs.version }}/OpenUtau-win-x86.exe)  
-            ▶ [Portable ZIP (64-bit)](${{ env.REPO_URL }}/releases/download/${{ inputs.version }}/OpenUtau-win-x64.zip)
+            [Installer (64-bit)](${{ env.REPO_URL }}/releases/download/${{ inputs.version }}/OpenUtau-win-x64.exe)  
+            [Installer (32-bit)](${{ env.REPO_URL }}/releases/download/${{ inputs.version }}/OpenUtau-win-x86.exe)  
+            [Portable ZIP (64-bit)](${{ env.REPO_URL }}/releases/download/${{ inputs.version }}/OpenUtau-win-x64.zip)
 
             **macOS**  
-            ▶ [Intel Mac (.dmg)](${{ env.REPO_URL }}/releases/download/${{ inputs.version }}/OpenUtau-osx-x64.dmg)  
-            ▶ [Apple Silicon (.dmg)](${{ env.REPO_URL }}/releases/download/${{ inputs.version }}/OpenUtau-osx-arm64.dmg)
+            [Intel Mac (.dmg)](${{ env.REPO_URL }}/releases/download/${{ inputs.version }}/OpenUtau-osx-x64.dmg)  
+            [Apple Silicon (.dmg)](${{ env.REPO_URL }}/releases/download/${{ inputs.version }}/OpenUtau-osx-arm64.dmg)
 
             **Linux**  
-            ▶ [64-bit (.zip)](${{ env.REPO_URL }}/releases/download/${{ inputs.version }}/OpenUtau-linux-x64.zip)  
-            ▶ [ARM64 (.zip)](${{ env.REPO_URL }}/releases/download/${{ inputs.version }}/OpenUtau-linux-arm64.zip)
+            [64-bit (.zip)](${{ env.REPO_URL }}/releases/download/${{ inputs.version }}/OpenUtau-linux-x64.zip)  
+            [ARM64 (.zip)](${{ env.REPO_URL }}/releases/download/${{ inputs.version }}/OpenUtau-linux-arm64.zip)
 
             ### Notes
             - macOS users: If you see "This app is damaged", run:
