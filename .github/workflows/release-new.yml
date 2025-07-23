@@ -135,6 +135,7 @@ jobs:
           prerelease: ${{ inputs.beta }}
           files: |
             OpenUtau-win-x64.exe
+            OpenUtau-win-x64.zip
             OpenUtau-win-x86.exe
             OpenUtau-win-arm64.exe
             OpenUtau-osx-x64.dmg
