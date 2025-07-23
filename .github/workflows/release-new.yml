@@ -135,7 +135,7 @@ jobs:
         shell: cmd
         run: |
           python appcast.py -v=${{ inputs.version }} -o=windows -r=${{ matrix.arch.name }} -f=OpenUtau-${{ matrix.arch.name }}.zip
-          python appcast.py -v=${{ inputs.version }} -o=windows -r=${{ matrix.arch.name }}-installer -f=OpenUtau-${{ matrix.arch.name }}.exe
+          python appcast.py -v=${{ inputs.version }} -o=windows -r=${{ matrix.arch.name }}_installer -f=OpenUtau-${{ matrix.arch.name }}.exe
 
       - name: Generate Appcast (macOS)
         if: matrix.arch.os == 'osx' && inputs.release
@@ -176,20 +176,18 @@ jobs:
             OpenUtau-linux-arm64.zip
             appcast.*.xml
           body: |
-            **OpenUtau ${{ env.RELEASE_NAME }}**
-
             ### Download for your OS:
 
-            🪟 **Windows**  
+            **Windows**  
             [Installer (64-bit)](https://github.com/keirokeer/OpenUtau-DiffSinger-Lunai/releases/download/${{ inputs.version }}/OpenUtau-win-x64.exe)  
             [Installer (32-bit)](https://github.com/keirokeer/OpenUtau-DiffSinger-Lunai/releases/download/${{ inputs.version }}/OpenUtau-win-x86.exe)  
             [Portable ZIP (64-bit)](https://github.com/keirokeer/OpenUtau-DiffSinger-Lunai/releases/download/${{ inputs.version }}/OpenUtau-win-x64.zip)
 
-            🍎 **macOS**  
+            **macOS**  
             [Intel Mac (.dmg)](https://github.com/keirokeer/OpenUtau-DiffSinger-Lunai/releases/download/${{ inputs.version }}/OpenUtau-osx-x64.dmg)  
             [Apple Silicon (.dmg)](https://github.com/keirokeer/OpenUtau-DiffSinger-Lunai/releases/download/${{ inputs.version }}/OpenUtau-osx-arm64.dmg)
 
-            🐧 **Linux**  
+            **Linux**  
             [64-bit (.zip)](https://github.com/keirokeer/OpenUtau-DiffSinger-Lunai/releases/download/${{ inputs.version }}/OpenUtau-linux-x64.zip)  
             [ARM64 (.zip)](https://github.com/keirokeer/OpenUtau-DiffSinger-Lunai/releases/download/${{ inputs.version }}/OpenUtau-linux-arm64.zip)
 
