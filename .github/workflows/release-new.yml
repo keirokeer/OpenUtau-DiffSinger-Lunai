@@ -137,6 +137,7 @@ jobs:
             OpenUtau-win-x64.exe
             OpenUtau-win-x64.zip
             OpenUtau-win-x86.exe
+            OpenUtau-win-x86.zip
             OpenUtau-win-arm64.exe
             OpenUtau-osx-x64.dmg
             OpenUtau-osx-arm64.dmg
@@ -149,6 +150,7 @@ jobs:
             [Installer (64-bit)](${{ env.REPO_URL }}/releases/download/${{ inputs.version }}/OpenUtau-win-x64.exe)  
             [Installer (32-bit)](${{ env.REPO_URL }}/releases/download/${{ inputs.version }}/OpenUtau-win-x86.exe)  
             [Portable ZIP (64-bit)](${{ env.REPO_URL }}/releases/download/${{ inputs.version }}/OpenUtau-win-x64.zip)
+            [Portable ZIP (32-bit)](${{ env.REPO_URL }}/releases/download/${{ inputs.version }}/OpenUtau-win-x86.zip)
 
             **macOS**  
             [Intel Mac (.dmg)](${{ env.REPO_URL }}/releases/download/${{ inputs.version }}/OpenUtau-osx-x64.dmg)  
