@@ -119,10 +119,11 @@ jobs:
       # Appcast generation
       - name: Generate Appcast
         if: inputs.release
-        shell: bash
         run: |
-          python appcast.py -v "${{ inputs.version }}" -o "${{ matrix.arch.os }}" -r "${{ matrix.arch.name }}" -f "OpenUtau-${{ matrix.arch.name }}.${{ matrix.arch.os == 'osx' && 'dmg' || matrix.arch.os == 'win' && 'exe' || 'zip' }}"
-          python appcast.py -v "${{ inputs.version }}" -o "${{ matrix.arch.os }}" -r "${{ matrix.arch.name }}_portable" -f "OpenUtau-${{ matrix.arch.name }}.zip"
+          python appcast.py -v ${{ inputs.version }} -o ${{ matrix.arch.os }} -r ${{ matrix.arch.name }} -f OpenUtau-${{ matrix.arch.name }}.${{ matrix.arch.os == 'osx' && 'dmg' || 'zip' }}
+          if [[ "${{ matrix.arch.os }}" == "win" ]]; then
+            python appcast.py -v ${{ inputs.version }} -o windows -r ${{ matrix.arch.name }}_installer -f OpenUtau-${{ matrix.arch.name }}.exe
+          fi
 
       # Upload all artifacts
       - name: Upload Artifacts
