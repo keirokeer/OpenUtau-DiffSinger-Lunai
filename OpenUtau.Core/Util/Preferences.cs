@@ -134,7 +134,7 @@ namespace OpenUtau.Core.Util {
             public int Theme = 1;
             public bool PenPlusDefault = false;
             public int DegreeStyle;
-            public bool UseTrackColor = false;
+            public bool UseTrackColor = true;
             public bool ClearCacheOnQuit = false;
             public bool PreRender = false;
             public bool UseSolidPlaybackLine = false;
