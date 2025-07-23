@@ -133,8 +133,8 @@ namespace OpenUtau.App.Controls {
                     double x4 = viewModel.TickToneToPoint(timeAxis.MsPosToTickPos(posMs + phoneme.envelope.data[4].X) - Part.position, 0).X;
                     double y4 = (1 - phoneme.envelope.data[4].Y / 100) * height;
 
-                    var pen = selectedNotes.Contains(phoneme.Parent) ? ThemeManager.AccentPen2 : ThemeManager.AccentPen2;
-                    var brush = selectedNotes.Contains(phoneme.Parent) ? ThemeManager.AccentBrush2Semi : ThemeManager.AccentBrush1NoteSemi;
+                    var pen = selectedNotes.Contains(phoneme.Parent) ? ThemeManager.NoteBorderPenPressed : ThemeManager.NoteBorderPen;
+                    var brush = selectedNotes.Contains(phoneme.Parent) ? ThemeManager.NoteBrushPressed : ThemeManager.NoteBrush;
 
                     var point0 = new Point(x0, y + y0);
                     var point1 = new Point(x1, y + y1);
@@ -154,9 +154,9 @@ namespace OpenUtau.App.Controls {
                     }
                 }
 
-                var penPos = ThemeManager.AccentPen2;
+                var penPos = ThemeManager.NoteBorderPen;
                 if (phoneme.rawPosition != phoneme.position) {
-                    penPos = ThemeManager.AccentPen2Thickness3;
+                    penPos = ThemeManager.NoteBorderPenThickness3;
                 }
                 context.DrawLine(penPos, new Point(x, y), new Point(x, y + height));
 

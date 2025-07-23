@@ -210,17 +210,26 @@ namespace OpenUtau.App.Controls {
             if (note.LeftBound >= rightTick || note.RightBound <= leftTick) {
                 return;
             }
+            List<string> triggerItems = new List<string> { "br", "-", "AP", "SP", "ap", "sp", "pau", "sil", "R", "cl", "vf", "hh", "exh", "'", "・", "息", ".sil", ".br", ".cl", ".hh" };
             Point leftTop = viewModel.TickToneToPoint(note.position, note.AdjustedTone);
             leftTop = leftTop.WithX(leftTop.X + 1).WithY(Math.Round(leftTop.Y));
             Size size = viewModel.TickToneToSize(note.duration, 1);
             size = size.WithWidth(size.Width - 1).WithHeight(Math.Floor(size.Height));
             Point rightBottom = new Point(leftTop.X + size.Width, leftTop.Y + size.Height);
-            var brush = selectedNotes.Contains(note)
-                ? (note.Error ? ThemeManager.AccentBrush2Semi : ThemeManager.AccentBrush2)
-                : (note.Error ? ThemeManager.AccentBrush1NoteSemi : ThemeManager.AccentBrush1Note);
-            context.DrawRectangle(brush, ThemeManager.NoteBorderPen, new Rect(leftTop, rightBottom), 4, 4);
-            var borderPen = selectedNotes.Contains(note) ? ThemeManager.NoteBorderPenPressed : ThemeManager.NoteBorderPen;
-            context.DrawRectangle(brush, borderPen, new Rect(leftTop, rightBottom), 4, 4);
+            if (triggerItems.Contains(note.lyric)) {
+                var brush1 = selectedNotes.Contains(note)
+                ? (note.Error ? ThemeManager.NoteBrushPressed : ThemeManager.NoteBrushPressed)
+                : (note.Error ? ThemeManager.NoteEmptyBrush : ThemeManager.NoteEmptyBrush);
+                context.DrawRectangle(brush1, ThemeManager.NoteBorderPen, new Rect(leftTop, rightBottom), 5, 5); var borderPen = selectedNotes.Contains(note);
+            } else {
+                var brush = selectedNotes.Contains(note)
+                ? (note.Error ? ThemeManager.NoteBrushPressed : ThemeManager.NoteBrushPressed)
+                : (note.Error ? ThemeManager.NoteBrushPressed : ThemeManager.NoteBrush);
+                var borderPen = selectedNotes.Contains(note)
+                    ? ThemeManager.NoteBorderPenPressed
+                    : ThemeManager.NoteBorderPen;
+                context.DrawRectangle(brush, borderPen, new Rect(leftTop, rightBottom), 4, 4);
+            }
             if (TrackHeight < 10 || note.lyric.Length == 0) {
                 return;
             }
