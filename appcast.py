@@ -33,7 +33,7 @@ def main():
 </rss>''' % (appcast_ver, datetime.now().strftime("%a, %d %b %Y %H:%M:%S %z"),
              appcast_ver, appcast_file, appcast_ver, appcast_ver, appcast_os)
 
-    with open("appcast.%s.xml" % (appcast_rid), 'w') as f:
+    with open(f"appcast.{args.rid.replace('-', '_')}.xml", 'w') as f:
         f.write(xml)
 
 
