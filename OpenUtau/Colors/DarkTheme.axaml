@@ -3,15 +3,15 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <system:Boolean x:Key="IsDarkMode">true</system:Boolean>
 
-  <Color x:Key="BackgroundColor">#262626</Color>
-  <Color x:Key="BackgroundColorPointerOver">#303030</Color>
-  <Color x:Key="BackgroundColorPressed">#303030</Color>
-  <Color x:Key="BackgroundColorDisabled">#262626</Color>
+  <Color x:Key="BackgroundColor">#252525</Color>
+  <Color x:Key="BackgroundColorPointerOver">#2F2F2F</Color>
+  <Color x:Key="BackgroundColorPressed">#2F2F2F</Color>
+  <Color x:Key="BackgroundColorDisabled">#252525</Color>
 
   <Color x:Key="ForegroundColor">#F0F0F0</Color>
   <Color x:Key="ForegroundColorPointerOver">#FCFCFC</Color>
   <Color x:Key="ForegroundColorPressed">#FCFCFC</Color>
-  <Color x:Key="ForegroundColorDisabled">#A5A5A5</Color>
+  <Color x:Key="ForegroundColorDisabled">#A6A6A6</Color>
 
   <Color x:Key="BorderColor">#E0E0E0</Color>
   <Color x:Key="BorderColorPointerOver">#FCFCFC</Color>
@@ -33,15 +33,15 @@
   <Color x:Key="NoteBorderColorPressed">#ADACFC</Color>
   <Color x:Key="FinalPitchColorTransparent">#CAFFFFFF</Color>
   
-  <Color x:Key="TickLineColor">#111111</Color>
+  <Color x:Key="TickLineColor">#0E0E0E</Color>
   <Color x:Key="BarNumberColor">#E0E0E0</Color>
   <Color x:Key="FinalPitchColor">#FFFFFF</Color>
-  <Color x:Key="TrackBackgroundAltColor">#303030</Color>
+  <Color x:Key="TrackBackgroundAltColor">#2F2F2F</Color>
 
   <!--Keyboard Background-->
   <Color x:Key="WhiteKeyColorLeft">#CACACA</Color>
   <Color x:Key="WhiteKeyColorRight">#E0E0E0</Color>
-  <Color x:Key="WhiteKeyNameColor">#303030</Color>
+  <Color x:Key="WhiteKeyNameColor">#2F2F2F</Color>
 
   <Color x:Key="CenterKeyColorLeft">#A9A6CD</Color>
   <Color x:Key="CenterKeyColorRight">#D3CFFF</Color>
