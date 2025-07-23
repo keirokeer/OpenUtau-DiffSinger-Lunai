@@ -111,19 +111,9 @@ jobs:
         if: matrix.arch.os == 'linux'
         run: chmod +x bin/${{ matrix.arch.name }}/OpenUtau
 
-      # Create packages - гарантированно создаём ZIP для всех платформ
+      # Create packages
       - name: Create portable package
-        run: |
-          7z a OpenUtau-${{ matrix.arch.name }}.zip ./bin/${{ matrix.arch.name }}/*
-
-      # Appcast generation
-      - name: Generate Appcast
-        if: inputs.release
-        run: |
-          python appcast.py -v ${{ inputs.version }} -o ${{ matrix.arch.os }} -r ${{ matrix.arch.name }} -f OpenUtau-${{ matrix.arch.name }}.${{ matrix.arch.os == 'osx' && 'dmg' || 'zip' }}
-          if [[ "${{ matrix.arch.os }}" == "win" ]]; then
-            python appcast.py -v ${{ inputs.version }} -o windows -r ${{ matrix.arch.name }}_installer -f OpenUtau-${{ matrix.arch.name }}.exe
-          fi
+        run: 7z a OpenUtau-${{ matrix.arch.name }}.zip ./bin/${{ matrix.arch.name }}/*
 
       # Upload all artifacts
       - name: Upload Artifacts
@@ -131,8 +121,9 @@ jobs:
         with:
           name: artifacts-${{ matrix.arch.name }}
           path: |
-            OpenUtau-${{ matrix.arch.name }}.*
-            appcast.*.xml
+            OpenUtau-${{ matrix.arch.name }}.exe
+            OpenUtau-${{ matrix.arch.name }}.zip
+            OpenUtau-${{ matrix.arch.name }}.dmg
 
       # Create Release
       - name: Create GitHub Release
@@ -143,10 +134,13 @@ jobs:
           name: ${{ env.RELEASE_NAME }}
           prerelease: ${{ inputs.beta }}
           files: |
-            OpenUtau-*.exe
-            OpenUtau-*.dmg
-            OpenUtau-*.zip
-            appcast.*.xml
+            OpenUtau-win-x64.exe
+            OpenUtau-win-x86.exe
+            OpenUtau-win-arm64.exe
+            OpenUtau-osx-x64.dmg
+            OpenUtau-osx-arm64.dmg
+            OpenUtau-linux-x64.zip
+            OpenUtau-linux-arm64.zip
           body: |
             ### Download for your OS:
 
@@ -168,4 +162,3 @@ jobs:
               ```sh
               xattr -rc /Applications/OpenUtau.app
               ```
-            - Automatic updates are supported for all platforms
