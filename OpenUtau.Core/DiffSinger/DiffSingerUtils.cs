@@ -11,6 +11,7 @@ namespace OpenUtau.Core.DiffSinger {
         public const string VELC = "velc";
         public const string ENE = "ene";
         public const string PEXP = "pexp";
+        public const string RTK = "rtk";
         public const string VoiceColorHeader = "cl";
         public const float headMs = 100;
         public const float tailMs = 100;
