@@ -37,6 +37,7 @@ namespace OpenUtau.Core.DiffSinger {
             ENE,
             PEXP,
             Format.Ustx.SHFC,
+            RTK,
         };
 
         private static readonly Dictionary<string, Func<float, float, float>> varianceDeltaFunctions =
