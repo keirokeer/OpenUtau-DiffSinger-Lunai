@@ -16,6 +16,10 @@ on:
         description: "Beta"
         type: boolean
         default: false
+      draft:
+        description: "Draft"
+        type: boolean
+        default: false
 
 env:
   RELEASE_NAME: ${{ inputs.version }}${{ inputs.beta && ' Beta' || '' }}
@@ -59,6 +63,10 @@ jobs:
         with:
           version: ${{ inputs.version }}
           csproj-files: "OpenUtau/*.csproj"
+
+      # Test
+      - name: Run Tests
+        run: dotnet test OpenUtau.Test
 
       # Build
       - name: Restore dependencies
@@ -115,6 +123,29 @@ jobs:
       - name: Create portable package
         run: 7z a OpenUtau-${{ matrix.arch.name }}.zip ./bin/${{ matrix.arch.name }}/*
 
+      - name: Create tar.gz for Linux
+        if: matrix.arch.os == 'linux'
+        run: |
+          tar -czf OpenUtau-${{ matrix.arch.name }}.tar.gz -C bin/${{ matrix.arch.name }} .
+
+      # Appcast generation
+      - name: Generate Appcast for Windows
+        if: inputs.release && matrix.arch.os == 'win'
+        shell: cmd
+        run: |
+          python appcast.py -v=${{ inputs.version }} -o=windows -r=${{ matrix.arch.name }} -f=OpenUtau-${{ matrix.arch.name }}.zip
+          python appcast.py -v=${{ inputs.version }} -o=windows -r=${{ matrix.arch.name }}-installer -f=OpenUtau-${{ matrix.arch.name }}.exe
+
+      - name: Generate Appcast for macOS
+        if: inputs.release && matrix.arch.os == 'osx'
+        run: |
+          python appcast.py -v=${{ inputs.version }} -o=macos -r=${{ matrix.arch.name }} -f=OpenUtau-${{ matrix.arch.name }}.dmg
+
+      - name: Generate Appcast for Linux
+        if: inputs.release && matrix.arch.os == 'linux'
+        run: |
+          python appcast.py -v=${{ inputs.version }} -o=linux -r=${{ matrix.arch.name }} -f=OpenUtau-${{ matrix.arch.name }}.zip
+
       # Upload all artifacts
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
@@ -124,6 +155,8 @@ jobs:
             OpenUtau-${{ matrix.arch.name }}.exe
             OpenUtau-${{ matrix.arch.name }}.zip
             OpenUtau-${{ matrix.arch.name }}.dmg
+            OpenUtau-${{ matrix.arch.name }}.tar.gz
+            appcast.${{ matrix.arch.name }}*.xml
 
       # Create Release
       - name: Create GitHub Release
@@ -133,24 +166,31 @@ jobs:
           tag_name: ${{ inputs.version }}
           name: ${{ env.RELEASE_NAME }}
           prerelease: ${{ inputs.beta }}
+          draft: ${{ inputs.draft }}
           files: |
             OpenUtau-win-x64.exe
             OpenUtau-win-x64.zip
             OpenUtau-win-x86.exe
             OpenUtau-win-x86.zip
             OpenUtau-win-arm64.exe
+            OpenUtau-win-arm64.zip
             OpenUtau-osx-x64.dmg
             OpenUtau-osx-arm64.dmg
             OpenUtau-linux-x64.zip
+            OpenUtau-linux-x64.tar.gz
             OpenUtau-linux-arm64.zip
+            OpenUtau-linux-arm64.tar.gz
+            appcast.*.xml
           body: |
             ### Download for your OS:
 
             **Windows**  
             [Installer (64-bit)](${{ env.REPO_URL }}/releases/download/${{ inputs.version }}/OpenUtau-win-x64.exe)  
             [Installer (32-bit)](${{ env.REPO_URL }}/releases/download/${{ inputs.version }}/OpenUtau-win-x86.exe)  
+            [Installer (ARM64)](${{ env.REPO_URL }}/releases/download/${{ inputs.version }}/OpenUtau-win-arm64.exe)  
             [Portable ZIP (64-bit)](${{ env.REPO_URL }}/releases/download/${{ inputs.version }}/OpenUtau-win-x64.zip)
             [Portable ZIP (32-bit)](${{ env.REPO_URL }}/releases/download/${{ inputs.version }}/OpenUtau-win-x86.zip)
+            [Portable ZIP (ARM64)](${{ env.REPO_URL }}/releases/download/${{ inputs.version }}/OpenUtau-win-arm64.zip)
 
             **macOS**  
             [Intel Mac (.dmg)](${{ env.REPO_URL }}/releases/download/${{ inputs.version }}/OpenUtau-osx-x64.dmg)  
@@ -158,10 +198,18 @@ jobs:
 
             **Linux**  
             [64-bit (.zip)](${{ env.REPO_URL }}/releases/download/${{ inputs.version }}/OpenUtau-linux-x64.zip)  
+            [64-bit (.tar.gz)](${{ env.REPO_URL }}/releases/download/${{ inputs.version }}/OpenUtau-linux-x64.tar.gz)
             [ARM64 (.zip)](${{ env.REPO_URL }}/releases/download/${{ inputs.version }}/OpenUtau-linux-arm64.zip)
+            [ARM64 (.tar.gz)](${{ env.REPO_URL }}/releases/download/${{ inputs.version }}/OpenUtau-linux-arm64.tar.gz)
 
             ### Notes
             - macOS users: If you see "This app is damaged", run:
               ```sh
               xattr -rc /Applications/OpenUtau.app
               ```
+            
+            ### Getting Started
+            See [Getting Started](https://github.com/stakira/OpenUtau/wiki/Getting-Started) for how to use.
+
+            ### FAQ
+            If you encountered issues, see [FAQ](https://github.com/stakira/OpenUtau/wiki/FAQ)
