@@ -272,8 +272,6 @@ namespace OpenUtau.Core.DiffSinger
                 .Append(0)
                 .ToList();
             note_dur[^1]=totalFrames-note_dur.Sum();
-            //var pitch = Enumerable.Repeat(60f, totalFrames).ToArray();
-            //var retake = Enumerable.Repeat(true, totalFrames).ToArray();
             var pitchInputs = new List<NamedOnnxValue>();
             pitchInputs.Add(NamedOnnxValue.CreateFromTensor("encoder_out", encoder_out));
             pitchInputs.Add(NamedOnnxValue.CreateFromTensor("note_midi",
@@ -292,6 +290,7 @@ namespace OpenUtau.Core.DiffSinger
                 .Reshape(new int[] { 1, pitch.Length })));
             bool isRetakeActive = phrase.phones.Any(p => p.retake);
             bool[] retakeMask;
+            //Not checking linguisticCache can bring higher flexibility
             //if (isRetakeActive && linguisticCacheHit){
             if (isRetakeActive){
                 retakeMask = DiffSingerUtils.GenerateRetakeMask(phrase, totalFrames, headFrames, ph_dur);
