@@ -186,7 +186,7 @@ namespace OpenUtau.Core.Util {
             public int OtoEditor = 0;
             public string VLabelerPath = string.Empty;
             public string SetParamPath = string.Empty;
-            public bool Beta = true;
+            public bool Beta = false;
             public bool RememberMid = false;
             public bool RememberUst = true;
             public bool RememberVsqx = true;
