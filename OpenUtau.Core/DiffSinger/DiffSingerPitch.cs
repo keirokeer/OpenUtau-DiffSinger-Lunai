@@ -272,6 +272,8 @@ namespace OpenUtau.Core.DiffSinger
                 .Append(0)
                 .ToList();
             note_dur[^1]=totalFrames-note_dur.Sum();
+            //var pitch = Enumerable.Repeat(60f, totalFrames).ToArray();
+            //var retake = Enumerable.Repeat(true, totalFrames).ToArray();
             var pitchInputs = new List<NamedOnnxValue>();
             pitchInputs.Add(NamedOnnxValue.CreateFromTensor("encoder_out", encoder_out));
             pitchInputs.Add(NamedOnnxValue.CreateFromTensor("note_midi",
@@ -347,65 +349,22 @@ namespace OpenUtau.Core.DiffSinger
 
             Onnx.VerifyInputNames(pitchModel, pitchInputs);
             var pitchOutputs = pitchModel.Run(pitchInputs);
-            var pitch_pred = pitchOutputs.First().AsTensor<float>().ToArray();
-
-            if (!isRetakeActive) {
-                var pitchEnd = phrase.timeAxis.MsPosToTickPos(startMs + (totalFrames - 1) * frameMs) - phrase.position;
-                if (pitchEnd <= phrase.duration) {
-                    return new RenderPitchResult {
-                        ticks = Enumerable.Range(0, totalFrames)
-                        .Select(i => (float)phrase.timeAxis.MsPosToTickPos(startMs + i * frameMs) - phrase.position)
-                        .Append((float)phrase.duration + 1)
-                        .ToArray(),
-                        tones = pitch_pred.Append(pitch_pred[^1]).ToArray()
-                    };
-                } else {
-                    return new RenderPitchResult {
-                        ticks = Enumerable.Range(0, totalFrames)
-                        .Select(i => (float)phrase.timeAxis.MsPosToTickPos(startMs + i * frameMs) - phrase.position)
-                        .ToArray(),
-                        tones = pitch_pred
-                    };
-                }
-            }
-            
-            const int crossfadeFrames = 5;
-            
-            var pitch_user = DiffSingerUtils.SampleCurve(phrase, phrase.pitches, 0, frameMs, totalFrames, headFrames, tailFrames,
-                x => x * 0.01).Select(f => (float)f).ToArray();
-            
-            var final_pitch = new float[totalFrames];
-
-            for (int i = 0; i < totalFrames; i++) {
-                final_pitch[i] = retakeMask[i] ? pitch_pred[i] : pitch_user[i];
-            }
-
-            for (int i = 1; i < totalFrames; i++) {
-                if (retakeMask[i] != retakeMask[i - 1]) {
-                    int start = Math.Max(0, i - crossfadeFrames / 2);
-                    int end = Math.Min(totalFrames, i + crossfadeFrames / 2);
-                    for (int j = start; j < end; j++) {
-                        float ratio = (float)(j - start) / (end - start);
-                        final_pitch[j] = pitch_user[j] * (1 - ratio) + pitch_pred[j] * ratio;
-                    }
-                }
-            }
-
-            var finalPitchEnd = phrase.timeAxis.MsPosToTickPos(startMs + (totalFrames - 1) * frameMs) - phrase.position;
-            if (finalPitchEnd <= phrase.duration) {
-                return new RenderPitchResult {
-                    ticks = Enumerable.Range(0, totalFrames)
-                    .Select(i => (float)phrase.timeAxis.MsPosToTickPos(startMs + i * frameMs) - phrase.position)
+            var pitch_out = pitchOutputs.First().AsTensor<float>().ToArray();
+            var pitchEnd = phrase.timeAxis.MsPosToTickPos(startMs + (totalFrames - 1) * frameMs) - phrase.position;
+            if(pitchEnd<=phrase.duration){
+                return new RenderPitchResult{
+                    ticks = Enumerable.Range(0,totalFrames)
+                    .Select(i=>(float)phrase.timeAxis.MsPosToTickPos(startMs + i*frameMs) - phrase.position)
                     .Append((float)phrase.duration + 1)
                     .ToArray(),
-                    tones = final_pitch.Append(final_pitch[^1]).ToArray()
+                    tones = pitch_out.Append(pitch_out[^1]).ToArray()
                 };
-            } else {
-                return new RenderPitchResult {
-                    ticks = Enumerable.Range(0, totalFrames)
-                    .Select(i => (float)phrase.timeAxis.MsPosToTickPos(startMs + i * frameMs) - phrase.position)
+            }else{
+                return new RenderPitchResult{
+                    ticks = Enumerable.Range(0,totalFrames)
+                    .Select(i=>(float)phrase.timeAxis.MsPosToTickPos(startMs + i*frameMs) - phrase.position)
                     .ToArray(),
-                    tones = final_pitch
+                    tones = pitch_out
                 };
             }
         }
