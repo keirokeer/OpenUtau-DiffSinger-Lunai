@@ -99,7 +99,7 @@ namespace OpenUtau.Core.G2p.Data {
                 return ((byte[])(obj));
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
@@ -129,7 +129,7 @@ namespace OpenUtau.Core.G2p.Data {
                 return ((byte[])(obj));
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>

@@ -16,10 +16,9 @@ namespace OpenUtau.Core.G2p {
         };
 
         private static readonly string[] phonemes = new string[] {
-            "", "", "", "", "ah", "eh", "ae", "ee", "oe", "ih", "oh",
-            "oo", "ou", "uh", "en", "in", "on", "uy", "y", "w", "f",
-            "k", "p", "s", "sh", "t", "h", "b", "d", "g", "l",
-            "m", "n", "r", "v", "z", "j", "ng", "q",
+            "", "", "", "", "ah", "eh", "ae", "ee", "oe", "ih", "oh", "oo", "ou",
+            "uh", "en", "in", "on", "uy", "y", "w", "f", "k", "p", "s", "sh",
+            "t", "h", "b", "d", "g", "l", "m", "n", "r", "v", "z", "j", "ng", "q",
         };
 
         private static object lockObj = new object();
