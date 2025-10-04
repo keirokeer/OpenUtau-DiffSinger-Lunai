@@ -96,6 +96,11 @@ jobs:
         run: |
           curl -L https://aka.ms/vs/17/release/vc_redist.${{ matrix.arch.arch }}.exe -o vc_redist.${{ matrix.arch.arch }}.exe
 
+      - name: Install NSIS
+        if: matrix.arch.os == 'win'
+        run: |
+          choco install nsis -y
+
       - name: Create Windows Installer
         if: matrix.arch.os == 'win'
         uses: joncloud/makensis-action@v5.0
