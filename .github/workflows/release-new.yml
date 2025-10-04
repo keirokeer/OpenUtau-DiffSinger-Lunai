@@ -96,9 +96,14 @@ jobs:
         run: |
           curl -L https://aka.ms/vs/17/release/vc_redist.${{ matrix.arch.arch }}.exe -o vc_redist.${{ matrix.arch.arch }}.exe
 
+      - name: Install NSIS
+        if: matrix.arch.os == 'win'
+        run: |
+          choco install nsis -y
+
       - name: Create Windows Installer
         if: matrix.arch.os == 'win'
-        uses: joncloud/makensis-action@v4.1
+        uses: joncloud/makensis-action@v5.0
         with:
           script-file: OpenUtau.nsi
           arguments: "-DPRODUCT_VERSION=${{ inputs.version }} -DARCH=${{ matrix.arch.arch }}"
