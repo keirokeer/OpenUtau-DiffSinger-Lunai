@@ -58,6 +58,11 @@ jobs:
         with:
           node-version: 20
 
+      - name: Install NSIS
+        if: matrix.arch.os == 'win'
+        run: |
+          choco install nsis -y
+
       - name: Patch Version
         uses: justalemon/VersionPatcher@v0.8
         with:
@@ -81,6 +86,13 @@ jobs:
         run: |
           Copy-Item "OpenUtau.Plugin.Builtin\bin\Release\netstandard2.1\OpenUtau.Plugin.Builtin.dll" -Destination "bin\${{ matrix.arch.name }}\"
 
+      # Write release channel info
+      - name: Write release channel info
+        shell: pwsh
+        run: |
+          $prefs = @{Beta=${{ inputs.beta }}}
+          $prefs | ConvertTo-Json | Out-File -FilePath "bin/${{ matrix.arch.name }}/prefs-default.json" -Encoding utf8
+
       # Windows specific
       - name: Download DirectML (Windows)
         if: matrix.arch.os == 'win'
@@ -96,11 +108,18 @@ jobs:
         run: |
           curl -L https://aka.ms/vs/17/release/vc_redist.${{ matrix.arch.arch }}.exe -o vc_redist.${{ matrix.arch.arch }}.exe
 
-      - name: Install NSIS
-        if: matrix.arch.os == 'win'
+      # Create packages
+      - name: Create portable package
         run: |
-          choco install nsis -y
+          cd bin/${{ matrix.arch.name }}
+          7z a ../../OpenUtau-${{ matrix.arch.name }}.zip *
 
+      - name: Create tar.gz for Linux
+        if: matrix.arch.os == 'linux'
+        run: |
+          tar -czf OpenUtau-${{ matrix.arch.name }}.tar.gz -C bin/${{ matrix.arch.name }} .
+
+      # Windows installer
       - name: Create Windows Installer
         if: matrix.arch.os == 'win'
         uses: joncloud/makensis-action@v5.0
@@ -123,15 +142,6 @@ jobs:
       - name: Set Linux executable permissions
         if: matrix.arch.os == 'linux'
         run: chmod +x bin/${{ matrix.arch.name }}/OpenUtau
-
-      # Create packages
-      - name: Create portable package
-        run: 7z a OpenUtau-${{ matrix.arch.name }}.zip ./bin/${{ matrix.arch.name }}/*
-
-      - name: Create tar.gz for Linux
-        if: matrix.arch.os == 'linux'
-        run: |
-          tar -czf OpenUtau-${{ matrix.arch.name }}.tar.gz -C bin/${{ matrix.arch.name }} .
 
       # Appcast generation
       - name: Generate Appcast for Windows
