@@ -88,10 +88,8 @@ jobs:
 
       # Write release channel info
       - name: Write release channel info
-        shell: pwsh
         run: |
-          $prefs = @{Beta=${{ inputs.beta }}}
-          $prefs | ConvertTo-Json | Out-File -FilePath "bin/${{ matrix.arch.name }}/prefs-default.json" -Encoding utf8
+          echo '{ "Beta": ${{ inputs.beta }} }' > "bin/${{ matrix.arch.name }}/prefs-default.json"
 
       # Windows specific
       - name: Download DirectML (Windows)
@@ -108,7 +106,7 @@ jobs:
         run: |
           curl -L https://aka.ms/vs/17/release/vc_redist.${{ matrix.arch.arch }}.exe -o vc_redist.${{ matrix.arch.arch }}.exe
 
-      # Create packages
+      # Create packages (BEFORE installer creation to include DirectML)
       - name: Create portable package
         run: |
           cd bin/${{ matrix.arch.name }}
@@ -119,7 +117,7 @@ jobs:
         run: |
           tar -czf OpenUtau-${{ matrix.arch.name }}.tar.gz -C bin/${{ matrix.arch.name }} .
 
-      # Windows installer
+      # Windows installer (AFTER DirectML is added)
       - name: Create Windows Installer
         if: matrix.arch.os == 'win'
         uses: joncloud/makensis-action@v5.0
