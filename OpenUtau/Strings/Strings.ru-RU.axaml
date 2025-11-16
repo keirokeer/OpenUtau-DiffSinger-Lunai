@@ -74,7 +74,7 @@ OpenUtau стремится стать средой редактирования
   <system:String x:Key="errors.diffsinger.downloadvocoder1">Ошибка загрузки вокодера </system:String>
   <system:String x:Key="errors.diffsinger.downloadvocoder2">. Пожалуйста, загрузите вокодер из: </system:String>
   <system:String x:Key="errors.editing.autopitch.unsupported">Данный войсбанк не поддерживает авто генерацию питча. Пожалуйста, используйте Diffsinger или Enunu войсбанк.</system:String>
-  <system:String x:Key="errors.encryptedarchive">Зашифрованные архивы не поддерживаются. Пожалуйста, распакуйте архив вручную.</system:String>
+  <system:String x:Key="errors.encryptedarchive">Зашифрованные архивы не поддерживаются. Пожалуйста, откройте папку Singers (Инструменты &gt; Параметры &gt; Пути) и вручную извлеките туда файлы архива.</system:String>
   <system:String x:Key="errors.expression.abbrlong">Аббревиатура должна содержать от 1 до 4 символов</system:String>
   <system:String x:Key="errors.expression.abbrset">Аббревиатура должна быть указана</system:String>
   <system:String x:Key="errors.expression.abbrunique">Аббревиатуры должны быть уникальными</system:String>
@@ -151,10 +151,11 @@ OpenUtau стремится стать средой редактирования
   <system:String x:Key="languages.zh-yue">Кантонский</system:String>
 
   <system:String x:Key="lyrics.apply">Применить</system:String>
+  <system:String x:Key="lyrics.applyselected">Применить только для выделенных нот</system:String>
   <system:String x:Key="lyrics.cancel">Отмена</system:String>
   <system:String x:Key="lyrics.caption">Редактировать текст</system:String>
   <system:String x:Key="lyrics.livepreview">Предварительный просмотр в реальном времени</system:String>
-  <system:String x:Key="lyrics.max">Макс.</system:String>
+  <system:String x:Key="lyrics.nonote">Нота отсутствует!</system:String>
   <system:String x:Key="lyrics.reset">Сброс</system:String>
   <system:String x:Key="lyrics.selectnotes">Сначала выберите несколько нот!</system:String>
   <system:String x:Key="lyrics.separators">Разделители</system:String>
@@ -284,6 +285,7 @@ OpenUtau стремится стать средой редактирования
   <system:String x:Key="noteproperty.set">Установить</system:String>
   <system:String x:Key="noteproperty.setlongnote">Установить только на длинные ноты</system:String>
   <system:String x:Key="noteproperty.tone">Тон</system:String>
+  <system:String x:Key="noteproperty.tuning">Тюнинг</system:String>
   <system:String x:Key="noteproperty.vibratoenable">Включить</system:String>
 
   <system:String x:Key="oto.alias">Алиас</system:String>
@@ -330,6 +332,8 @@ OpenUtau стремится стать средой редактирования
   <system:String x:Key="pianoroll.menu.notes.autolegato">Автоматическое легато</system:String>
   <system:String x:Key="pianoroll.menu.notes.bakepitch">Преобразование PITD в контролируемые точки питча</system:String>
   <system:String x:Key="pianoroll.menu.notes.clear.vibratos">Очистить вибрато</system:String>
+  <system:String x:Key="pianoroll.menu.notes.commonnotecopy">Скопировать Commonnote</system:String>
+  <system:String x:Key="pianoroll.menu.notes.commonnotepaste">Вставить Commonnote</system:String>
   <system:String x:Key="pianoroll.menu.notes.fixoverlap">Исправить пересекающиеся ноты</system:String>
   <system:String x:Key="pianoroll.menu.notes.hanzitopinyin">Ханьцзы в пиньинь</system:String>
   <system:String x:Key="pianoroll.menu.notes.lengthencrossfade">Удлинить кроссфейд</system:String>
@@ -337,6 +341,7 @@ OpenUtau стремится стать средой редактирования
   <system:String x:Key="pianoroll.menu.notes.octavedown">Переместить на октаву ниже</system:String>
   <system:String x:Key="pianoroll.menu.notes.octaveup">Переместить на октаву выше</system:String>
   <system:String x:Key="pianoroll.menu.notes.quantize">Выровнять по сетке</system:String>
+  <system:String x:Key="pianoroll.menu.notes.randomizetuning">Рандомизировать тюнинг</system:String>
   <system:String x:Key="pianoroll.menu.notes.refreshrealcurves">Обновить реальные кривые</system:String>
   <system:String x:Key="pianoroll.menu.notes.removetaildash">Удалить хвост &quot;-&quot;</system:String>
   <system:String x:Key="pianoroll.menu.notes.removetailrest">Удалить хвост &quot;R&quot;</system:String>
@@ -391,6 +396,14 @@ OpenUtau стремится стать средой редактирования
     Правая кнопка для сбрасывания
     Удерживайте Ctrl, чтобы выбрать
     Удерживайте Alt, чтобы сгладить</system:String>
+    <system:String x:Key="pianoroll.tool.overwritelinepitch">
+        Инструмент для рисования питча линией (Ctrl + Shift + 4)
+        Левая кнопка для рисования
+        (прямая линия, которая игнорирует вибрато и mod+)
+        Правая кнопка для сбрасывания
+        Удерживайте Ctrl, чтобы выбрать
+        Удерживайте Alt, чтобы сгладить
+    </system:String>
   <system:String x:Key="pianoroll.tool.penplus">Карандаш Плюс (Ctrl + 2)
     Левая кнопка для рисования
     Правая кнопка для сбрасывания
@@ -496,9 +509,10 @@ OpenUtau стремится стать средой редактирования
   <system:String x:Key="singererror.aliasmultiplespaces">Алиас содержит несколько пробелов.</system:String>
   <system:String x:Key="singererror.aliasstartwithspace">Алиас содержит пробел в начале или конце.</system:String>
   <system:String x:Key="singererror.bitdepth">Звуковой файл имеет глубину, отличную от 16 бит.</system:String>
-  <system:String x:Key="singererror.consonantoutofduration">Согласная вне длительности звукового файла {fileDuration}.</system:String>
+  <system:String x:Key="singererror.consonantoutofduration">Согласная вне длительности звукового файла.</system:String>
   <system:String x:Key="singererror.consonantshort">Согласная должна быть &gt;= 0.</system:String>
   <system:String x:Key="singererror.cutoffconsonant">Конец должен быть справа от согласной.</system:String>
+  <system:String x:Key="singererror.cutoffoutofduration">Конец вне длительности звукового файла.</system:String>
   <system:String x:Key="singererror.cutoffoverlap">Конец должен быть справа от нахлеста.</system:String>
   <system:String x:Key="singererror.cutoffpreutter">Конец должен быть справа от вступления.</system:String>
   <system:String x:Key="singererror.duplicatealias">Имеются дублирующиеся алиасы.{0}</system:String>
@@ -507,10 +521,10 @@ OpenUtau стремится стать средой редактирования
   <system:String x:Key="singererror.invalidduration">Неверная продолжительность {0}.</system:String>
   <system:String x:Key="singererror.invalidoto">Неверный формат oto.</system:String>
   <system:String x:Key="singererror.mono">Звуковой файл не является моноканальным.</system:String>
-  <system:String x:Key="singererror.offsetoutofduration">Начало вне длительности звукового файла {fileDuration}.</system:String>
+  <system:String x:Key="singererror.offsetoutofduration">Начало вне длительности звукового файла.</system:String>
   <system:String x:Key="singererror.offsetshort">Начало должно быть &gt;= 0.</system:String>
-  <system:String x:Key="singererror.overlapoutofduration">Нахлест вне длительности звукового файла {fileDuration}.</system:String>
-  <system:String x:Key="singererror.preutteroutofduration">Вступление вне длительности звукового файла {fileDuration}.</system:String>
+  <system:String x:Key="singererror.overlapoutofduration">Нахлест вне длительности звукового файла.</system:String>
+  <system:String x:Key="singererror.preutteroutofduration">Вступление вне длительности звукового файла.</system:String>
   <system:String x:Key="singererror.preuttershort">Вступление должно быть &gt;= 0.</system:String>
   <system:String x:Key="singererror.samplerate">Звуковой файл имеет частоту дискретизации, отличную от 44100 Гц.</system:String>
   <system:String x:Key="singererror.soundmissing">Звуковой файл отсутствует</system:String>

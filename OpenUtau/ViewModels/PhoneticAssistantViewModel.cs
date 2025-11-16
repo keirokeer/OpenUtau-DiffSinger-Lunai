@@ -36,6 +36,7 @@ namespace OpenUtau.App.ViewModels {
             new G2pOption(typeof(RussianG2p)),
             new G2pOption(typeof(SpanishG2p)),
             new G2pOption(typeof(KoreanG2p)),
+            new G2pOption(typeof(FilipinoG2p)),
             new G2pOption(typeof(ThaiG2p)),
             new G2pOption(typeof(UkrainianG2p)),
         };
