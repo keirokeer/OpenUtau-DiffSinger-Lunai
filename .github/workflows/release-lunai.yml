@@ -80,12 +80,6 @@ jobs:
       - name: Publish
         run: dotnet publish OpenUtau -c Release -r ${{ matrix.arch.rid }} --self-contained true -o bin/${{ matrix.arch.name }}
 
-      # Add plugins
-      - name: Add OpenUtau.Plugins.Builtin
-        shell: pwsh
-        run: |
-          Copy-Item "OpenUtau.Plugin.Builtin\bin\Release\netstandard2.1\OpenUtau.Plugin.Builtin.dll" -Destination "bin\${{ matrix.arch.name }}\"
-
       # Write release channel info
       - name: Write release channel info
         run: |
