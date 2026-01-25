@@ -4,7 +4,7 @@ using OpenUtau.Core.G2p;
 using System.Linq;
 
 namespace OpenUtau.Plugin.Builtin {
-    [Phonemizer("Italian Syllable-Based Phonemizer", "IT SYL", "Lotte V", language:"IT")]
+    [Phonemizer("Italian Syllable-Based Phonemizer", "IT SYL", "Lotte V", language: "UTAU")]
     public class ItalianSyllableBasedPhonemizer : SyllableBasedPhonemizer {
         /// <summary>
         /// Italian syllable-based phonemizer.

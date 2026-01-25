@@ -9,7 +9,7 @@ using OpenUtau.Core.Ustx;
 using Serilog;
 
 namespace OpenUtau.Core.Enunu {
-    [Phonemizer("Enunu Phonemizer", "ENUNU")]
+    [Phonemizer("Enunu Phonemizer", "Default ENUNU", language: "ENUNU")]
     public class EnunuPhonemizer : Phonemizer {
         readonly string PhonemizerType = "ENUNU";
 
