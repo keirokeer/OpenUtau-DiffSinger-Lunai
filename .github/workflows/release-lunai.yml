@@ -1,0 +1,250 @@
+name: Release Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version"
+        required: true
+        default: "0.0.0.0"
+        type: string
+      release:
+        description: "Release"
+        type: boolean
+        default: true
+      beta:
+        description: "Beta"
+        type: boolean
+        default: false
+      draft:
+        description: "Draft"
+        type: boolean
+        default: false
+
+env:
+  RELEASE_NAME: ${{ inputs.version }}${{ inputs.beta && ' Beta' || '' }}
+  REPO_URL: "https://github.com/keirokeer/OpenUtau-DiffSinger-Lunai"
+
+jobs:
+  build:
+    runs-on: ${{ matrix.arch.runs-on }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        arch:
+          - { name: win-x64, rid: win-x64, arch: x64, os: win, runs-on: windows-latest }
+          - { name: win-x86, rid: win-x86, arch: x86, os: win, runs-on: windows-latest }
+          - { name: win-arm64, rid: win-arm64, arch: arm64, os: win, runs-on: windows-latest }
+          - { name: osx-x64, rid: osx-x64, arch: x64, os: osx, runs-on: macos-15-intel }
+          - { name: osx-arm64, rid: osx-arm64, arch: arm64, os: osx, runs-on: macos-15-intel }
+          - { name: linux-x64, rid: linux-x64, arch: x64, os: linux, runs-on: ubuntu-latest, linuxarch: x86_64 }
+          - { name: linux-arm64, rid: linux-arm64, arch: arm64, os: linux, runs-on: ubuntu-latest, linuxarch: aarch64 }
+
+    steps:
+      # Setup
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            6.0.x
+            8.0.x
+
+      - name: Setup Node.js (for DMG)
+        if: matrix.arch.os == 'osx'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - uses: repolevedavaj/install-nsis@v1.0.3
+        with:
+          nsis-version: '3.11'
+        if: ${{ matrix.arch.os == 'win' }}
+
+      - name: Patch Version
+        uses: justalemon/VersionPatcher@v0.8
+        with:
+          version: ${{ inputs.version }}
+          csproj-files: "OpenUtau/*.csproj"
+
+      # Test
+      - name: Run Tests
+        run: dotnet test OpenUtau.Test
+
+      # Build
+      - name: Restore dependencies
+        run: dotnet restore OpenUtau -r ${{ matrix.arch.rid }}
+
+      - name: Publish
+        run: dotnet publish OpenUtau -c Release -r ${{ matrix.arch.rid }} --self-contained true -o bin/${{ matrix.arch.name }}
+
+      # Add plugins
+      - name: Add OpenUtau.Plugins.Builtin
+        shell: pwsh
+        run: |
+          Copy-Item "OpenUtau.Plugin.Builtin\bin\Release\netstandard2.1\OpenUtau.Plugin.Builtin.dll" -Destination "bin\${{ matrix.arch.name }}\"
+
+      # Write release channel info
+      - name: Write release channel info
+        run: |
+          echo '{ "Beta": ${{ inputs.beta }} }' > "bin/${{ matrix.arch.name }}/prefs-default.json"
+
+      # Windows specific
+      - name: Download DirectML (Windows)
+        if: matrix.arch.os == 'win'
+        shell: cmd
+        run: |
+          curl -L https://www.nuget.org/api/v2/package/Microsoft.AI.DirectML/1.15.4 -o Microsoft.AI.DirectML.nupkg
+          mkdir Microsoft.AI.DirectML
+          tar -xf Microsoft.AI.DirectML.nupkg -C Microsoft.AI.DirectML
+          copy /y Microsoft.AI.DirectML\bin\${{ matrix.arch.arch }}-win\DirectML.dll bin\${{ matrix.arch.name }}\
+
+      - name: Download VC Redist (Windows)
+        if: matrix.arch.os == 'win'
+        run: |
+          curl -L https://aka.ms/vs/17/release/vc_redist.${{ matrix.arch.arch }}.exe -o vc_redist.${{ matrix.arch.arch }}.exe
+
+      # Linux specific
+      - name: Set Linux executable permissions
+        if: matrix.arch.os == 'linux'
+        run: chmod +x bin/${{ matrix.arch.name }}/OpenUtau
+
+      # Create packages (BEFORE installer creation to include DirectML)
+      - name: Create portable package
+        run: |
+          cd bin/${{ matrix.arch.name }}
+          7z a ../../OpenUtau-${{ matrix.arch.name }}.zip *
+
+      - name: Create tar.gz for Linux
+        if: matrix.arch.os == 'linux'
+        run: |
+          tar -czf OpenUtau-${{ matrix.arch.name }}.tar.gz -C bin/${{ matrix.arch.name }} .
+
+      # Windows installer (AFTER DirectML is added)
+      - name: Create Windows Installer
+        if: matrix.arch.os == 'win'
+        uses: joncloud/makensis-action@v5.0
+        with:
+          script-file: OpenUtau.nsi
+          arguments: "-DPRODUCT_VERSION=${{ inputs.version }} -DARCH=${{ matrix.arch.arch }}"
+
+      # macOS specific
+      - name: Create macOS DMG
+        if: matrix.arch.os == 'osx'
+        run: |
+          dotnet msbuild OpenUtau -t:BundleApp -p:Configuration=Release -p:RuntimeIdentifier=${{ matrix.arch.rid }} -p:UseAppHost=true -p:OutputPath=../bin/${{ matrix.arch.name }}/
+          npm install -g create-dmg
+          cp OpenUtau/Assets/OpenUtau.icns bin/${{ matrix.arch.name }}/publish/OpenUtau.app/Contents/Resources/
+          create-dmg bin/${{ matrix.arch.name }}/publish/OpenUtau.app || true
+          mv *.dmg OpenUtau-${{ matrix.arch.name }}.dmg
+          codesign -fvs - OpenUtau-${{ matrix.arch.name }}.dmg
+
+      # Create Appimage
+      - name: Install LinuxDeploy
+        uses: AnimMouse/setup-appimage@v1
+        with:
+          name: linuxdeploy
+          url: https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
+        if: ${{ matrix.arch.os == 'linux' }}
+
+      - name: Create appimage
+        run: |
+          cp OpenUtau/Assets/OpenUtau.desktop bin/${{ matrix.arch.name }}
+          cp OpenUtau/Assets/OpenUtau.png bin/${{ matrix.arch.name }}
+          cp OpenUtau/Assets/OpenUtau.png bin/${{ matrix.arch.name }}/.DirIcon
+          cp OpenUtau/Assets/AppRun bin/${{ matrix.arch.name }}
+          chmod 755 bin/${{ matrix.arch.name }}/AppRun
+          ARCH=${{ matrix.arch.linuxarch }} linuxdeploy --appdir bin/${{ matrix.arch.name }} --output appimage
+        if: ${{ matrix.arch.os == 'linux' }}
+
+      # Appcast generation
+      - name: Generate Appcast for Windows
+        if: inputs.release && matrix.arch.os == 'win'
+        shell: cmd
+        run: |
+          python appcast.py -v=${{ inputs.version }} -o=windows -r=${{ matrix.arch.name }} -f=OpenUtau-${{ matrix.arch.name }}.zip
+          python appcast.py -v=${{ inputs.version }} -o=windows -r=${{ matrix.arch.name }}-installer -f=OpenUtau-${{ matrix.arch.name }}.exe
+
+      - name: Generate Appcast for macOS
+        if: inputs.release && matrix.arch.os == 'osx'
+        run: |
+          python appcast.py -v=${{ inputs.version }} -o=macos -r=${{ matrix.arch.name }} -f=OpenUtau-${{ matrix.arch.name }}.dmg
+
+      - name: Generate Appcast for Linux
+        if: inputs.release && matrix.arch.os == 'linux'
+        run: |
+          python appcast.py -v=${{ inputs.version }} -o=linux -r=${{ matrix.arch.name }} -f=OpenUtau-${{ matrix.arch.name }}.zip
+
+      # Upload all artifacts
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: artifacts-${{ matrix.arch.name }}
+          path: |
+            OpenUtau-${{ matrix.arch.name }}.exe
+            OpenUtau-${{ matrix.arch.name }}.zip
+            OpenUtau-${{ matrix.arch.name }}.dmg
+            OpenUtau-${{ matrix.arch.name }}.tar.gz
+            bin/${{ matrix.arch.name }}/*.AppImage
+            appcast.${{ matrix.arch.name }}*.xml
+
+      # Create Release
+      - name: Create GitHub Release
+        if: inputs.release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.version }}
+          name: ${{ env.RELEASE_NAME }}
+          prerelease: ${{ inputs.beta }}
+          draft: ${{ inputs.draft }}
+          files: |
+            OpenUtau-win-x64.exe
+            OpenUtau-win-x64.zip
+            OpenUtau-win-x86.exe
+            OpenUtau-win-x86.zip
+            OpenUtau-win-arm64.exe
+            OpenUtau-win-arm64.zip
+            OpenUtau-osx-x64.dmg
+            OpenUtau-osx-arm64.dmg
+            OpenUtau-linux-x64.zip
+            OpenUtau-linux-x64.tar.gz
+            OpenUtau-linux-arm64.zip
+            OpenUtau-linux-arm64.tar.gz
+            bin/linux-x64/*.AppImage
+            bin/linux-arm64/*.AppImage
+            appcast.*.xml
+          body: |
+            ### Download for your OS:
+
+            **Windows**  
+            [Installer (64-bit)](${{ env.REPO_URL }}/releases/download/${{ inputs.version }}/OpenUtau-win-x64.exe)  
+            [Installer (32-bit)](${{ env.REPO_URL }}/releases/download/${{ inputs.version }}/OpenUtau-win-x86.exe)  
+            [Installer (ARM64)](${{ env.REPO_URL }}/releases/download/${{ inputs.version }}/OpenUtau-win-arm64.exe)  
+            [Portable ZIP (64-bit)](${{ env.REPO_URL }}/releases/download/${{ inputs.version }}/OpenUtau-win-x64.zip)
+            [Portable ZIP (32-bit)](${{ env.REPO_URL }}/releases/download/${{ inputs.version }}/OpenUtau-win-x86.zip)
+            [Portable ZIP (ARM64)](${{ env.REPO_URL }}/releases/download/${{ inputs.version }}/OpenUtau-win-arm64.zip)
+
+            **macOS**  
+            [Intel Mac (.dmg)](${{ env.REPO_URL }}/releases/download/${{ inputs.version }}/OpenUtau-osx-x64.dmg)  
+            [Apple Silicon (.dmg)](${{ env.REPO_URL }}/releases/download/${{ inputs.version }}/OpenUtau-osx-arm64.dmg)
+
+            **Linux**  
+            [AppImage (64-bit)](${{ env.REPO_URL }}/releases/download/${{ inputs.version }}/OpenUtau-x86_64.AppImage)
+            [64-bit (.zip)](${{ env.REPO_URL }}/releases/download/${{ inputs.version }}/OpenUtau-linux-x64.zip)  
+            [64-bit (.tar.gz)](${{ env.REPO_URL }}/releases/download/${{ inputs.version }}/OpenUtau-linux-x64.tar.gz)
+            [ARM64 (.zip)](${{ env.REPO_URL }}/releases/download/${{ inputs.version }}/OpenUtau-linux-arm64.zip)
+            [ARM64 (.tar.gz)](${{ env.REPO_URL }}/releases/download/${{ inputs.version }}/OpenUtau-linux-arm64.tar.gz)
+
+            ### Notes
+            - macOS users: If you see "This app is damaged", run:
+              ```sh
+              xattr -rc /Applications/OpenUtau.app
+              ```
+            
+            ### Getting Started
+            See [Getting Started](https://github.com/stakira/OpenUtau/wiki/Getting-Started) for how to use.
+
+            ### FAQ
+            If you encountered issues, see [FAQ](https://github.com/stakira/OpenUtau/wiki/FAQ)
