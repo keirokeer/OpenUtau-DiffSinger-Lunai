@@ -7,7 +7,7 @@ using OpenUtau.Core.Ustx;
 using Serilog;
 
 namespace OpenUtau.Core.DiffSinger {
-    [Phonemizer("DiffSinger BRAPA Phonemizer", "DIFFS BRAPA", language: "PT", author: "HAI-D")]
+    [Phonemizer("DiffSinger BRAPA Phonemizer", "Portuguese BRAPA", language: "DiffSinger", author: "HAI-D")]
     public class DiffSingerBrapaPhonemizer : DiffSingerRefinedPhonemizer {
         
         #region Base Class Overrides
