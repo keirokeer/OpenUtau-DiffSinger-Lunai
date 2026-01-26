@@ -533,7 +533,8 @@ namespace OpenUtau.App.ViewModels {
                 Solo = false,
                 Volume = track.Volume,
                 Pan = track.Pan,
-                TrackColor = track.TrackColor
+                TrackColor = track.TrackColor,
+                TrackExpressions = track.TrackExpressions.Select(exp => exp.Clone()).ToList()
             };
             DocManager.Inst.ExecuteCmd(new AddTrackCommand(DocManager.Inst.Project, newTrack));
             var parts = DocManager.Inst.Project.parts
@@ -559,7 +560,8 @@ namespace OpenUtau.App.ViewModels {
                 Solo = false,
                 Volume = track.Volume,
                 Pan = track.Pan,
-                TrackColor = track.TrackColor
+                TrackColor = track.TrackColor,
+                TrackExpressions = track.TrackExpressions.Select(exp => exp.Clone()).ToList()
             }));
             DocManager.Inst.EndUndoGroup();
         }
