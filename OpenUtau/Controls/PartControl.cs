@@ -153,9 +153,10 @@ namespace OpenUtau.App.Controls {
         }
 
         public override void Render(DrawingContext context) {
-            var backgroundBrush = Selected ? ThemeManager.AccentBrush2 : ThemeManager.AccentBrush1;
+            var trackColorBrush = new SolidColorBrush(Color.FromArgb(0xBF, 0x52, 0x52, 0x52));
+            var backgroundBrush = Selected ? trackColorBrush : trackColorBrush;
             // Background
-            context.DrawRectangle(backgroundBrush, null, new Rect(1, 0, Width - 1, Height - 1), 4, 4);
+            context.DrawRectangle(backgroundBrush, null, new Rect(1, 0, Width - 1, Height - 1), 6, 6);
 
             // Text
             var textLayout = TextLayoutCache.Get(Text, Brushes.White, 12);
