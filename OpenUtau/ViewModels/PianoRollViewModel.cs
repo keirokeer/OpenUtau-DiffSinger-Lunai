@@ -80,6 +80,8 @@ namespace OpenUtau.App.ViewModels {
         public Dictionary<Key, MenuItemViewModel> LegacyPluginShortcuts { get; private set; }
             = new Dictionary<Key, MenuItemViewModel>();
 
+        [Reactive] public bool UseSolidPlaybackLine { get; set; }
+        public ReactiveCommand<Unit, Unit> TogglePlaybackLineCommand { get; set; }
         [Reactive] public double Progress { get; set; }
         [Reactive] public bool CanUndo { get; set; } = false;
         [Reactive] public bool CanRedo { get; set; } = false;
@@ -107,6 +109,9 @@ namespace OpenUtau.App.ViewModels {
             });
             NoteCopyCommand = ReactiveCommand.Create<NoteHitInfo>(info => {
                 NotesViewModel.CopyNotes();
+            });
+            TogglePlaybackLineCommand = ReactiveCommand.Create(() => {
+                UseSolidPlaybackLine = !UseSolidPlaybackLine;
             });
             ClearPhraseCacheCommand = ReactiveCommand.Create<NoteHitInfo>(info => {
                 NotesViewModel.ClearPhraseCache();

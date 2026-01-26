@@ -205,19 +205,19 @@ namespace OpenUtau.App.Controls {
 
         private void RenderNoteBody(UNote note, NotesViewModel viewModel, DrawingContext context) {
             Point leftTop = viewModel.TickToneToPoint(note.position, note.AdjustedTone);
-            leftTop = leftTop.WithX(leftTop.X + 1).WithY(Math.Round(leftTop.Y + 1));
+            leftTop = leftTop.WithX(leftTop.X + 1).WithY(Math.Round(leftTop.Y));
             Size size = viewModel.TickToneToSize(note.duration, 1);
-            size = size.WithWidth(size.Width - 1).WithHeight(Math.Floor(size.Height - 2));
+            size = size.WithWidth(size.Width - 1).WithHeight(Math.Floor(size.Height));
             Point rightBottom = new Point(leftTop.X + size.Width, leftTop.Y + size.Height);
             var brush = selectedNotes.Contains(note)
                 ? (note.Error ? ThemeManager.AccentBrush2Semi : ThemeManager.AccentBrush2)
                 : (note.Error ? ThemeManager.AccentBrush1Semi : ThemeManager.AccentBrush1);
-            context.DrawRectangle(brush, null, new Rect(leftTop, rightBottom), 2, 2);
+            context.DrawRectangle(brush, null, new Rect(leftTop, rightBottom), 4, 4);
             if (TrackHeight < 10 || note.lyric.Length == 0) {
                 return;
             }
             string displayLyric = note.lyric;
-            int txtsize = 12;
+            int txtsize = 14;
             var textLayout = TextLayoutCache.Get(displayLyric, Brushes.White, txtsize);
             if (txtsize > size.Height) {
                 return;

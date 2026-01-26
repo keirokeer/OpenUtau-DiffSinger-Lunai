@@ -142,12 +142,13 @@ namespace OpenUtau.Core.Util {
             public int? PlaybackDeviceIndex;
             public bool ShowPrefs = true;
             public bool ShowTips = true;
-            public string ThemeName = "Light";
+            public string ThemeName = "Dark";
             public bool PenPlusDefault = false;
             public int DegreeStyle;
             public bool UseTrackColor = false;
             public bool ClearCacheOnQuit = false;
-            public bool PreRender = true;
+            public bool PreRender = false;
+            public bool UseSolidPlaybackLine = false;
             public int NumRenderThreads = 2;
             public string DefaultRenderer = string.Empty;
             public int WorldlineR = 0;
@@ -159,7 +160,7 @@ namespace OpenUtau.Core.Util {
             public int DiffSingerStepsPitch = 10;
             public bool DiffSingerTensorCache = true;
             public bool DiffSingerLangCodeHide = false;
-            public bool SkipRenderingMutedTracks = false;
+            public bool SkipRenderingMutedTracks = true;
             public string Language = string.Empty;
             public string? SortingOrder = null;
             public List<string> RecentFiles = new List<string>();
@@ -181,9 +182,9 @@ namespace OpenUtau.Core.Util {
             public bool ShowPortrait = true;
             public bool ShowIcon = true;
             public bool ShowGhostNotes = true;
-            public bool PlayTone = true;
+            public bool PlayTone = false;
             public bool ShowVibrato = true;
-            public bool ShowPitch = true;
+            public bool ShowPitch = false;
             public bool ShowFinalPitch = true;
             public bool ShowWaveform = true;
             public bool ShowPhoneme = true;
