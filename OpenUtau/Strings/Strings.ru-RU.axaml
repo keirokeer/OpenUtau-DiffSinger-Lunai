@@ -134,6 +134,8 @@ OpenUtau стремится стать средой редактирования
   <system:String x:Key="errors.failed.importaudio">Не удалось импортировать аудио</system:String>
   <system:String x:Key="errors.failed.importfiles">Не удалось импортировать файлы</system:String>
   <system:String x:Key="errors.failed.importmidi">Не удалось импортировать midi</system:String>
+  <system:String x:Key="errors.failed.importustandothers">Не удалось открыть проекты. Файлы не могут быть разных форматов.</system:String>
+  <system:String x:Key="errors.failed.importustflags">Не удалось импортировать следующие нераспознанные флаги:</system:String>
   <system:String x:Key="errors.failed.installsinger">Не удалось установить вокалиста</system:String>
   <system:String x:Key="errors.failed.load">Не удалось загрузить</system:String>
   <system:String x:Key="errors.failed.loadprefs">Не удалось загрузить параметры. Пожалуйста, проведите инициализацию.</system:String>
@@ -279,7 +281,6 @@ OpenUtau стремится стать средой редактирования
   <system:String x:Key="menu.tools">Инструменты</system:String>
   <system:String x:Key="menu.tools.clearcache">Очистить кэш</system:String>
   <system:String x:Key="menu.tools.debugwindow">Окно отладки</system:String>
-  <system:String x:Key="menu.tools.dependency.install">Установить зависимость (.oudep)...</system:String>
   <system:String x:Key="menu.tools.fullscreen">Полноэкранный режим</system:String>
   <system:String x:Key="menu.tools.layout">Расположение</system:String>
   <system:String x:Key="menu.tools.layout.hsplit11">Горизонтально 1:1</system:String>
@@ -289,6 +290,7 @@ OpenUtau стремится стать средой редактирования
   <system:String x:Key="menu.tools.layout.vsplit11">Вертикально 1:1</system:String>
   <system:String x:Key="menu.tools.layout.vsplit12">Вертикально 1:2</system:String>
   <system:String x:Key="menu.tools.layout.vsplit13">Вертикально 1:3</system:String>
+  <system:String x:Key="menu.tools.packages">Пакеты...</system:String>
   <system:String x:Key="menu.tools.prefs">Параметры...</system:String>
   <system:String x:Key="menu.tools.singer.install">Установить вокалиста...</system:String>
   <system:String x:Key="menu.tools.singer.installadv">Установить вокалиста (расширенный)...</system:String>
@@ -363,11 +365,46 @@ OpenUtau стремится стать средой редактирования
   <system:String x:Key="oto.set">Установить</system:String>
   <system:String x:Key="oto.suffix">Суффикс</system:String>
 
+  <system:String x:Key="packages.caption">Пакеты</system:String>
+  <system:String x:Key="packages.refresh">Обновить</system:String>
+  <system:String x:Key="packages.installed">Установлено</system:String>
+  <system:String x:Key="packages.col.name">Название</system:String>
+  <system:String x:Key="packages.col.id">ID</system:String>
+  <system:String x:Key="packages.col.developer">Разработчик</system:String>
+  <system:String x:Key="packages.col.version">Версия</system:String>
+  <system:String x:Key="packages.col.action">Действие</system:String>
+  <system:String x:Key="packages.col.installed">Установлено</system:String>
+  <system:String x:Key="packages.unknownversion">неизвестная версия</system:String>
+  <system:String x:Key="packages.install">Установить</system:String>
+  <system:String x:Key="packages.update">Обновить</system:String>
+  <system:String x:Key="packages.uninstall">Удалить</system:String>
+  <system:String x:Key="packages.openinstalllocation">Открыть папку установки</system:String>
+  <system:String x:Key="packages.installfromfile">Установить из файла (.oudep)...</system:String>
+  <system:String x:Key="packages.confirm.install.caption">Установка пакета</system:String>
+  <system:String x:Key="packages.confirm.install.message">Установить {0}?</system:String>
+  <system:String x:Key="packages.confirm.update.caption">Обновление пакета</system:String>
+  <system:String x:Key="packages.confirm.update.message">Обновить {0} до версии {1}?</system:String>
+  <system:String x:Key="packages.confirm.uninstall.caption">Удаление пакета</system:String>
+  <system:String x:Key="packages.confirm.uninstall.message">Удалить {0}?</system:String>
+  <system:String x:Key="packages.status.fetching">Загрузка реестра...</system:String>
+  <system:String x:Key="packages.status.uninstalling">Удаление {0}...</system:String>
+  <system:String x:Key="packages.status.uninstallfinished">Удаление завершено</system:String>
+  <system:String x:Key="packages.status.uninstallfailed">Не удалось удалить</system:String>
+  <system:String x:Key="packages.status.listinginstalled">Получение списка...</system:String>
+  <system:String x:Key="packages.status.ready">Готово</system:String>
+  <system:String x:Key="packages.status.error">Ошибка</system:String>
+  <system:String x:Key="packages.status.installing">Установка {0}...</system:String>
+  <system:String x:Key="packages.status.installfinished">Установка завершена</system:String>
+  <system:String x:Key="packages.status.installfailed">Не удалось установить</system:String>
+  <system:String x:Key="packages.errors.missing">Пакет {0} не найден. Установите его с помощью Менеджера Пакетов.</system:String>
+
   <system:String x:Key="phoneticassistant.caption">Фонетический помощник</system:String>
   <system:String x:Key="phoneticassistant.copy">Скопировать</system:String>
 
   <system:String x:Key="pianoroll.key">Тональность (для отображения ступеней)</system:String>
-  <system:String x:Key="pianoroll.menu.view.detachpianoroll">Отсоединить Пианоролл</system:String>
+  <system:String x:Key="pianoroll.menu.view.pianoroll">Пианоролл</system:String>
+  <system:String x:Key="pianoroll.menu.view.pianoroll.detach">Открепить</system:String>
+  <system:String x:Key="pianoroll.menu.view.pianoroll.hide">Скрыть</system:String>
   <system:String x:Key="pianoroll.menu.batch">Пакетное редактирование</system:String>
   <system:String x:Key="pianoroll.menu.batch.running">Групповое редактирование</system:String>
   <system:String x:Key="pianoroll.menu.lyrics">Текст</system:String>
