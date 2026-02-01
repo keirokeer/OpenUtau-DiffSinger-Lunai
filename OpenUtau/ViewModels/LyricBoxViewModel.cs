@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
@@ -19,6 +19,12 @@ namespace OpenUtau.App.ViewModels {
         [Reactive] public LyricBoxNoteOrPhoneme? NoteOrPhoneme { get; set; }
         [Reactive] public bool IsVisible { get; set; }
         [Reactive] public string? Text { get; set; }
+        /// <summary>When editing phoneme: true = editing only tag; commit builds full = Text + "/" + PhonemeOtherPart.</summary>
+        [Reactive] public bool EditPhonemeTagOnly { get; set; }
+        /// <summary>When editing phoneme: true = editing only phoneme part; commit builds full = (PhonemeOtherPart + "/") + Text.</summary>
+        [Reactive] public bool EditPhonemePhonemeOnly { get; set; }
+        /// <summary>The other part (phoneme-only when EditPhonemeTagOnly, tag when EditPhonemePhonemeOnly).</summary>
+        [Reactive] public string? PhonemeOtherPart { get; set; }
         [Reactive] public SuggestionItem? SelectedSuggestion { get; set; }
         [Reactive] public ObservableCollectionExtended<SuggestionItem> Suggestions { get; set; }
 
@@ -86,16 +92,24 @@ namespace OpenUtau.App.ViewModels {
                 }
             } else {
                 var phoneme = NoteOrPhoneme as LyricBoxPhoneme;
-                if (Text == phoneme!.Unwrap().phoneme) {
+                var currentPhoneme = phoneme!.Unwrap().phoneme;
+                string textToApply = Text!;
+                if (EditPhonemeTagOnly && !string.IsNullOrEmpty(PhonemeOtherPart)) {
+                    textToApply = Text + "/" + PhonemeOtherPart;
+                } else if (EditPhonemePhonemeOnly) {
+                    textToApply = string.IsNullOrEmpty(PhonemeOtherPart) ? Text : (PhonemeOtherPart + "/" + Text);
+                }
+                if (textToApply == currentPhoneme) {
                     return;
                 }
+                Text = textToApply;
             }
             if (IsAliasBox) {
                 DocManager.Inst.StartUndoGroup("command.phoneme.edit");
                 var phoneme = (NoteOrPhoneme as LyricBoxPhoneme)!.Unwrap();
                 var note = phoneme.Parent;
                 int index = phoneme.index;
-                DocManager.Inst.ExecuteCmd(new ChangePhonemeAliasCommand(Part, note.Extends ?? note, index, Text));
+                DocManager.Inst.ExecuteCmd(new ChangePhonemeAliasCommand(Part, note.Extends ?? note, index, Text!));
             } else {
                 DocManager.Inst.StartUndoGroup("command.note.lyric");
                 DocManager.Inst.ExecuteCmd(new ChangeNoteLyricCommand(Part, (NoteOrPhoneme as LyricBoxNote)!.Unwrap(), Text));

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -83,6 +83,13 @@ namespace OpenUtau.App.ViewModels {
         [Reactive] public double ExpShadowOpacity { get; set; }
         [Reactive] public double ExpHeightMin { get; set; }
         [Reactive] public double ExpHeightMax { get; set; }
+        [Reactive] public double PhonemePanelHeight { get; set; }
+        [Reactive] public double PhonemePanelHeightMin { get; set; }
+        [Reactive] public double PhonemePanelHeightMax { get; set; }
+        // Tag strip (20px) only in DiffSinger panel mode; in normal mode never add it (avoids white strip, keeps height)
+        public double PhonemePanelTagStripHeight => (Preferences.Default.DiffSingerPhonemePanelMode && !Preferences.Default.DiffSingerLangCodeHide) ? ViewConstants.PhonemeTagStripHeight : 0;
+        public Thickness PhonemePanelBottomMargin => new Thickness(0, 0, 0, ViewConstants.PhonemePanelResizeHandleHeight + PhonemePanelHeight + PhonemePanelTagStripHeight);
+        public GridLength PhonemePanelHeightGridLength => new GridLength(PhonemePanelHeight + PhonemePanelTagStripHeight);
         [Reactive] public UVoicePart? Part { get; set; }
         [Reactive] public Bitmap? Avatar { get; set; }
         [Reactive] public Bitmap? Portrait { get; set; }
@@ -267,6 +274,20 @@ namespace OpenUtau.App.ViewModels {
                 Preferences.Save();
             });
             ShowPhoneme = Preferences.Default.ShowPhoneme;
+            PhonemePanelHeight = ViewConstants.PhonemePanelHeightDefault;
+            PhonemePanelHeightMin = ViewConstants.PhonemePanelHeightMin;
+            PhonemePanelHeightMax = ViewConstants.PhonemePanelHeightMax;
+            this.WhenAnyValue(x => x.PhonemePanelHeight)
+                .Subscribe(_ => {
+                    this.RaisePropertyChanged(nameof(PhonemePanelBottomMargin));
+                    this.RaisePropertyChanged(nameof(PhonemePanelHeightGridLength));
+                });
+            MessageBus.Current.Listen<NotesRefreshEvent>()
+                .Subscribe(_ => {
+                    this.RaisePropertyChanged(nameof(PhonemePanelTagStripHeight));
+                    this.RaisePropertyChanged(nameof(PhonemePanelBottomMargin));
+                    this.RaisePropertyChanged(nameof(PhonemePanelHeightGridLength));
+                });
             this.WhenAnyValue(x => x.ShowPhoneme)
             .Subscribe(showPhoneme => {
                 Preferences.Default.ShowPhoneme = showPhoneme;

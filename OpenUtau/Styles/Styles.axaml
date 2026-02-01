@@ -1,6 +1,7 @@
-﻿<Styles xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-  <Style>
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:OpenUtau.App.ViewModels">
+  <Style Selector="Control">
     <Style.Resources>
       <CornerRadius x:Key="ControlCornerRadius">5</CornerRadius>
       <CornerRadius x:Key="OverlayCornerRadius">5</CornerRadius>
@@ -378,7 +379,7 @@
               <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <Border ZIndex="1" Padding="2,0,2,0" Background="{TemplateBinding Background}" Margin="5,0,0,0">
-              <TextBlock Text="{TemplateBinding Header}"/>
+              <TextBlock Text="{TemplateBinding Header, Converter={x:Static vm:ObjectToStringConverter.Instance}}"/>
             </Border>
             <Border Grid.RowSpan="2" Grid.ColumnSpan="2" Margin="0,8,0,0" Padding="12,12,12,8"
                 BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1"

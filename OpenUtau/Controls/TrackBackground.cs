@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Reactive.Linq;
 using Avalonia;
@@ -73,6 +73,7 @@ namespace OpenUtau.App.Controls {
             if (change.Property == TrackHeightProperty ||
                 change.Property == TrackOffsetProperty ||
                 change.Property == ForegroundProperty ||
+                change.Property == BackgroundProperty ||
                 change.Property == KeyProperty) {
                 InvalidateVisual();
             }

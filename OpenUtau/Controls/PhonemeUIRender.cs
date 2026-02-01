@@ -1,3 +1,4 @@
+using System;
 using Avalonia;
 using Avalonia.Media.TextFormatting;
 using OpenUtau.App.ViewModels;
@@ -7,7 +8,8 @@ using OpenUtau.Core.Ustx;
 using OpenUtau.Core.Util;
 
 namespace OpenUtau.App.Controls {
-    static class PhonemeUIRender{
+    static class PhonemeUIRender {
+
         public static string getLangCode(UVoicePart part){
             int trackNo = part.trackNo;
             var track = DocManager.Inst.Project.tracks[trackNo];
@@ -18,6 +20,30 @@ namespace OpenUtau.App.Controls {
                 langCode = basePhonemizer.GetLangCode();
             }
             return langCode;
+        }
+
+        /// <summary>
+        /// Splits phoneme text into language tag (e.g. "ja") and phoneme without tag (e.g. "a").
+        /// Same logic as "hide language prefix" preference: prefix is langCode + "/".
+        /// Fallback: if langCode is empty but phoneme contains "/", split on first "/".
+        /// </summary>
+        public static (string tagText, string phonemeOnly) SplitTagAndPhoneme(string phonemeText, string? langCode) {
+            if (string.IsNullOrEmpty(phonemeText)) {
+                return ("", "");
+            }
+            // Match langCode + "/" prefix (case-insensitive for robustness)
+            if (!string.IsNullOrEmpty(langCode)) {
+                var prefix = langCode + "/";
+                if (phonemeText.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)) {
+                    return (langCode, phonemeText.Substring(prefix.Length));
+                }
+            }
+            // Fallback: split on first "/" (e.g. "ja/o" -> "ja", "o")
+            var slashIdx = phonemeText.IndexOf('/');
+            if (slashIdx > 0 && slashIdx < phonemeText.Length - 1) {
+                return (phonemeText.Substring(0, slashIdx), phonemeText.Substring(slashIdx + 1));
+            }
+            return ("", phonemeText);
         }
         //Calculates the position of a phoneme alias on a piano roll view, 
         //considering factors like tick width, phoneme text, and text layout. 

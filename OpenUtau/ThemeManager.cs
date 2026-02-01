@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
@@ -61,6 +61,7 @@ namespace OpenUtau.App {
         public static IBrush ExpShadowNameBrush = Brushes.White;
         public static IBrush ExpActiveBrush = Brushes.Black;
         public static IBrush ExpActiveNameBrush = Brushes.White;
+        public static IBrush TrackBackgroundAltBrush = Brushes.Gray;
 
         public static List<TrackColor> TrackColors = new List<TrackColor>(){
                 new TrackColor("Flamingo", "#D491AA", "#E06C96", "#E8B0C6", "#EBCFDC", "#66AC7288", "#C2708E", "#D491AA", "#EBCFDC", "#1AAC7288"), // piano1, piano2, piano3, piano4, note, note pressed, border, border pressed, note empty
@@ -171,6 +172,9 @@ namespace OpenUtau.App {
             if (resDict.TryGetResource("RealCurveStrokeBrush", themeVariant, out outVar)) {
                 RealCurveStrokeBrush = (IBrush)outVar!;
                 RealCurvePen = new Pen(RealCurveStrokeBrush, 2, DashStyle.Dash);
+            }
+            if (resDict.TryGetResource("TrackBackgroundAltBrush", themeVariant, out outVar)) {
+                TrackBackgroundAltBrush = (IBrush)outVar!;
             }
             SetKeyboardBrush();
             TextLayoutCache.Clear();

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Globalization;
 using System.Text;
 using Avalonia.Data.Converters;
@@ -16,6 +16,12 @@ namespace OpenUtau.App.ViewModels {
 
     public class EncodingNameConverter : IValueConverter {
         public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture) => (value as Encoding)?.EncodingName ?? string.Empty;
+        public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) => throw new NotImplementedException();
+    }
+
+    public class ObjectToStringConverter : IValueConverter {
+        public static readonly ObjectToStringConverter Instance = new ObjectToStringConverter();
+        public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture) => value?.ToString() ?? string.Empty;
         public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) => throw new NotImplementedException();
     }
 }

@@ -324,6 +324,10 @@
             <TextBlock Text="{DynamicResource prefs.appearance.diffsingerlangcodehide}" HorizontalAlignment="Left" />
             <ToggleSwitch IsChecked="{Binding DiffSingerLangCodeHide}" />
           </Grid>
+          <Grid Margin="0,5,0,0">
+            <TextBlock Text="{DynamicResource prefs.diffsinger.phonemepanel}" HorizontalAlignment="Left" />
+            <ToggleSwitch IsChecked="{Binding DiffSingerPhonemePanelMode}" />
+          </Grid>
         </StackPanel>
 
         <!-- Advanced -->

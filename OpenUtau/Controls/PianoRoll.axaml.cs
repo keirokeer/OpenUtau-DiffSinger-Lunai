@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -34,6 +34,9 @@ namespace OpenUtau.App.Controls {
             OS.IsMacOS() ? KeyModifiers.Meta : KeyModifiers.Control;
         private KeyboardPlayState? keyboardPlayState;
         private NoteEditState? editState;
+        private bool phonemePanelResizing;
+        private double phonemePanelResizeStartY;
+        private double phonemePanelResizeStartHeight;
         private Point valueTipPointerPosition;
         private bool shouldOpenNotesContextMenu;
 
@@ -986,13 +989,34 @@ namespace OpenUtau.App.Controls {
                 editState = null;
                 Cursor = null;
             }
-            var hitInfo = ViewModel.NotesViewModel.HitTest.HitTestAlias(point);
+            var hitTestPoint = GetPhonemeHitTestPoint(args, control);
+            var hitInfo = ViewModel.NotesViewModel.HitTest.HitTestAlias(hitTestPoint);
             var phoneme = hitInfo.phoneme;
             Log.Debug($"PhonemeCanvasDoubleTapped, hit = {hitInfo.hit}, point = {{{hitInfo.point}}}, phoneme = {phoneme?.phoneme}");
             if (!hitInfo.hit) {
                 return;
             }
-            LyricBox?.Show(ViewModel.NotesViewModel.Part, new LyricBoxPhoneme(phoneme!), phoneme!.phoneme);
+            var part = ViewModel.NotesViewModel.Part!;
+            if (Preferences.Default.DiffSingerPhonemePanelMode) {
+                string phonemeText = !string.IsNullOrEmpty(phoneme!.phonemeMapped) ? phoneme.phonemeMapped : phoneme.phoneme;
+                string langCode = PhonemeUIRender.getLangCode(part);
+                (string tagText, string phonemeOnly) = PhonemeUIRender.SplitTagAndPhoneme(phonemeText, langCode);
+                if (hitInfo.hitTagLine) {
+                    LyricBox?.Show(part, new LyricBoxPhoneme(phoneme), tagText, true, false, phonemeOnly);
+                } else {
+                    LyricBox?.Show(part, new LyricBoxPhoneme(phoneme), phonemeOnly, false, true, tagText);
+                }
+            } else {
+                // Normal mode: DiffSingerLangCodeHide - show phoneme-only in editor (display handled by AliasPosition), add prefix back on commit
+                string phonemeText = !string.IsNullOrEmpty(phoneme!.phonemeMapped) ? phoneme.phonemeMapped : phoneme.phoneme;
+                string langCode = PhonemeUIRender.getLangCode(part);
+                (string tagText, string phonemeOnly) = PhonemeUIRender.SplitTagAndPhoneme(phonemeText, langCode);
+                if (Preferences.Default.DiffSingerLangCodeHide && !string.IsNullOrEmpty(tagText)) {
+                    LyricBox?.Show(part, new LyricBoxPhoneme(phoneme), phonemeOnly, false, true, tagText);
+                } else {
+                    LyricBox?.Show(part, new LyricBoxPhoneme(phoneme!), phoneme!.phoneme);
+                }
+            }
         }
 
         public async void PhonemeCanvasPointerPressed(object sender, PointerPressedEventArgs args) {
@@ -1007,7 +1031,8 @@ namespace OpenUtau.App.Controls {
             }
             if (point.Properties.IsLeftButtonPressed) {
                 if (args.KeyModifiers == cmdKey) {
-                    var hitAliasInfo = ViewModel.NotesViewModel.HitTest.HitTestAlias(args.GetPosition(control));
+                    var aliasPoint = GetPhonemeHitTestPoint(args, control);
+                    var hitAliasInfo = ViewModel.NotesViewModel.HitTest.HitTestAlias(aliasPoint);
                     if (hitAliasInfo.hit) {
                         var singer = ViewModel.NotesViewModel.Project.tracks[ViewModel.NotesViewModel.Part.trackNo].Singer;
                         if (Preferences.Default.OtoEditor == 1 && !string.IsNullOrEmpty(Preferences.Default.VLabelerPath)) {
@@ -1022,7 +1047,8 @@ namespace OpenUtau.App.Controls {
                         return;
                     }
                 }
-                var hitInfo = ViewModel.NotesViewModel.HitTest.HitTestPhoneme(point.Position);
+                var hitTestPoint = GetPhonemeHitTestPoint(args, control);
+                var hitInfo = ViewModel.NotesViewModel.HitTest.HitTestPhoneme(hitTestPoint);
                 if (hitInfo.hit) {
                     var phoneme = hitInfo.phoneme;
                     var note = phoneme.Parent;
@@ -1062,16 +1088,18 @@ namespace OpenUtau.App.Controls {
                 editState.Update(point.Pointer, point.Position);
                 return;
             }
-            var aliasHitInfo = ViewModel.NotesViewModel.HitTest.HitTestAlias(point.Position);
-            if (aliasHitInfo.hit) {
-                ViewModel.MouseoverPhoneme(aliasHitInfo.phoneme);
-                Cursor = null;
-                return;
-            }
-            var hitInfo = ViewModel.NotesViewModel.HitTest.HitTestPhoneme(point.Position);
+            var hitTestPoint = GetPhonemeHitTestPoint(args, control);
+            // Check timing bar first so cursor changes over the full grab area (not just left of bar)
+            var hitInfo = ViewModel.NotesViewModel.HitTest.HitTestPhoneme(hitTestPoint);
             if (hitInfo.hit) {
                 Cursor = ViewConstants.cursorSizeWE;
                 ViewModel.MouseoverPhoneme(null);
+                return;
+            }
+            var aliasHitInfo = ViewModel.NotesViewModel.HitTest.HitTestAlias(hitTestPoint);
+            if (aliasHitInfo.hit) {
+                ViewModel.MouseoverPhoneme(aliasHitInfo.phoneme);
+                Cursor = null;
                 return;
             }
             ViewModel.MouseoverPhoneme(null);
@@ -1091,6 +1119,48 @@ namespace OpenUtau.App.Controls {
             editState.End(point.Pointer, point.Position);
             editState = null;
             Cursor = null;
+        }
+
+        /// <summary>Hit test point: X from NotesCanvas (viewport), Y from PhonemeCanvas (phoneme panel content).</summary>
+        private Point GetPhonemeHitTestPoint(TappedEventArgs args, Control phonemeCanvas) {
+            if (NotesCanvas == null) return args.GetPosition(phonemeCanvas);
+            var notesPt = args.GetPosition(NotesCanvas);
+            var phonemePt = args.GetPosition(phonemeCanvas);
+            return new Point(notesPt.X, phonemePt.Y);
+        }
+        private Point GetPhonemeHitTestPoint(PointerEventArgs args, Control phonemeCanvas) {
+            if (NotesCanvas == null) return args.GetPosition(phonemeCanvas);
+            var notesPt = args.GetPosition(NotesCanvas);
+            var phonemePt = args.GetPosition(phonemeCanvas);
+            return new Point(notesPt.X, phonemePt.Y);
+        }
+
+        public void PhonemePanelResizePointerPressed(object sender, PointerPressedEventArgs args) {
+            if (ViewModel?.NotesViewModel == null || args.GetCurrentPoint((Control)sender).Pointer.Type != Avalonia.Input.PointerType.Mouse) {
+                return;
+            }
+            if (args.GetCurrentPoint((Control)sender).Properties.IsLeftButtonPressed) {
+                phonemePanelResizing = true;
+                phonemePanelResizeStartY = args.GetPosition(this).Y;
+                phonemePanelResizeStartHeight = ViewModel.NotesViewModel.PhonemePanelHeight;
+            }
+        }
+
+        public void PhonemePanelResizePointerMoved(object sender, PointerEventArgs args) {
+            if (!phonemePanelResizing || ViewModel?.NotesViewModel == null) {
+                return;
+            }
+            var vm = ViewModel.NotesViewModel;
+            var currentY = args.GetPosition(this).Y;
+            var deltaY = currentY - phonemePanelResizeStartY;
+            var newHeight = phonemePanelResizeStartHeight - deltaY;
+            vm.PhonemePanelHeight = Math.Max(vm.PhonemePanelHeightMin, Math.Min(vm.PhonemePanelHeightMax, newHeight));
+        }
+
+        public void PhonemePanelResizePointerReleased(object sender, PointerReleasedEventArgs args) {
+            if (args.GetCurrentPoint((Control)sender).Pointer.Type == Avalonia.Input.PointerType.Mouse) {
+                phonemePanelResizing = false;
+            }
         }
 
         public void BackgroundPointerMoved(object sender, PointerEventArgs args) {

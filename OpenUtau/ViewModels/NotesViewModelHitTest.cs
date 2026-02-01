@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Avalonia;
@@ -52,6 +52,8 @@ namespace OpenUtau.App.ViewModels {
     public struct AliasHitInfo {
         public UPhoneme phoneme;
         public bool hit;
+        /// <summary>When true, tag line was hit; when false (and hit), phoneme line was hit. Only in DiffSinger phoneme panel mode.</summary>
+        public bool hitTagLine;
         public Point point;
     }
 
@@ -317,26 +319,44 @@ namespace OpenUtau.App.ViewModels {
                 if (leftBound >= rightTick || rightBound <= leftTick || note.Error || note.OverlapError) {
                     continue;
                 }
-                int p0Tick = timeAxis.MsPosToTickPos(phoneme.PositionMs + phoneme.envelope.data[0].X) - viewModel.Part.position;
-                double p0x = viewModel.TickToneToPoint(p0Tick, 0).X;
-                var point = new Point(p0x, 60 - phoneme.envelope.data[0].Y * 0.24 - 1);
-                if (WithIn(point, mousePos, 3)) {
-                    result.phoneme = phoneme;
-                    result.hit = true;
-                    result.hitPreutter = true;
-                    return result;
-                }
-                int p1Tick = timeAxis.MsPosToTickPos(phoneme.PositionMs + phoneme.envelope.data[1].X) - viewModel.Part.position;
-                double p1x = viewModel.TickToneToPoint(p1Tick, 0).X;
-                point = new Point(p1x, 60 - phoneme.envelope.data[1].Y * 0.24);
-                if (WithIn(point, mousePos, 3)) {
-                    result.phoneme = phoneme;
-                    result.hit = true;
-                    result.hitOverlap = true;
-                    return result;
+                Point point;
+                // In DiffSinger phoneme panel mode, preutter/overlap handles are not shown or draggable
+                if (!Preferences.Default.DiffSingerPhonemePanelMode) {
+                    int p0Tick = timeAxis.MsPosToTickPos(phoneme.PositionMs + phoneme.envelope.data[0].X) - viewModel.Part.position;
+                    double p0x = viewModel.TickToneToPoint(p0Tick, 0).X;
+                    var pt = new Point(p0x, 60 - phoneme.envelope.data[0].Y * 0.24 - 1);
+                    if (WithIn(pt, mousePos, 3)) {
+                        result.phoneme = phoneme;
+                        result.hit = true;
+                        result.hitPreutter = true;
+                        return result;
+                    }
+                    int p1Tick = timeAxis.MsPosToTickPos(phoneme.PositionMs + phoneme.envelope.data[1].X) - viewModel.Part.position;
+                    double p1x = viewModel.TickToneToPoint(p1Tick, 0).X;
+                    pt = new Point(p1x, 60 - phoneme.envelope.data[1].Y * 0.24);
+                    if (WithIn(pt, mousePos, 3)) {
+                        result.phoneme = phoneme;
+                        result.hit = true;
+                        result.hitOverlap = true;
+                        return result;
+                    }
                 }
                 point = viewModel.TickToneToPoint(phoneme.position, 0);
-                if (Math.Abs(point.X - mousePos.X) < 3) {
+                double xLeft = point.X;
+                // DiffSinger: use rect-based hit (10px wide strip centered on bar) within bar Y bounds for reliable grabbing
+                if (Preferences.Default.DiffSingerPhonemePanelMode) {
+                    double tagStripH = Preferences.Default.DiffSingerLangCodeHide ? 0 : ViewConstants.PhonemeTagStripHeight;
+                    double barY = tagStripH;
+                    double barH = viewModel.PhonemePanelHeight;
+                    const double grabWidth = 5;
+                    var grabRect = new Rect(xLeft - grabWidth, barY, grabWidth * 2, barH);
+                    if (grabRect.Contains(mousePos)) {
+                        result.phoneme = phoneme;
+                        result.hit = true;
+                        result.hitPosition = true;
+                        return result;
+                    }
+                } else if (Math.Abs(xLeft - mousePos.X) < 3) {
                     result.phoneme = phoneme;
                     result.hit = true;
                     result.hitPosition = true;
@@ -368,15 +388,39 @@ namespace OpenUtau.App.ViewModels {
                 if (note.OverlapError) {
                     continue;
                 }
-                // Mimicking the rendering logic of `PhonemeCanvas`. Might have a better solution.
                 if (viewModel.TickWidth <= ViewConstants.PianoRollTickWidthShowDetails) {
+                    continue;
+                }
+                // DiffSinger mode: tag above bars (tag strip +20px, hidden when DiffSingerLangCodeHide), phoneme inside bars; bar height = PhonemePanelHeight
+                if (Preferences.Default.DiffSingerPhonemePanelMode) {
+                    double tagStripHeight = Preferences.Default.DiffSingerLangCodeHide ? 0 : ViewConstants.PhonemeTagStripHeight;
+                    double barY = tagStripHeight;
+                    double barHeight = viewModel.PhonemePanelHeight;
+                    const double leftEdgeWidth = 5;
+                    double xLeft = viewModel.TickToneToPoint(phoneme.position, 0).X;
+                    double xRight = viewModel.TickToneToPoint(phoneme.End, 0).X;
+                    double w = Math.Max(0, xRight - xLeft - leftEdgeWidth);
+                    var tagRect = new Rect(xLeft + leftEdgeWidth, 0, w, tagStripHeight);
+                    var phonemeRect = new Rect(xLeft + leftEdgeWidth, barY, w, barHeight);
+                    if (tagRect.Contains(mousePos)) {
+                        result.phoneme = phoneme;
+                        result.hit = true;
+                        result.hitTagLine = true;
+                        return result;
+                    }
+                    if (phonemeRect.Contains(mousePos)) {
+                        result.phoneme = phoneme;
+                        result.hit = true;
+                        result.hitTagLine = false;
+                        return result;
+                    }
                     continue;
                 }
                 string phonemeText = !string.IsNullOrEmpty(phoneme.phonemeMapped) ? phoneme.phonemeMapped : phoneme.phoneme;
                 if (string.IsNullOrEmpty(phonemeText)) {
                     continue;
                 }
-                (double textX, double textY, Size size, TextLayout textLayout) 
+                (double textX, double textY, Size size, TextLayout textLayout)
                     = PhonemeUIRender.AliasPosition(viewModel, phoneme, langCode, ref lastTextEndX, ref raiseText);
                 var rect = new Rect(new Point(textX - 2, textY + 1.5), size);
                 if (rect.Contains(mousePos)) {

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -120,6 +120,7 @@ namespace OpenUtau.App.ViewModels {
         [Reactive] public double DiffSingerDepth { get; set; }
         [Reactive] public bool DiffSingerTensorCache { get; set; }
         [Reactive] public bool DiffSingerLangCodeHide { get; set; }
+        [Reactive] public bool DiffSingerPhonemePanelMode { get; set; }
 
         // Advanced
         [Reactive] public bool RememberMid { get; set; }
@@ -173,6 +174,7 @@ namespace OpenUtau.App.ViewModels {
             DiffSingerStepsPitch = Preferences.Default.DiffSingerStepsPitch;
             DiffSingerTensorCache = Preferences.Default.DiffSingerTensorCache;
             DiffSingerLangCodeHide = Preferences.Default.DiffSingerLangCodeHide;
+            DiffSingerPhonemePanelMode = Preferences.Default.DiffSingerPhonemePanelMode;
             SkipRenderingMutedTracks = Preferences.Default.SkipRenderingMutedTracks;
             ThemeName = Preferences.Default.ThemeName;
             PenPlusDefault = Preferences.Default.PenPlusDefault;
@@ -387,6 +389,13 @@ namespace OpenUtau.App.ViewModels {
                 .Subscribe(useCache => {
                     Preferences.Default.DiffSingerLangCodeHide = useCache;
                     Preferences.Save();
+                    MessageBus.Current.SendMessage(new NotesRefreshEvent());
+                });
+            this.WhenAnyValue(vm => vm.DiffSingerPhonemePanelMode)
+                .Subscribe(mode => {
+                    Preferences.Default.DiffSingerPhonemePanelMode = mode;
+                    Preferences.Save();
+                    MessageBus.Current.SendMessage(new NotesRefreshEvent());
                 });
             this.WhenAnyValue(vm => vm.SkipRenderingMutedTracks)
                 .Subscribe(skipRenderingMutedTracks => {

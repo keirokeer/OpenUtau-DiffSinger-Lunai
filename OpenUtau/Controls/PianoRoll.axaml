@@ -1,4 +1,4 @@
-﻿<UserControl xmlns="https://github.com/avaloniaui"
+<UserControl xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -135,13 +135,13 @@
       <Image Grid.Row="3" Grid.RowSpan="3" Grid.Column="1" HorizontalAlignment="Right" Margin="0,0,100,0"
              Source="{Binding NotesViewModel.Portrait}" OpacityMask="{Binding NotesViewModel.PortraitMask}" Stretch="None"/>
       <Border Grid.Row="3" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Bottom"
-              Margin="0,0,0,60" Height="60" IsHitTestVisible="False">
+              Margin="{Binding NotesViewModel.PhonemePanelBottomMargin}" Height="60" IsHitTestVisible="False">
         <c:WaveformImage DataContext="{Binding NotesViewModel, Mode=OneWay}"
                          TickWidth="{Binding TickWidth, Mode=OneWay}"
                          TickOffset="{Binding TickOffset, Mode=OneWay}"
                          ShowWaveform="{Binding ShowWaveform, Mode=OneWay}"/>
       </Border>
-      <c:NotesCanvas Grid.Row="3" Grid.Column="1"
+      <c:NotesCanvas x:Name="NotesCanvas" Grid.Row="3" Grid.Column="1"
                      TickWidth="{Binding NotesViewModel.TickWidth}"
                      TrackHeight="{Binding NotesViewModel.TrackHeight}"
                      TickOffset="{Binding NotesViewModel.TickOffset}"
@@ -611,7 +611,7 @@
         </Border>
       </StackPanel>
       <Rectangle Grid.Row="3" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Bottom"
-                 Margin="0,0,0,60" Height="6" Opacity="0.15" IsVisible="{Binding NotesViewModel.ShowPhoneme}">
+                 Margin="{Binding NotesViewModel.PhonemePanelBottomMargin}" Height="6" Opacity="0.15" IsVisible="{Binding NotesViewModel.ShowPhoneme}">
         <Rectangle.Fill>
           <LinearGradientBrush StartPoint="0,0" EndPoint="0,6">
             <GradientStop Color="Transparent" Offset="0"/>
@@ -619,20 +619,35 @@
           </LinearGradientBrush>
         </Rectangle.Fill>
       </Rectangle>
-      <c:PhonemeCanvas Grid.Row="3" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Margin="0" Height="60"
-                       Background="{DynamicResource BackgroundBrushSemi}"
-                       TickWidth="{Binding NotesViewModel.TickWidth}"
-                       TickOffset="{Binding NotesViewModel.TickOffset}"
-                       Part="{Binding NotesViewModel.Part}" IsVisible="{Binding NotesViewModel.ShowPhoneme}"
-                       DoubleTapped="PhonemeCanvasDoubleTapped"
-                       PointerPressed="PhonemeCanvasPointerPressed"
-                       PointerMoved="PhonemeCanvasPointerMoved"
-                       PointerReleased="PhonemeCanvasPointerReleased"/>
+      <Grid Grid.Row="3" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" IsVisible="{Binding NotesViewModel.ShowPhoneme}">
+        <Grid.RowDefinitions>
+          <RowDefinition Height="10"/>
+          <RowDefinition Height="{Binding NotesViewModel.PhonemePanelHeightGridLength}"/>
+        </Grid.RowDefinitions>
+        <Border Grid.Row="0" Background="{DynamicResource SystemControlBackgroundAltHighBrush}" Cursor="SizeNorthSouth"
+                BorderThickness="0"
+                PointerPressed="PhonemePanelResizePointerPressed"
+                PointerMoved="PhonemePanelResizePointerMoved"
+                PointerReleased="PhonemePanelResizePointerReleased"/>
+        <Border Grid.Row="1" Background="{DynamicResource SystemRegionBrush}" BoxShadow="inset 0 0 5 1 #3F000000"
+                ClipToBounds="True">
+          <c:PhonemeCanvas HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0"
+                         Background="{DynamicResource SystemRegionBrush}"
+                         TickWidth="{Binding NotesViewModel.TickWidth}"
+                         TickOffset="{Binding NotesViewModel.TickOffset}"
+                         Part="{Binding NotesViewModel.Part}" IsVisible="True"
+                         DoubleTapped="PhonemeCanvasDoubleTapped"
+                         PointerPressed="PhonemeCanvasPointerPressed"
+                         PointerMoved="PhonemeCanvasPointerMoved"
+                         PointerReleased="PhonemeCanvasPointerReleased"/>
+        </Border>
+      </Grid>
       <GridSplitter Grid.Row="4" Grid.ColumnSpan="3" Height="10" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                     Background="{DynamicResource SystemControlBackgroundAltHighBrush}" IsVisible="{Binding NotesViewModel.ShowExpressions}"
                     Focusable="False" Cursor="SizeNorthSouth"/>
       <c:TrackBackground Grid.Row="5" Grid.Column="1" IsHitTestVisible="False"
                          IsVisible="{Binding NotesViewModel.ShowExpressions}"
+                         Background="{DynamicResource SystemRegionBrush}"
                          Foreground="{DynamicResource TrackBackgroundAltBrush}"
                          TrackHeight="{Binding NotesViewModel.ExpTrackHeight}"/>
       <c:TickBackground Grid.Row="5"  Grid.Column="1" IsHitTestVisible="False"

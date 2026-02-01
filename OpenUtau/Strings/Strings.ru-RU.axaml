@@ -546,6 +546,7 @@ OpenUtau стремится стать средой редактирования
   <system:String x:Key="prefs.cache.diffsingertensorcache">Тензорный кэш DiffSinger</system:String>
   <system:String x:Key="prefs.caption">Параметры</system:String>
   <system:String x:Key="prefs.diffsinger">DiffSinger</system:String>
+  <system:String x:Key="prefs.diffsinger.phonemepanel">Удобный режим панели фонем для DiffSinger</system:String>
   <system:String x:Key="prefs.editing">Редактирование</system:String>
   <system:String x:Key="prefs.general">Общее</system:String>
   <system:String x:Key="prefs.note.restart">Примечание: пожалуйста, перезапустите OpenUtau после изменения этого пункта.</system:String>

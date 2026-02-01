@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
@@ -152,9 +152,19 @@ namespace OpenUtau.App.Controls {
         }
 
         public void Show(UVoicePart part, LyricBoxNoteOrPhoneme noteOrPhoneme, string text) {
+            Show(part, noteOrPhoneme, text, false, false, null);
+        }
+
+        /// <param name="editTagOnly">When true, text is tag only; commit builds full = text + "/" + otherPart.</param>
+        /// <param name="editPhonemeOnly">When true, text is phoneme only; commit builds full = (otherPart + "/") + text.</param>
+        /// <param name="otherPart">The other part (phoneme-only when editTagOnly, tag when editPhonemeOnly).</param>
+        public void Show(UVoicePart part, LyricBoxNoteOrPhoneme noteOrPhoneme, string text, bool editTagOnly, bool editPhonemeOnly, string? otherPart) {
             viewModel.Part = part;
             viewModel.NoteOrPhoneme = noteOrPhoneme;
             viewModel.Text = text;
+            viewModel.EditPhonemeTagOnly = editTagOnly;
+            viewModel.EditPhonemePhonemeOnly = editPhonemeOnly;
+            viewModel.PhonemeOtherPart = otherPart ?? string.Empty;
             viewModel.IsVisible = true;
             box.SelectAll();
             focusTimer = new DispatcherTimer(
@@ -181,6 +191,9 @@ namespace OpenUtau.App.Controls {
             viewModel.NoteOrPhoneme = null;
             viewModel.IsVisible = false;
             viewModel.Text = string.Empty;
+            viewModel.EditPhonemeTagOnly = false;
+            viewModel.EditPhonemePhonemeOnly = false;
+            viewModel.PhonemeOtherPart = null;
             this.Focus();
         }
     }

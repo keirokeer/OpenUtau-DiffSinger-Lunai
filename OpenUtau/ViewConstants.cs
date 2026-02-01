@@ -1,4 +1,4 @@
-﻿using Avalonia.Input;
+using Avalonia.Input;
 
 namespace OpenUtau.App {
     static class ViewConstants {
@@ -55,5 +55,11 @@ namespace OpenUtau.App {
 
         public const double ExpHeightMin = 132;
         public const double ExpHeightMax = 600;
+
+        public const double PhonemePanelHeightDefault = 45;
+        public const double PhonemePanelHeightMin = 45;
+        public const double PhonemePanelHeightMax = 250;
+        public const double PhonemePanelResizeHandleHeight = 10;
+        public const double PhonemeTagStripHeight = 20;  // DiffSinger: space for tag above bars
     }
 }
