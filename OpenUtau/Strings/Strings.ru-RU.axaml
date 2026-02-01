@@ -575,6 +575,7 @@ OpenUtau стремится стать средой редактирования
   <system:String x:Key="prefs.playback.backend.mini">MiniAudio</system:String>
   <system:String x:Key="prefs.playback.cursorposition">Поле автопрокрутки</system:String>
   <system:String x:Key="prefs.playback.device">Устройство воспроизведения</system:String>
+  <system:String x:Key="prefs.playback.solidline">Сплошная линия воспроизведения</system:String>
   <system:String x:Key="prefs.playback.lockstarttime">На паузе</system:String>
   <system:String x:Key="prefs.playback.lockstarttime.off">Ничего не делать</system:String>
   <system:String x:Key="prefs.playback.lockstarttime.on">Переместить курсор и вид обратно в исходную позицию воспроизведения</system:String>

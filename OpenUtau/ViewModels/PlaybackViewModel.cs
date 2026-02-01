@@ -42,7 +42,7 @@ namespace OpenUtau.App.ViewModels {
 
         public void MovePlayPos(int tick) {
             if (DocManager.Inst.playPosTick != tick) {
-                DocManager.Inst.ExecuteCmd(new SeekPlayPosTickNotification(Math.Max(0, tick)));
+                DocManager.Inst.ExecuteCmd(new SeekPlayPosTickNotification(Math.Max(0, tick), pause: true));
             }
         }
 

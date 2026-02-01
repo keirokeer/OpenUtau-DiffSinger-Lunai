@@ -52,7 +52,6 @@ namespace OpenUtau.App.ViewModels {
         [Reactive] public double PlayPosHighlightWidth { get; set; }
         [Reactive] public bool PlayPosWaitingRendering { get; set; }
         [Reactive] public bool UseSolidPlaybackLine { get; set; }
-        public ReactiveCommand<Unit, Unit> TogglePlaybackLineCommand { get; }
         [Reactive] public bool CursorTool { get; set; }
         [Reactive] public bool PenTool { get; set; }
         [Reactive] public bool PenPlusTool { get; set; }
@@ -309,13 +308,14 @@ namespace OpenUtau.App.ViewModels {
                 Preferences.Default.ShowNoteParams = showNoteParams;
                 Preferences.Save();
             });
-            TogglePlaybackLineCommand = ReactiveCommand.Create(() => {
-                UseSolidPlaybackLine = !UseSolidPlaybackLine;
-            });
-            this.WhenAnyValue(x => x.UseSolidPlaybackLine)
-            .Subscribe(value => {
-                MessageBus.Current.SendMessage(new PlaybackLineModeChangedEvent(value));
-            });
+            UseSolidPlaybackLine = Preferences.Default.UseSolidPlaybackLine;
+            MessageBus.Current.Listen<PlaybackLineModeChangedEvent>()
+                .Subscribe(e => {
+                    UseSolidPlaybackLine = e.UseSolidLine;
+                    if (Part != null) {
+                        SetPlayPos(DocManager.Inst.playPosTick, false);
+                    }
+                });
 
             TickWidth = ViewConstants.PianoRollTickWidthDefault;
             TrackHeight = ViewConstants.NoteHeightDefault;
@@ -1030,8 +1030,8 @@ namespace OpenUtau.App.ViewModels {
             tick -= Part?.position ?? 0;
             PlayPosX = TickToneToPoint(tick, 0).X;
             if (UseSolidPlaybackLine) {
-                PlayPosHighlightX = PlayPosX - 2;
-                PlayPosHighlightWidth = 4;
+                PlayPosHighlightX = PlayPosX - 1;
+                PlayPosHighlightWidth = 2;
             } else {
                 TickToLineTick(tick, out int left, out int right);
                 PlayPosHighlightX = TickToneToPoint(left, 0).X;
@@ -1110,7 +1110,7 @@ namespace OpenUtau.App.ViewModels {
                     PrimaryKeyNotSupported = !IsExpSupported(PrimaryKey);
                 } else if (cmd is SetPlayPosTickNotification setPlayPosTick) {
                     SetPlayPos(setPlayPosTick.playPosTick, setPlayPosTick.waitingRendering);
-                    if (!setPlayPosTick.pause || Preferences.Default.LockStartTime == 1) {
+                    if (!setPlayPosTick.pause) {
                         MaybeAutoScroll(PlayPosX);
                     }
                 } else if (cmd is FocusNoteNotification focusNote) {

@@ -112,6 +112,10 @@
             <ComboBoxItem Content="{DynamicResource prefs.playback.autoscrollmode.stationarycursor}"/>
             <ComboBoxItem Content="{DynamicResource prefs.playback.autoscrollmode.pagescroll}"/>
           </ComboBox>
+          <Grid ColumnDefinitions="*,Auto" Margin="0,10,0,0">
+            <TextBlock Grid.Column="0" Text="{DynamicResource prefs.playback.solidline}" VerticalAlignment="Center"/>
+            <ToggleSwitch Grid.Column="1" IsChecked="{Binding UseSolidPlaybackLine}"/>
+          </Grid>
           <Grid ColumnDefinitions="Auto,8,20,8,*" Margin="0,10,0,0">
             <TextBlock Grid.Column="0" Text="{DynamicResource prefs.playback.cursorposition}"/>
             <TextBlock Grid.Column="2">
