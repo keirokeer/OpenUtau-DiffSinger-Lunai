@@ -78,7 +78,8 @@
     <Setter Property="Margin" Value="0,0,0,4"/>
     <Setter Property="FontSize" Value="12"/>
     <Setter Property="VerticalAlignment" Value="Top"/>
-    <Setter Property="SelectionForegroundBrush" Value="Black"/>
+    <Setter Property="SelectionBrush" Value="{DynamicResource SystemControlForegroundBaseHighBrush}"/>
+    <Setter Property="SelectionForegroundBrush" Value="{DynamicResource SystemControlBackgroundAltHighBrush}"/>
   </Style>
   <Style Selector="TextBox:disabled">
     <Setter Property="Foreground" Value="{DynamicResource TextControlForegroundDisabled}" />

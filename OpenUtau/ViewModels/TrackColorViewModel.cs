@@ -2,6 +2,7 @@
 using System.Linq;
 using OpenUtau.Core;
 using OpenUtau.Core.Ustx;
+using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 
 namespace OpenUtau.App.ViewModels {
@@ -20,6 +21,8 @@ namespace OpenUtau.App.ViewModels {
                 DocManager.Inst.StartUndoGroup("command.track.setting");
                 DocManager.Inst.ExecuteCmd(new ChangeTrackColorCommand(DocManager.Inst.Project, track, SelectedColor.Name));
                 DocManager.Inst.EndUndoGroup();
+                MessageBus.Current.SendMessage(new ThemeChangedEvent());
+                MessageBus.Current.SendMessage(new PianorollRefreshEvent("TrackColor"));
             }
         }
     }

@@ -5,8 +5,10 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
 using OpenUtau.App.ViewModels;
+using OpenUtau.App;
 using OpenUtau.Core;
 using OpenUtau.Core.Ustx;
+using OpenUtau.Core.Util;
 using ReactiveUI;
 
 namespace OpenUtau.App.Controls {
@@ -107,6 +109,15 @@ namespace OpenUtau.App.Controls {
             if (descriptor.max <= descriptor.min) {
                 return;
             }
+            bool useTrackColor = Preferences.Default.UseTrackColor;
+            var tcolor = useTrackColor ? ThemeManager.GetTrackColor(track.TrackColor) : null;
+            // Curves (UExpressionType.Curve) always use default white accent; only Options/Numerical use track color
+            var lPen = ThemeManager.AccentPen1;
+            var lPen2 = ThemeManager.AccentPen1Thickness2;
+            var accentBrush = useTrackColor && tcolor != null ? tcolor.AccentColor : (IBrush)ThemeManager.AccentBrush1Note;
+            var accentPen2 = useTrackColor && tcolor != null ? new Pen(tcolor.AccentColorDark, 2) : ThemeManager.AccentPen2Thickness2;
+            var accentPen3 = useTrackColor && tcolor != null ? new Pen(tcolor.AccentColorDark, 3) : ThemeManager.AccentPen2Thickness3;
+            var accentBrush2 = useTrackColor && tcolor != null ? tcolor.AccentColorDark : (IBrush)ThemeManager.AccentBrush2;
             DrawBackgroundForHitTest(context);
             double leftTick = TickOffset - 480;
             double rightTick = TickOffset + Bounds.Width / TickWidth + 480;
@@ -116,10 +127,8 @@ namespace OpenUtau.App.Controls {
             if (descriptor.type == UExpressionType.Curve) {
                 var curve = Part.curves.FirstOrDefault(c => c.descriptor == descriptor);
                 double defaultHeight = Math.Round(Bounds.Height - Bounds.Height * (descriptor.defaultValue - descriptor.min) / (descriptor.max - descriptor.min));
-                var lPen = ThemeManager.AccentPen1;
-                var lPen2 = ThemeManager.AccentPen1Thickness2;
                 var lPen3 = new Pen(ThemeManager.NeutralAccentBrush, 1, new DashStyle(new double[] { 4, 4 }, 0));
-                var brush = ThemeManager.AccentBrush1Note;
+                var brush = accentBrush;
                 double x3 = Math.Round(viewModel.TickToneToPoint(leftTick, 0).X);
                 double x4 = Math.Round(viewModel.TickToneToPoint(rightTick, 0).X);
                 context.DrawLine(lPen3, new Point(x3, defaultHeight), new Point(x4, defaultHeight));
@@ -216,9 +225,9 @@ namespace OpenUtau.App.Controls {
                     continue;
                 }
                 var note = phoneme.Parent;
-                var hPen = selectedNotes.Contains(note) ? ThemeManager.AccentPen2Thickness2 : ThemeManager.AccentPen1Thickness2;
-                var vPen = selectedNotes.Contains(note) ? ThemeManager.AccentPen2Thickness3 : ThemeManager.AccentPen1Thickness3;
-                var brush = selectedNotes.Contains(note) ? ThemeManager.AccentBrush2 : ThemeManager.AccentBrush1;
+                var hPen = selectedNotes.Contains(note) ? accentPen2 : lPen2;
+                var vPen = selectedNotes.Contains(note) ? accentPen3 : (useTrackColor && tcolor != null ? new Pen(tcolor.AccentColor, 3) : ThemeManager.AccentPen1Thickness3);
+                var brush = selectedNotes.Contains(note) ? accentBrush2 : (useTrackColor && tcolor != null ? tcolor.AccentColor : (IBrush)ThemeManager.AccentBrush1);
                 var (value, overriden) = phoneme.GetExpression(project, track, Key);
                 double x1 = Math.Round(viewModel.TickToneToPoint(phoneme.position, 0).X);
                 double x2 = Math.Round(viewModel.TickToneToPoint(phoneme.End, 0).X);

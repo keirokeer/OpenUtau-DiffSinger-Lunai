@@ -102,7 +102,12 @@ namespace OpenUtau.App.Controls {
                     }
                 });
             MessageBus.Current.Listen<ThemeChangedEvent>()
-                .Subscribe(_ => InvalidateVisual());
+                .Subscribe(_ => {
+                    InvalidateVisual();
+                    foreach (var control in partControls.Values) {
+                        control.InvalidateVisual();
+                    }
+                });
         }
 
         protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change) {
