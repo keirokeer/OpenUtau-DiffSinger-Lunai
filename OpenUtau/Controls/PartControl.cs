@@ -6,6 +6,8 @@ using Avalonia;
 using Avalonia.Media;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
+using OpenUtau.App;
+using OpenUtau.Core;
 using OpenUtau.Core.Ustx;
 using ReactiveUI;
 using Avalonia.Media.Imaging;
@@ -153,15 +155,26 @@ namespace OpenUtau.App.Controls {
         }
 
         public override void Render(DrawingContext context) {
-            var trackColorBrush = new SolidColorBrush(Color.FromArgb(0xBF, 0x52, 0x52, 0x52));
-            var backgroundBrush = Selected ? trackColorBrush : trackColorBrush;
+            IBrush backgroundBrush;
+            if (Core.Util.Preferences.Default.UseTrackColor && part != null) {
+                var project = DocManager.Inst.Project;
+                if (project != null && part.trackNo >= 0 && part.trackNo < project.tracks.Count) {
+                    var track = project.tracks[part.trackNo];
+                    var tcolor = ThemeManager.GetTrackColor(track.TrackColor);
+                    var c = tcolor.NoteColor.Color;
+                    backgroundBrush = new SolidColorBrush(Color.FromArgb(190, c.R, c.G, c.B));
+                } else {
+                    backgroundBrush = new SolidColorBrush(Color.FromArgb(0xBF, 0x52, 0x52, 0x52));
+                }
+            } else {
+                backgroundBrush = new SolidColorBrush(Color.FromArgb(0xBF, 0x52, 0x52, 0x52));
+            }
             // Background
             context.DrawRectangle(backgroundBrush, null, new Rect(1, 0, Width - 1, Height - 1), 6, 6);
 
             // Text
             var textLayout = TextLayoutCache.Get(Text, Brushes.White, 12);
             using (var state = context.PushTransform(Matrix.CreateTranslation(3, 2))) {
-                context.DrawRectangle(backgroundBrush, null, new Rect(new Point(0, 0), new Size(textLayout.Width, textLayout.Height)));
                 textLayout.Draw(context, new Point());
             }
 
