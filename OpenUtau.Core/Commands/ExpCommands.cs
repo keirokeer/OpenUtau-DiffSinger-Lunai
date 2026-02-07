@@ -18,7 +18,7 @@ namespace OpenUtau.Core {
         public ExpCommand(UVoicePart part) {
             Part = part;
         }
-        }
+    }
 
     public class SetNoteExpressionCommand : ExpCommand {
         static readonly HashSet<string> needsPhonemizer = new HashSet<string> {
