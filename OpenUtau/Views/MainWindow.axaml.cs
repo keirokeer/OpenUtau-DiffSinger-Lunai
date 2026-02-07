@@ -34,7 +34,8 @@ namespace OpenUtau.App.Views {
             OS.IsMacOS() ? KeyModifiers.Meta : KeyModifiers.Control;
         private readonly MainWindowViewModel viewModel;
 
-        private PianoRollWindow? pianoRollWindow;
+        private PianoRollDetachedWindow? pianoRollWindow;
+        private PianoRoll? pianoRoll;
         private bool openPianoRollWindow;
 
         private PartEditState? partEditState;
@@ -585,8 +586,8 @@ namespace OpenUtau.App.Views {
                     Core.Vogen.VogenSingerInstaller.Install(file);
                     return;
                 }
-                if (file.EndsWith(DependencyInstaller.FileExt)) {
-                    DependencyInstaller.Install(file);
+                if (file.EndsWith(PackageManager.OudepExt)) {
+                    await PackageManager.Inst.InstallFromFileAsync(file);
                     return;
                 }
 
@@ -605,15 +606,13 @@ namespace OpenUtau.App.Views {
             }
         }
 
-        async void OnMenuInstallDependency(object sender, RoutedEventArgs args) {
-            var file = await FilePicker.OpenFile(
-                this, "menu.tools.dependency.install", FilePicker.OUDEP);
-            if (file == null) {
-                return;
-            }
-            if (file.EndsWith(DependencyInstaller.FileExt)) {
-                DependencyInstaller.Install(file);
-                return;
+        void OnMenuPackageManager(object sender, RoutedEventArgs args) {
+            try {
+                var dialog = new PackageManagerDialog() { DataContext = new PackageManagerViewModel() };
+                dialog.Show();
+                if (dialog.Position.Y < 0) dialog.Position = dialog.Position.WithY(0);
+            } catch (Exception e) {
+                DocManager.Inst.ExecuteCmd(new ErrorMessageNotification(e));
             }
         }
 
@@ -769,7 +768,13 @@ namespace OpenUtau.App.Views {
         }
 
         void OnKeyDown(object sender, KeyEventArgs args) {
+            if (PianoRollContainer.IsKeyboardFocusWithin) {
+                args.Handled = false;
+                return;
+            }
+
             var tracksVm = viewModel.TracksViewModel;
+
             if (args.KeyModifiers == KeyModifiers.None) {
                 args.Handled = true;
                 switch (args.Key) {
@@ -850,9 +855,8 @@ namespace OpenUtau.App.Views {
         }
 
         void OnPointerPressed(object? sender, PointerPressedEventArgs args) {
-            if (!args.Handled && args.ClickCount == 1) {
+            if (!PianoRollContainer.IsPointerOver && !args.Handled && args.ClickCount == 1) {
                 this.Focus();
-                
             }
         }
 
@@ -866,7 +870,7 @@ namespace OpenUtau.App.Views {
                 .Append(".dll")
                 .Append(".exe")
                 .Append(Core.Vogen.VogenSingerInstaller.FileExt)
-                .Append(DependencyInstaller.FileExt)
+                .Append(PackageManager.OudepExt)
                 .ToArray();
             var files = args.Data?.GetFiles()?.Where(i => i != null).Select(i => i.Path.LocalPath).ToArray() ?? new string[] { };
             if (files.Length == 0) {
@@ -958,14 +962,14 @@ namespace OpenUtau.App.Views {
                 if (setup.Position.Y < 0) {
                     setup.Position = setup.Position.WithY(0);
                 }
-            } else if (ext == DependencyInstaller.FileExt) {
+            } else if (ext == PackageManager.OudepExt) {
                 var result = await MessageBox.Show(
                     this,
                     ThemeManager.GetString("dialogs.installdependency.message") + file,
                     ThemeManager.GetString("dialogs.installdependency.caption"),
                     MessageBox.MessageBoxButtons.OkCancel);
                 if (result == MessageBox.MessageBoxResult.Ok) {
-                    DependencyInstaller.Install(file);
+                    await PackageManager.Inst.InstallFromFileAsync(file);
                 }
             }
         }
@@ -1147,28 +1151,64 @@ namespace OpenUtau.App.Views {
             }
             var control = canvas.InputHitTest(args.GetPosition(canvas));
             if (control is PartControl partControl && partControl.part is UVoicePart) {
-                if (pianoRollWindow == null) {
+                if (pianoRoll == null) {
                     LoadingWindow.BeginLoading(this);
 
                     var model = await Task.Run<PianoRollViewModel>(() => new PianoRollViewModel());
-                    pianoRollWindow = new PianoRollWindow(model) {
-                        MainWindow = this,
+
+                    // Let's attach when needed to avoid startup slowdowns
+                    pianoRoll = new PianoRoll(model) {
+                        MainWindow = this
                     };
 
+                    if (Preferences.Default.DetachPianoRoll) {
+                        viewModel!.ShowPianoRoll = false;
+                        pianoRollWindow = new(pianoRoll);
+                        pianoRollWindow.Show();
+                    } else {
+                        viewModel!.ShowPianoRoll = true;
+                        PianoRollContainer.Content = pianoRoll;
+                    }
+
                     await Task.Run(() => 
-                        pianoRollWindow.InitializePianoRollWindowAsync()
+                        pianoRoll.InitializePianoRollWindowAsync()
                     );
                     LoadingWindow.EndLoading();
 
-                    pianoRollWindow.ViewModel.PlaybackViewModel = viewModel.PlaybackViewModel;
-                    pianoRollWindow.Show();
+                    pianoRoll.ViewModel.PlaybackViewModel = viewModel.PlaybackViewModel;
                 }
                 // Workaround for new window losing focus.
-                openPianoRollWindow = true;
+                if (pianoRollWindow != null) {
+                    openPianoRollWindow = true;
+                } else {
+                    viewModel.ShowPianoRoll = true;
+                }
                 int tick = viewModel.TracksViewModel.PointToTick(args.GetPosition(canvas));
                 DocManager.Inst.ExecuteCmd(new LoadPartNotification(partControl.part, DocManager.Inst.Project, tick));
-                pianoRollWindow.AttachExpressions();
+                pianoRoll.AttachExpressions();
             }
+        }
+
+        public void SetPianoRollAttachment() {
+            if (pianoRoll == null) {
+                return;
+            }
+            if (Preferences.Default.DetachPianoRoll) {
+                pianoRollWindow?.ForceClose();
+                pianoRollWindow = null;
+                PianoRollContainer.Content = pianoRoll;
+                viewModel!.ShowPianoRoll = true;
+                Preferences.Default.DetachPianoRoll = false;
+            } else {
+                PianoRollContainer.Content = null;
+                viewModel!.ShowPianoRoll = false;
+                if (pianoRollWindow == null) {
+                    pianoRollWindow = new(pianoRoll);
+                    pianoRollWindow.Show();
+                }
+                Preferences.Default.DetachPianoRoll = true;
+            }
+            Preferences.Save();
         }
 
         public void MainPagePointerWheelChanged(object sender, PointerWheelEventArgs args) {

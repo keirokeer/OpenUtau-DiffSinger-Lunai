@@ -5,7 +5,7 @@ using System.Reactive;
 using Avalonia.Input;
 using Avalonia.Threading;
 using DynamicData.Binding;
-using OpenUtau.App.Views;
+using OpenUtau.App.Controls;
 using OpenUtau.Classic;
 using OpenUtau.Core;
 using OpenUtau.Core.Ustx;
@@ -67,6 +67,7 @@ namespace OpenUtau.App.ViewModels {
         public bool PlaybackAutoScroll0 { get => Preferences.Default.PlaybackAutoScroll == 0 ? true : false; }
         public bool PlaybackAutoScroll1 { get => Preferences.Default.PlaybackAutoScroll == 1 ? true : false; }
         public bool PlaybackAutoScroll2 { get => Preferences.Default.PlaybackAutoScroll == 2 ? true : false; }
+        public bool PianoRollDetached { get => Preferences.Default.DetachPianoRoll; }
 
         public ObservableCollectionExtended<MenuItemViewModel> LegacyPlugins { get; private set; }
             = new ObservableCollectionExtended<MenuItemViewModel>();
@@ -160,7 +161,7 @@ namespace OpenUtau.App.ViewModels {
                 if (NotesViewModel.Part == null || NotesViewModel.Part.notes.Count == 0) {
                     return;
                 }
-                DocManager.Inst.ExecuteCmd(new LoadingNotification(typeof(PianoRollWindow), true, "legacy plugin"));
+                DocManager.Inst.ExecuteCmd(new LoadingNotification(typeof(PianoRoll), true, "legacy plugin"));
                 
                 try {
                     var part = NotesViewModel.Part;
@@ -179,7 +180,7 @@ namespace OpenUtau.App.ViewModels {
                 } catch (Exception e) {
                     DocManager.Inst.ExecuteCmd(new ErrorMessageNotification(e));
                 } finally {
-                    DocManager.Inst.ExecuteCmd(new LoadingNotification(typeof(PianoRollWindow), false, "legacy plugin"));
+                    DocManager.Inst.ExecuteCmd(new LoadingNotification(typeof(PianoRoll), false, "legacy plugin"));
                 }
             });
             LoadLegacyPlugins();
@@ -278,9 +279,11 @@ namespace OpenUtau.App.ViewModels {
 
         public void OnNext(UCommand cmd, bool isUndo) {
             if (cmd is ProgressBarNotification progressBarNotification) {
-                Dispatcher.UIThread.InvokeAsync(() => {
-                    Progress = progressBarNotification.Progress;
-                });
+                if (PianoRollDetached) {
+                    Dispatcher.UIThread.InvokeAsync(() => {
+                        Progress = progressBarNotification.Progress;
+                    });
+                }
             }
             SetUndoState();
         }

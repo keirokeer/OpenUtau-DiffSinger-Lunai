@@ -73,6 +73,9 @@ namespace OpenUtau.App.ViewModels {
         public string AppVersion => $"OpenUtau v{System.Reflection.Assembly.GetEntryAssembly()?.GetName().Version}";
         [Reactive] public double Progress { get; set; }
         [Reactive] public string ProgressText { get; set; }
+        [Reactive] public bool ShowPianoRoll { get; set; }
+        [Reactive] public double PianoRollMaxHeight { get; set; }
+        [Reactive] public double PianoRollMinHeight { get; set; }
         public ReactiveCommand<UPart, Unit> PartDeleteCommand { get; set; }
         public ReactiveCommand<int, Unit>? AddTempoChangeCmd { get; set; }
         public ReactiveCommand<int, Unit>? DelTempoChangeCmd { get; set; }
@@ -96,6 +99,7 @@ namespace OpenUtau.App.ViewModels {
             TracksViewModel = new TracksViewModel();
             ClearCacheHeader = string.Empty;
             ProgressText = string.Empty;
+            ShowPianoRoll = false;
             RecentFiles.Clear();
             RecentFiles.AddRange(Preferences.Default.RecentFiles
                 .Select(file => new RecentFileInfo(file))
@@ -124,6 +128,12 @@ namespace OpenUtau.App.ViewModels {
                 TracksViewModel.DeleteSelectedParts();
             });
             DocManager.Inst.AddSubscriber(this);
+
+            this.WhenAnyValue(vm => vm.ShowPianoRoll)
+                .Subscribe(x => {
+                    PianoRollMaxHeight = x ? double.PositiveInfinity : 0;
+                    PianoRollMinHeight = x ? ViewConstants.PianoRollMinHeight : 0;
+                });
         }
 
         public void Undo() {
