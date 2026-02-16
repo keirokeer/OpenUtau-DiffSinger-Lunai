@@ -333,6 +333,11 @@
                   </MenuItem.Icon>
                 </MenuItem>
                 <MenuItem Header="{DynamicResource pianoroll.menu.view.pianoroll.hide}" Click="OnMenuHidePianoRoll"/>
+                <MenuItem Header="{DynamicResource pianoroll.menu.view.tiktokmode}" Click="OnMenuTikTokMode">
+                  <MenuItem.Icon>
+                    <CheckBox IsChecked="{Binding IsTikTokMode}" IsHitTestVisible="False"/>
+                  </MenuItem.Icon>
+                </MenuItem>
               </MenuItem>
             </MenuItem>
 

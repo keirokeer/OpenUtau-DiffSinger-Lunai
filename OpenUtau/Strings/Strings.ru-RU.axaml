@@ -405,6 +405,7 @@ OpenUtau стремится стать средой редактирования
   <system:String x:Key="pianoroll.menu.view.pianoroll">Пианоролл</system:String>
   <system:String x:Key="pianoroll.menu.view.pianoroll.detach">Открепить</system:String>
   <system:String x:Key="pianoroll.menu.view.pianoroll.hide">Скрыть</system:String>
+  <system:String x:Key="pianoroll.menu.view.tiktokmode">Режим съёмки для TikTok</system:String>
   <system:String x:Key="pianoroll.menu.batch">Пакетное редактирование</system:String>
   <system:String x:Key="pianoroll.menu.batch.running">Групповое редактирование</system:String>
   <system:String x:Key="pianoroll.menu.lyrics">Текст</system:String>

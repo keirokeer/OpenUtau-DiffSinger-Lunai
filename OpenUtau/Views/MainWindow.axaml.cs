@@ -38,6 +38,17 @@ namespace OpenUtau.App.Views {
         private PianoRoll? pianoRoll;
         private bool openPianoRollWindow;
 
+        private bool tikTokSavedDetach;
+        private double tikTokSavedWidth;
+        private double tikTokSavedHeight;
+        private int tikTokSavedX;
+        private int tikTokSavedY;
+        private int tikTokSavedWindowState;
+        private bool tikTokSavedSolidLine;
+        private int tikTokSavedAutoScroll;
+        private double tikTokSavedMargin;
+        private bool tikTokStateWasSaved;
+
         private PartEditState? partEditState;
         private readonly DispatcherTimer timer;
         private readonly DispatcherTimer autosaveTimer;
@@ -1211,6 +1222,64 @@ namespace OpenUtau.App.Views {
             Preferences.Save();
         }
 
+        public void EnterTikTokMode() {
+            if (pianoRoll == null) return;
+            var prefs = Preferences.Default;
+            tikTokSavedDetach = prefs.DetachPianoRoll;
+            tikTokSavedWidth = prefs.PianorollWindowSize.Width;
+            tikTokSavedHeight = prefs.PianorollWindowSize.Height;
+            tikTokSavedX = prefs.PianorollWindowSize.PositionX ?? 0;
+            tikTokSavedY = prefs.PianorollWindowSize.PositionY ?? 0;
+            tikTokSavedWindowState = prefs.PianorollWindowSize.State;
+            tikTokSavedSolidLine = prefs.UseSolidPlaybackLine;
+            tikTokSavedAutoScroll = prefs.PlaybackAutoScroll;
+            tikTokSavedMargin = prefs.PlayPosMarkerMargin;
+            tikTokStateWasSaved = true;
+
+            if (!tikTokSavedDetach) {
+                SetPianoRollAttachment();
+            }
+            if (pianoRollWindow != null) {
+                pianoRollWindow.SetTikTokMode(true);
+            }
+
+            prefs.UseSolidPlaybackLine = true;
+            prefs.PlaybackAutoScroll = 1;
+            prefs.PlayPosMarkerMargin = 0.5;
+            MessageBus.Current.SendMessage(new NotesViewModel.PlaybackLineModeChangedEvent(true));
+        }
+
+        public void ExitTikTokMode() {
+            if (pianoRoll == null) return;
+            var prefs = Preferences.Default;
+            prefs.UseSolidPlaybackLine = tikTokSavedSolidLine;
+            prefs.PlaybackAutoScroll = tikTokSavedAutoScroll;
+            prefs.PlayPosMarkerMargin = tikTokSavedMargin;
+            prefs.PianorollWindowSize.Set(tikTokSavedWidth, tikTokSavedHeight, tikTokSavedX, tikTokSavedY, tikTokSavedWindowState);
+            Preferences.Save();
+
+            if (pianoRollWindow != null) {
+                pianoRollWindow.SetTikTokMode(false);
+            }
+            MessageBus.Current.SendMessage(new NotesViewModel.PlaybackLineModeChangedEvent(tikTokSavedSolidLine));
+
+            if (!tikTokSavedDetach) {
+                SetPianoRollAttachment();
+            }
+        }
+
+        /// <summary>
+        /// Restores preferences overwritten by TikTok mode and saves. Call when app is closing so TikTok settings are not persisted.
+        /// </summary>
+        private void RestoreTikTokPreferencesOnClose() {
+            var prefs = Preferences.Default;
+            prefs.DetachPianoRoll = tikTokSavedDetach;
+            prefs.UseSolidPlaybackLine = tikTokSavedSolidLine;
+            prefs.PlaybackAutoScroll = tikTokSavedAutoScroll;
+            prefs.PlayPosMarkerMargin = tikTokSavedMargin;
+            Preferences.Save();
+        }
+
         public void MainPagePointerWheelChanged(object sender, PointerWheelEventArgs args) {
             var delta = args.Delta;
             if (args.KeyModifiers == KeyModifiers.None || args.KeyModifiers == KeyModifiers.Shift) {
@@ -1496,6 +1565,10 @@ namespace OpenUtau.App.Views {
 
         public void WindowClosing(object? sender, WindowClosingEventArgs e) {
             if (forceClose || DocManager.Inst.ChangesSaved) {
+                if (pianoRoll?.ViewModel.IsTikTokMode == true && tikTokStateWasSaved) {
+                    RestoreTikTokPreferencesOnClose();
+                    pianoRoll.ViewModel.IsTikTokMode = false;
+                }
                 if (Preferences.Default.ClearCacheOnQuit) {
                     Log.Information("Clearing cache...");
                     PathManager.Inst.ClearCache();

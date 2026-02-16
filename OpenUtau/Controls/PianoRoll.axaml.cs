@@ -310,6 +310,17 @@ namespace OpenUtau.App.Controls {
             }
         }
 
+        void OnMenuTikTokMode(object sender, RoutedEventArgs args) {
+            if (MainWindow == null) return;
+            bool entering = !ViewModel.IsTikTokMode;
+            ViewModel.IsTikTokMode = entering;
+            if (entering) {
+                MainWindow.EnterTikTokMode();
+            } else {
+                MainWindow.ExitTikTokMode();
+            }
+        }
+
         void SearchNote() {
             if (ViewModel.NotesViewModel.Part == null || ViewModel.NotesViewModel.Part.notes.Count == 0) {
                 return;
