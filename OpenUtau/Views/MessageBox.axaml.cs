@@ -8,8 +8,11 @@ using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.Media;
 using Avalonia.Threading;
+using OpenUtau.App;
 using OpenUtau.Core;
 using Serilog;
 using SharpCompress;
@@ -123,12 +126,13 @@ namespace OpenUtau.App.Views {
                 Title = title
             };
             msgbox.Text.IsVisible = false;
-            msgbox.SetTextWithLink(text, msgbox.TextPanel);
+            var linkBrush = GetAccentBrush(parent);
+            msgbox.SetTextWithLink(text, msgbox.TextPanel, linkBrush);
             if (stackTrace != null) {
                 var stackTracePanel = new StackPanel();
                 var expander = new Expander() { Header = ThemeManager.GetString("errors.details"), Content = stackTracePanel };
                 msgbox.TextPanel.Children.Add(expander);
-                msgbox.SetTextWithLink(stackTrace, stackTracePanel);
+                msgbox.SetTextWithLink(stackTrace, stackTracePanel, null);
             }
 
             var res = MessageBoxResult.Ok;
@@ -235,27 +239,46 @@ namespace OpenUtau.App.Views {
             return task;
         }
 
-        private void SetTextWithLink(string text, StackPanel textPanel) {
-            // @"http(s)?://([\w-]+\.)+[\w-]+(/[A-Z0-9-.,_/?%&=]*)?"
+        private static IBrush? GetAccentBrush(Window? parent) {
+            if (parent != null && parent.TryFindResource("AccentBrush1", out var res) && res is IBrush brush)
+                return brush;
+            if (Application.Current?.TryFindResource("AccentBrush1", out var appRes) == true && appRes is IBrush appBrush)
+                return appBrush;
+            return ThemeManager.AccentBrush1;
+        }
+
+        private void SetTextWithLink(string text, StackPanel textPanel, IBrush? linkBrush) {
             var regex = new Regex(@"http(s)?://[^(\r\n|\n| )]+", RegexOptions.IgnoreCase | RegexOptions.Singleline);
             var match = regex.Match(text);
             if (match.Success) {
-                textPanel.Children.Add(new TextBlock { Text = text.Substring(0, match.Index) });
-                var hyperlink = new Button();
-                hyperlink.Content = match.Value.Trim();
+                textPanel.Children.Add(new TextBlock { Text = text.Substring(0, match.Index), TextAlignment = Avalonia.Media.TextAlignment.Center });
+                var url = match.Value.Trim();
+                var hyperlink = new Button {
+                    HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
+                    Background = Brushes.Transparent,
+                    BorderThickness = new Avalonia.Thickness(0),
+                    Padding = new Avalonia.Thickness(0),
+                    Cursor = new Cursor(StandardCursorType.Hand),
+                    Content = new TextBlock {
+                        Text = url,
+                        Foreground = linkBrush ?? ThemeManager.AccentBrush1,
+                        TextDecorations = TextDecorations.Underline
+                    },
+                    Tag = url
+                };
                 hyperlink.Click += OnUrlClick;
                 textPanel.Children.Add(hyperlink);
 
-                SetTextWithLink(text.Substring(match.Index + match.Length), textPanel);
+                SetTextWithLink(text.Substring(match.Index + match.Length), textPanel, linkBrush);
             } else {
                 if (!string.IsNullOrEmpty(text)) {
-                    textPanel.Children.Add(new TextBlock { Text = text });
+                    textPanel.Children.Add(new TextBlock { Text = text, TextAlignment = Avalonia.Media.TextAlignment.Center });
                 }
             }
         }
         private void OnUrlClick(object? sender, RoutedEventArgs e) {
             try {
-                if (sender is Button button && button.Content is string url) {
+                if (sender is Button button && button.Tag is string url) {
                     OS.OpenWeb(url);
                 }
             } catch (Exception ex) {

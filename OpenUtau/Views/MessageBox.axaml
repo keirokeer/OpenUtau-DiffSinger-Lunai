@@ -25,7 +25,7 @@
             <Setter Property="LineHeight" Value="22"/>
           </Style>
           <Style Selector="Button">
-            <Setter Property="Foreground" Value="Blue" />
+            <Setter Property="Foreground" Value="{DynamicResource AccentBrush1}" />
             <Setter Property="Margin" Value="0" />
             <Setter Property="Padding" Value="0" />
             <Setter Property="Cursor" Value="Hand" />
