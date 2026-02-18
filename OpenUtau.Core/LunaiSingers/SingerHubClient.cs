@@ -72,9 +72,11 @@ namespace OpenUtau.Core.SingerHub {
         static readonly Regex TrailingVersionRegex = new Regex(
             @"V([\d.]+)\s*$",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
-        // BRAPA installed name pattern: "Umidaji DS v110" -> displayName="Umidaji", version="110"
+        // BRAPA installed name pattern:
+        // - "Umidaji DS v110"  -> displayName="Umidaji", version="110"
+        // - "Umidaji v110"     -> displayName="Umidaji", version="110"
         static readonly Regex BrapaNameVersionRegex = new Regex(
-            @"^(.+?)\s+DS\s+v(\d+)\s*$",
+            @"^(.+?)\s+(?:DS\s+)?v(\d+)\s*$",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         /// <summary>Fetch the registry JSON from URL (HTTP) or local file path.</summary>
@@ -121,6 +123,45 @@ namespace OpenUtau.Core.SingerHub {
             }
         }
 
+        /// <summary>
+        /// Try to read installed version from character.yaml ("version:" field) in the singer folder.
+        /// This is used for all hosts (LUNAI, UFR, BRAPA, etc.) as the primary source of the installed version.
+        /// </summary>
+        public static bool TryGetVersionFromCharacterYaml(string folderPath, out string version) {
+            version = string.Empty;
+            if (string.IsNullOrEmpty(folderPath)) {
+                return false;
+            }
+            try {
+                var yamlPath = Path.Combine(folderPath, "character.yaml");
+                if (!File.Exists(yamlPath)) {
+                    return false;
+                }
+                foreach (var line in File.ReadLines(yamlPath)) {
+                    if (string.IsNullOrWhiteSpace(line)) {
+                        continue;
+                    }
+                    var trimmed = line.TrimStart();
+                    if (!trimmed.StartsWith("version:", StringComparison.OrdinalIgnoreCase)) {
+                        continue;
+                    }
+                    var idx = trimmed.IndexOf(':');
+                    if (idx < 0 || idx + 1 >= trimmed.Length) {
+                        continue;
+                    }
+                    var value = trimmed.Substring(idx + 1).Trim();
+                    if (string.IsNullOrEmpty(value)) {
+                        continue;
+                    }
+                    version = value.Trim('\"', '\'');
+                    return !string.IsNullOrEmpty(version);
+                }
+            } catch {
+                // Ignore parsing errors and fall back to other strategies.
+            }
+            return false;
+        }
+
         /// <summary>Get all installed singers from the program's list; IsLunai is set via credits.txt.</summary>
         public async Task<List<InstalledHubSinger>> GetInstalledAsync(IEnumerable<SingerHubEntry> registry) {
             return await Task.Run(() => {
@@ -136,6 +177,8 @@ namespace OpenUtau.Core.SingerHub {
                 foreach (var singer in singers) {
                     if (string.IsNullOrEmpty(singer?.Name) || string.IsNullOrEmpty(singer.Location)) continue;
                     var rawName = singer.Name?.Trim() ?? string.Empty;
+                    string configVersion;
+                    var hasConfigVersion = TryGetVersionFromCharacterYaml(singer.Location, out configVersion);
 
                     // 1) UFR-specific matching: try to map by known names from UFR registry.
                     if (ufrEntries.Count > 0 && !string.IsNullOrEmpty(rawName)) {
@@ -147,7 +190,9 @@ namespace OpenUtau.Core.SingerHub {
                             if (rawName.IndexOf(targetName, StringComparison.OrdinalIgnoreCase) >= 0) {
                                 var displayNameUfr = targetName;
                                 string versionUfr;
-                                if (!TryParseTrailingVersion(rawName, out versionUfr)) {
+                                if (hasConfigVersion && !string.IsNullOrEmpty(configVersion)) {
+                                    versionUfr = configVersion;
+                                } else if (!TryParseTrailingVersion(rawName, out versionUfr)) {
                                     versionUfr = entry.Version?.Trim() ?? string.Empty;
                                 }
                                 result.Add(new InstalledHubSinger {
@@ -171,7 +216,9 @@ namespace OpenUtau.Core.SingerHub {
                             if (rawName.IndexOf(targetName, StringComparison.OrdinalIgnoreCase) >= 0) {
                                 var displayNameBrapa = targetName;
                                 string versionBrapa;
-                                if (!TryParseBrapaNameVersion(rawName, out _, out versionBrapa)) {
+                                if (hasConfigVersion && !string.IsNullOrEmpty(configVersion)) {
+                                    versionBrapa = configVersion;
+                                } else if (!TryParseBrapaNameVersion(rawName, out _, out versionBrapa)) {
                                     versionBrapa = entry.Version?.Trim() ?? string.Empty;
                                 }
                                 result.Add(new InstalledHubSinger {
@@ -191,19 +238,33 @@ namespace OpenUtau.Core.SingerHub {
                     if (TryParseNameVersion(rawName, out displayName, out version)
                         || TryParseUfrNameVersion(rawName, out displayName, out version)
                         || TryParseBrapaNameVersion(rawName, out displayName, out version)) {
+
+                        if (hasConfigVersion && !string.IsNullOrEmpty(configVersion)) {
+                            version = configVersion;
+                        }
+
                         result.Add(new InstalledHubSinger {
                             FolderPath = singer.Location,
                             DisplayName = displayName,
                             Version = version,
                             IsLunai = IsLunaiSinger(singer.Location),
                         });
-                    } else if (!string.IsNullOrWhiteSpace(singer.Version)) {
-                        result.Add(new InstalledHubSinger {
-                            FolderPath = singer.Location,
-                            DisplayName = singer.Name.Trim(),
-                            Version = singer.Version.Trim(),
-                            IsLunai = IsLunaiSinger(singer.Location),
-                        });
+                    } else {
+                        string fallbackVersion = string.Empty;
+                        if (hasConfigVersion && !string.IsNullOrEmpty(configVersion)) {
+                            fallbackVersion = configVersion;
+                        } else if (!string.IsNullOrWhiteSpace(singer.Version)) {
+                            fallbackVersion = singer.Version.Trim();
+                        }
+
+                        if (!string.IsNullOrEmpty(fallbackVersion)) {
+                            result.Add(new InstalledHubSinger {
+                                FolderPath = singer.Location,
+                                DisplayName = singer.Name.Trim(),
+                                Version = fallbackVersion,
+                                IsLunai = IsLunaiSinger(singer.Location),
+                            });
+                        }
                     }
                 NextSinger:
                     ;
