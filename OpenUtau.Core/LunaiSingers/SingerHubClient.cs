@@ -81,7 +81,8 @@ namespace OpenUtau.Core.SingerHub {
 
         /// <summary>Fetch the registry JSON from URL (HTTP) or local file path.</summary>
         public async Task<List<SingerHubEntry>> FetchRegistryAsync(string? registryUrl = null) {
-            var url = registryUrl ?? DefaultRegistryUrl;
+            var url = (registryUrl ?? DefaultRegistryUrl).Trim();
+            if (string.IsNullOrEmpty(url)) return new List<SingerHubEntry>();
             if (url.StartsWith("file://", StringComparison.OrdinalIgnoreCase)) {
                 var path = new Uri(url).LocalPath;
                 return await FetchRegistryFromFileAsync(path).ConfigureAwait(false);
@@ -325,11 +326,13 @@ namespace OpenUtau.Core.SingerHub {
             return false;
         }
 
-        /// <summary>Compare version strings (numeric).</summary>
+        /// <summary>Compare version strings (supports integers e.g. 170, and semantic versions e.g. 1.0, 1.1).</summary>
         public static int CompareVersions(string a, string b) {
-            if (int.TryParse(a, out var va) && int.TryParse(b, out var vb))
+            if (Version.TryParse(a?.Trim(), out var va) && Version.TryParse(b?.Trim(), out var vb))
                 return va.CompareTo(vb);
-            return string.Compare(a, b, StringComparison.OrdinalIgnoreCase);
+            if (int.TryParse(a?.Trim(), out var ia) && int.TryParse(b?.Trim(), out var ib))
+                return ia.CompareTo(ib);
+            return string.Compare(a ?? string.Empty, b ?? string.Empty, StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>Derives folder name from download URL: e.g. "Aka Subaru v170.zip" -> "Aka Subaru v170".</summary>
@@ -358,17 +361,16 @@ namespace OpenUtau.Core.SingerHub {
             string? existingFolderPathToRemove,
             string? host,
             IProgress<int>? progress = null) {
+            if (string.IsNullOrWhiteSpace(downloadUrl))
+                throw new ArgumentException("Download URL is required.", nameof(downloadUrl));
             var basePath = PathManager.Inst.SingersInstallPath;
             string installPath;
             if (!string.IsNullOrEmpty(host) && host.Equals("ufr", StringComparison.OrdinalIgnoreCase)) {
-                // UFR: extract directly into the singers folder.
                 installPath = basePath;
             } else {
-                // Default (LUNAI): extract into subfolder named after archive.
                 var folderName = GetArchiveFolderName(downloadUrl);
                 installPath = Path.Combine(basePath, folderName);
             }
-            Directory.CreateDirectory(installPath);
 
             byte[] data;
             using (var client = new HttpClient()) {
@@ -403,6 +405,7 @@ namespace OpenUtau.Core.SingerHub {
                         throw;
                     }
                 }
+                Directory.CreateDirectory(installPath);
                 using var archive = ArchiveFactory.Open(new MemoryStream(data));
                 foreach (var entry in archive.Entries) {
                     if (string.IsNullOrEmpty(entry.Key) || entry.Key.Contains("..")) continue;

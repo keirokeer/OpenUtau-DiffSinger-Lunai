@@ -9,6 +9,10 @@ namespace OpenUtau.App.Views {
     public partial class SingerHubDialog : Window {
         public SingerHubDialog() {
             InitializeComponent();
+            // Share the pane's ViewModel so DataContext is available when dialog is used as a window.
+            if (Content is SingerHubPane pane) {
+                DataContext = pane.DataContext;
+            }
         }
 
         async void OnPrimaryActionClick(object sender, RoutedEventArgs e) {

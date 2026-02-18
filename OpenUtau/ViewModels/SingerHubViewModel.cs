@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Concurrent;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -181,6 +182,7 @@ namespace OpenUtau.App.ViewModels {
 
     public class SingerHubViewModel : ViewModelBase {
         readonly SingerHubClient client = new SingerHubClient();
+        readonly ConcurrentDictionary<string, Bitmap> iconCache = new ConcurrentDictionary<string, Bitmap>(StringComparer.OrdinalIgnoreCase);
 
         public ObservableCollection<SingerHubRowViewModel> Rows { get; } = new ObservableCollection<SingerHubRowViewModel>();
         public ObservableCollection<SingerHubRowViewModel> FilteredRows { get; } = new ObservableCollection<SingerHubRowViewModel>();
@@ -238,11 +240,20 @@ namespace OpenUtau.App.ViewModels {
             http.DefaultRequestHeaders.Add("User-Agent", "OpenUtau-LUNAI");
             foreach (var row in rows.Where(r => !string.IsNullOrEmpty(r.IconUrl))) {
                 try {
+                    if (iconCache.TryGetValue(row.IconUrl, out var cached)) {
+                        await Dispatcher.UIThread.InvokeAsync(() => {
+                            row.IconBitmap = cached;
+                        });
+                        continue;
+                    }
+
                     var bytes = await http.GetByteArrayAsync(row.IconUrl);
                     await Dispatcher.UIThread.InvokeAsync(() => {
                         try {
                             using var ms = new MemoryStream(bytes);
-                            row.IconBitmap = new Bitmap(ms);
+                            var bmp = new Bitmap(ms);
+                            row.IconBitmap = bmp;
+                            iconCache[row.IconUrl] = bmp;
                         } catch { /* ignore decode errors */ }
                     });
                 } catch { /* ignore load errors */ }
@@ -326,7 +337,8 @@ namespace OpenUtau.App.ViewModels {
                 var baseStatus = string.Format(ThemeManager.GetString("lunai.status.installing"), row.Name);
                 Status = baseStatus;
                 var progress = new Progress<int>(p => Status = $"{baseStatus} ({p}%)");
-                await client.InstallOrUpdateAsync(row.Registry.DownloadUrl, null, row.Host, progress);
+                var existingPath = row.IsInstalled && !string.IsNullOrEmpty(row.FolderPath) ? row.FolderPath : null;
+                await client.InstallOrUpdateAsync(row.Registry.DownloadUrl, existingPath, row.Host, progress);
                 await Dispatcher.UIThread.InvokeAsync(() => SingerManager.Inst.SearchAllSingers());
                 await RefreshAsync();
                 Status = ThemeManager.GetString("lunai.status.installfinished");
