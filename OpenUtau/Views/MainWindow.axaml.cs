@@ -632,7 +632,7 @@ namespace OpenUtau.App.Views {
 
         void OnMenuSingerHub(object sender, RoutedEventArgs args) {
             try {
-                var dialog = new SingerHubDialog() { DataContext = new SingerHubViewModel() };
+                var dialog = new SingerHubDialog();
                 dialog.Show();
                 if (dialog.Position.Y < 0) dialog.Position = dialog.Position.WithY(0);
             } catch (Exception e) {

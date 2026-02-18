@@ -421,6 +421,9 @@ OpenUtau стремится стать средой редактирования
   <system:String x:Key="lunai.outdated">Устаревшая версия</system:String>
   <system:String x:Key="lunai.latest">Последняя</system:String>
   <system:String x:Key="lunai.newversionavailable">Доступна новая версия</system:String>
+  <system:String x:Key="lunai.section.updatesavailable">Доступны обновления</system:String>
+  <system:String x:Key="lunai.section.installed">Установленные</system:String>
+  <system:String x:Key="lunai.section.notinstalled">Не установленные</system:String>
   <system:String x:Key="lunai.refresh">Обновить</system:String>
   <system:String x:Key="lunai.status.fetching">Загрузка списка...</system:String>
   <system:String x:Key="lunai.status.listing">Сканирование...</system:String>
@@ -831,6 +834,8 @@ OpenUtau стремится стать средой редактирования
   <system:String x:Key="welcome.open">Открыть</system:String>
   <system:String x:Key="welcome.open.description">Открыть локальный проект</system:String>
   <system:String x:Key="welcome.recent">Недавние</system:String>
+  <system:String x:Key="welcome.singerhub.description">Установите или обновите голосовые банки от проверенных источников (LUNAI, UFR, BRAPA).</system:String>
+  <system:String x:Key="welcome.singerhub.open">Открыть центр исполнителей</system:String>
   <system:String x:Key="welcome.start">Начать</system:String>
   <system:String x:Key="welcome.template">Шаблон</system:String>
 

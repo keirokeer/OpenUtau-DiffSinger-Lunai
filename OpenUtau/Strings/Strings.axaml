@@ -419,6 +419,9 @@ Warning: this option removes custom presets.</system:String>
   <system:String x:Key="lunai.outdated">Outdated</system:String>
   <system:String x:Key="lunai.latest">Latest</system:String>
   <system:String x:Key="lunai.newversionavailable">New version available</system:String>
+  <system:String x:Key="lunai.section.updatesavailable">Updates available</system:String>
+  <system:String x:Key="lunai.section.installed">Installed</system:String>
+  <system:String x:Key="lunai.section.notinstalled">Not installed</system:String>
   <system:String x:Key="lunai.refresh">Refresh</system:String>
   <system:String x:Key="lunai.status.fetching">Fetching list...</system:String>
   <system:String x:Key="lunai.status.listing">Scanning installed...</system:String>
@@ -830,6 +833,8 @@ General
   <system:String x:Key="welcome.open">Open</system:String>
   <system:String x:Key="welcome.open.description">Open a local project</system:String>
   <system:String x:Key="welcome.recent">Recent</system:String>
+  <system:String x:Key="welcome.singerhub.description">Install or update voicebanks from trusted sources (LUNAI, UFR, BRAPA).</system:String>
+  <system:String x:Key="welcome.singerhub.open">Open Singer Hub</system:String>
   <system:String x:Key="welcome.start">Start</system:String>
   <system:String x:Key="welcome.template">Template</system:String>
 

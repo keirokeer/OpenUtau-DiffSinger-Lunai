@@ -173,11 +173,19 @@ namespace OpenUtau.App.ViewModels {
         }
     }
 
+    /// <summary>Section header and its singer rows (e.g. "Updates available", "Installed", "Not installed").</summary>
+    public sealed class SingerHubSectionViewModel {
+        public string Header { get; init; } = string.Empty;
+        public List<SingerHubRowViewModel> Rows { get; init; } = new List<SingerHubRowViewModel>();
+    }
+
     public class SingerHubViewModel : ViewModelBase {
         readonly SingerHubClient client = new SingerHubClient();
 
         public ObservableCollection<SingerHubRowViewModel> Rows { get; } = new ObservableCollection<SingerHubRowViewModel>();
         public ObservableCollection<SingerHubRowViewModel> FilteredRows { get; } = new ObservableCollection<SingerHubRowViewModel>();
+        /// <summary>Grouped list for UI: Updates available, Installed, Not installed.</summary>
+        public ObservableCollection<SingerHubSectionViewModel> Sections { get; } = new ObservableCollection<SingerHubSectionViewModel>();
         [Reactive] public string Status { get; set; } = string.Empty;
         [Reactive] public string SearchText { get; set; } = string.Empty;
         [Reactive] public int SelectedTabIndex { get; set; }
@@ -205,8 +213,22 @@ namespace OpenUtau.App.ViewModels {
             else if (SelectedTabIndex == 3) q = q.Where(r => r.Host == "brapa");
             if (!string.IsNullOrWhiteSpace(SearchText))
                 q = q.Where(r => (r.Name ?? string.Empty).Contains(SearchText.Trim(), StringComparison.OrdinalIgnoreCase));
+            var list = q.ToList();
+
             FilteredRows.Clear();
-            foreach (var r in q) FilteredRows.Add(r);
+            foreach (var r in list) FilteredRows.Add(r);
+
+            var updates = list.Where(r => r.IsNewVersionAvailable).ToList();
+            var installed = list.Where(r => r.IsInstalled && !r.IsNewVersionAvailable).ToList();
+            var notInstalled = list.Where(r => !r.IsInstalled).ToList();
+
+            Sections.Clear();
+            if (updates.Count > 0)
+                Sections.Add(new SingerHubSectionViewModel { Header = ThemeManager.GetString("lunai.section.updatesavailable"), Rows = updates });
+            if (installed.Count > 0)
+                Sections.Add(new SingerHubSectionViewModel { Header = ThemeManager.GetString("lunai.section.installed"), Rows = installed });
+            if (notInstalled.Count > 0)
+                Sections.Add(new SingerHubSectionViewModel { Header = ThemeManager.GetString("lunai.section.notinstalled"), Rows = notInstalled });
         }
 
         static string NormalizeName(string s) => (s ?? string.Empty).Trim();

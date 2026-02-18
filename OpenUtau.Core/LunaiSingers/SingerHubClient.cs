@@ -72,6 +72,10 @@ namespace OpenUtau.Core.SingerHub {
         static readonly Regex TrailingVersionRegex = new Regex(
             @"V([\d.]+)\s*$",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        // BRAPA installed name pattern: "Umidaji DS v110" -> displayName="Umidaji", version="110"
+        static readonly Regex BrapaNameVersionRegex = new Regex(
+            @"^(.+?)\s+DS\s+v(\d+)\s*$",
+            RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         /// <summary>Fetch the registry JSON from URL (HTTP) or local file path.</summary>
         public async Task<List<SingerHubEntry>> FetchRegistryAsync(string? registryUrl = null) {
@@ -124,6 +128,9 @@ namespace OpenUtau.Core.SingerHub {
                 var ufrEntries = registry
                     .Where(e => string.Equals(e.Host ?? "lunai", "ufr", StringComparison.OrdinalIgnoreCase))
                     .ToList();
+                var brapaEntries = registry
+                    .Where(e => string.Equals(e.Host ?? "lunai", "brapa", StringComparison.OrdinalIgnoreCase))
+                    .ToList();
 
                 var singers = SingerManager.Inst.Singers.Values;
                 foreach (var singer in singers) {
@@ -154,11 +161,36 @@ namespace OpenUtau.Core.SingerHub {
                         }
                     }
 
-                    // 2) Default name/version parsing (LUNAI-style or previous UFR pattern).
+                    // 2) BRAPA-specific matching: try to map by known names from BRAPA registry.
+                    if (brapaEntries.Count > 0 && !string.IsNullOrEmpty(rawName)) {
+                        foreach (var entry in brapaEntries) {
+                            var targetName = entry.Name?.Trim();
+                            if (string.IsNullOrEmpty(targetName)) {
+                                continue;
+                            }
+                            if (rawName.IndexOf(targetName, StringComparison.OrdinalIgnoreCase) >= 0) {
+                                var displayNameBrapa = targetName;
+                                string versionBrapa;
+                                if (!TryParseBrapaNameVersion(rawName, out _, out versionBrapa)) {
+                                    versionBrapa = entry.Version?.Trim() ?? string.Empty;
+                                }
+                                result.Add(new InstalledHubSinger {
+                                    FolderPath = singer.Location,
+                                    DisplayName = displayNameBrapa,
+                                    Version = versionBrapa,
+                                    IsLunai = IsLunaiSinger(singer.Location),
+                                });
+                                goto NextSinger;
+                            }
+                        }
+                    }
+
+                    // 3) Default name/version parsing (LUNAI-style, UFR pattern, or BRAPA pattern).
                     string displayName;
                     string version;
                     if (TryParseNameVersion(rawName, out displayName, out version)
-                        || TryParseUfrNameVersion(rawName, out displayName, out version)) {
+                        || TryParseUfrNameVersion(rawName, out displayName, out version)
+                        || TryParseBrapaNameVersion(rawName, out displayName, out version)) {
                         result.Add(new InstalledHubSinger {
                             FolderPath = singer.Location,
                             DisplayName = displayName,
@@ -216,6 +248,20 @@ namespace OpenUtau.Core.SingerHub {
             if (!m.Success) return false;
             version = m.Groups[1].Value.Trim();
             return !string.IsNullOrEmpty(version);
+        }
+
+        /// <returns>Parsed (displayName, version) from BRAPA name like "Umidaji DS v110".</returns>
+        public static bool TryParseBrapaNameVersion(string nameLine, out string displayName, out string version) {
+            displayName = nameLine?.Trim() ?? string.Empty;
+            version = string.Empty;
+            if (string.IsNullOrWhiteSpace(displayName)) return false;
+            var m = BrapaNameVersionRegex.Match(displayName);
+            if (m.Success) {
+                displayName = m.Groups[1].Value.Trim();
+                version = m.Groups[2].Value.Trim();
+                return !string.IsNullOrEmpty(displayName) && !string.IsNullOrEmpty(version);
+            }
+            return false;
         }
 
         /// <summary>Compare version strings (numeric).</summary>

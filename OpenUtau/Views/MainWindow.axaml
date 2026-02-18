@@ -4,6 +4,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="using:OpenUtau.App.ViewModels"
         xmlns:c="clr-namespace:OpenUtau.App.Controls"
+        xmlns:views="clr-namespace:OpenUtau.App.Views"
         mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="650"
         x:Class="OpenUtau.App.Views.MainWindow"
         Icon="/Assets/open-utau.ico"
@@ -88,7 +89,7 @@
         </Menu>
       <Carousel SelectedIndex="{Binding Page}" >
         <!--Welcome page-->
-        <Grid Margin="60,50,60,40" RowDefinitions="Auto,Auto,Auto,*" ColumnDefinitions="*,*">
+        <Grid Margin="60,50,60,40" RowDefinitions="Auto,Auto,Auto,*" ColumnDefinitions="*,*,*">
           <!--Startup warnings-->
           <StackPanel Grid.Row="0" Grid.ColumnSpan="2">
             <Button Click="OnWelcomeRecovery" Height="40" Content="{Binding RecoveryString}"
@@ -169,7 +170,7 @@
 
           <!-- Recent files -->
           <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,24,0,8" Text="{DynamicResource welcome.recent}" FontSize="20"/>
-          <ListBox ItemsSource="{Binding RecentFiles}" Grid.Row="3" Grid.Column="0" Margin="0,0,15,0" ScrollViewer.VerticalScrollBarVisibility="Auto" VerticalAlignment="Stretch">
+          <ListBox ItemsSource="{Binding RecentFiles}" Grid.Row="3" Grid.Column="0" Margin="0,0,12,0" ScrollViewer.VerticalScrollBarVisibility="Auto" VerticalAlignment="Stretch">
             <ListBox.Styles>
               <Style Selector="ListBoxItem">
                 <Setter Property="Height" Value="NaN" />
@@ -189,8 +190,8 @@
           </ListBox>
 
           <!-- Template files -->
-          <TextBlock Grid.Row="2" Grid.Column="1" Margin="15,24,0,8" Text="{DynamicResource welcome.template}" FontSize="20"/>
-          <ListBox ItemsSource="{Binding TemplateFiles}" Grid.Row="3" Grid.Column="1" Margin="15,0,0,0" ScrollViewer.VerticalScrollBarVisibility="Auto" VerticalAlignment="Stretch">
+          <TextBlock Grid.Row="2" Grid.Column="1" Margin="12,24,0,8" Text="{DynamicResource welcome.template}" FontSize="20"/>
+          <ListBox ItemsSource="{Binding TemplateFiles}" Grid.Row="3" Grid.Column="1" Margin="12,0,12,0" ScrollViewer.VerticalScrollBarVisibility="Auto" VerticalAlignment="Stretch">
             <ListBox.Styles>
               <Style Selector="ListBoxItem">
                 <Setter Property="Height" Value="NaN" />
@@ -207,6 +208,18 @@
               </DataTemplate>
             </ListBox.ItemTemplate>
           </ListBox>
+
+          <!-- Singer Hub (right panel), embedded; width scales with welcome screen -->
+          <Border Grid.Row="0" Grid.RowSpan="4" Grid.Column="2" Margin="20,0,0,0"
+                  Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
+                  BorderBrush="{DynamicResource SystemControlHighlightBaseMediumLowBrush}"
+                  BorderThickness="1" CornerRadius="8" Padding="16,12,16,12">
+            <Grid RowDefinitions="Auto,Auto,*">
+              <TextBlock Grid.Row="0" Text="{DynamicResource lunai.caption}" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,4"/>
+              <TextBlock Grid.Row="1" Text="{DynamicResource welcome.singerhub.description}" FontSize="12" TextWrapping="Wrap" Opacity="0.9" Margin="0,0,0,8"/>
+              <views:SingerHubPane Grid.Row="2" Margin="0,0,0,0"/>
+            </Grid>
+          </Border>
         </Grid>
       
         <!--Main page-->
