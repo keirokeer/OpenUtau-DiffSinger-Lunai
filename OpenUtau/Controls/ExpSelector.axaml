@@ -8,8 +8,7 @@
     <vm:ExpSelectorViewModel/>
   </Design.DataContext>
   <Grid Height="22" Width="60" Background="{Binding Background}" PointerPressed="TextBlockPointerPressed">
-    <ComboBox x:Name="PartComboBox" Classes="expSelectorComboBox"
-              VerticalAlignment="Center" HorizontalAlignment="Left" Height="22"
+    <ComboBox VerticalAlignment="Center" HorizontalAlignment="Left" Height="22"
               Focusable="False" Foreground="{Binding TagBrush}" Background="Transparent" Width="20"
               SelectedItem="{Binding Descriptor}" ItemsSource="{Binding Descriptors}" SelectedIndex="{Binding SelectedIndex}">
       <ComboBox.SelectionBoxItemTemplate>
