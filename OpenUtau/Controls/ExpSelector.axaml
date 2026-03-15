@@ -8,9 +8,13 @@
     <vm:ExpSelectorViewModel/>
   </Design.DataContext>
   <Grid Height="22" Width="60" Background="{Binding Background}" PointerPressed="TextBlockPointerPressed">
-    <ComboBox VerticalAlignment="Center" HorizontalAlignment="Left" Height="22"
+    <ComboBox x:Name="PartComboBox" Classes="expSelectorComboBox"
+              VerticalAlignment="Center" HorizontalAlignment="Left" Height="22"
               Focusable="False" Foreground="{Binding TagBrush}" Background="Transparent" Width="20"
               SelectedItem="{Binding Descriptor}" ItemsSource="{Binding Descriptors}" SelectedIndex="{Binding SelectedIndex}">
+      <ComboBox.SelectionBoxItemTemplate>
+        <DataTemplate><Panel/></DataTemplate>
+      </ComboBox.SelectionBoxItemTemplate>
       <ComboBox.Styles>
         <Style Selector="ComboBox">
           <Setter Property="Padding" Value="{DynamicResource ComboBoxPadding}" />
@@ -100,10 +104,8 @@
         </Style>
       </ComboBox.Styles>
     </ComboBox>
-    <Viewbox Margin="20,0,0,0" Height="22" Width="40">
-      <TextBlock Height="22" MinWidth="36" Margin="0,0,4,0" Padding="0,3,0,3"
-                 Foreground="{Binding TagBrush}"
-                 TextAlignment="Right" Text="{Binding Header}"/>
-    </Viewbox>
+    <TextBlock Margin="20,0,6,0" FontSize="12" VerticalAlignment="Center"
+               HorizontalAlignment="Right" Foreground="{Binding TagBrush}"
+               TextAlignment="Right" Text="{Binding Header}"/>
   </Grid>
 </UserControl>
