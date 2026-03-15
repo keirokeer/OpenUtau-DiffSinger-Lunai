@@ -110,14 +110,16 @@ namespace OpenUtau.App.Controls {
                 return;
             }
             bool useTrackColor = Preferences.Default.UseTrackColor;
-            var tcolor = useTrackColor ? ThemeManager.GetTrackColor(track.TrackColor) : null;
-            // Curves (UExpressionType.Curve) always use default white accent; only Options/Numerical use track color
-            var lPen = ThemeManager.AccentPen1;
-            var lPen2 = ThemeManager.AccentPen1Thickness2;
-            var accentBrush = useTrackColor && tcolor != null ? tcolor.AccentColor : (IBrush)ThemeManager.AccentBrush1Note;
-            var accentPen2 = useTrackColor && tcolor != null ? new Pen(tcolor.AccentColorDark, 2) : ThemeManager.AccentPen2Thickness2;
-            var accentPen3 = useTrackColor && tcolor != null ? new Pen(tcolor.AccentColorDark, 3) : ThemeManager.AccentPen2Thickness3;
-            var accentBrush2 = useTrackColor && tcolor != null ? tcolor.AccentColorDark : (IBrush)ThemeManager.AccentBrush2;
+            var tcolor = ThemeManager.GetTrackColor(track.TrackColor);
+            var pointOutlinePenNormal = useTrackColor ? new Pen(tcolor.AccentColorCenterKey, 2) : ThemeManager.AccentPen1Thickness2;
+            var pointOutlinePenSelected = useTrackColor ? new Pen(tcolor.AccentColorLight, 2) : ThemeManager.AccentPen1Thickness2;
+            var useTrackColorForCurve = useTrackColor && !ThemeManager.IsDarkMode;
+            var lPen = useTrackColorForCurve ? new Pen(tcolor.AccentColorDark, 1) : ThemeManager.AccentPen1;
+            var lPen2 = useTrackColorForCurve ? new Pen(tcolor.AccentColorDark, 2) : ThemeManager.AccentPen1Thickness2;
+            var accentBrush = useTrackColor ? tcolor.AccentColor : (IBrush)ThemeManager.AccentBrush1Note;
+            var accentPen2 = useTrackColor ? new Pen(tcolor.AccentColorDark, 2) : ThemeManager.AccentPen2Thickness2;
+            var accentPen3 = useTrackColor ? new Pen(tcolor.AccentColorDark, 3) : ThemeManager.AccentPen2Thickness3;
+            var accentBrush2 = useTrackColor ? tcolor.AccentColorDark : (IBrush)ThemeManager.AccentBrush2;
             DrawBackgroundForHitTest(context);
             double leftTick = TickOffset - 480;
             double rightTick = TickOffset + Bounds.Width / TickWidth + 480;
@@ -226,8 +228,8 @@ namespace OpenUtau.App.Controls {
                 }
                 var note = phoneme.Parent;
                 var hPen = selectedNotes.Contains(note) ? accentPen2 : lPen2;
-                var vPen = selectedNotes.Contains(note) ? accentPen3 : (useTrackColor && tcolor != null ? new Pen(tcolor.AccentColor, 3) : ThemeManager.AccentPen1Thickness3);
-                var brush = selectedNotes.Contains(note) ? accentBrush2 : (useTrackColor && tcolor != null ? tcolor.AccentColor : (IBrush)ThemeManager.AccentBrush1);
+                var vPen = selectedNotes.Contains(note) ? accentPen3 : (useTrackColor ? new Pen(tcolor.AccentColor, 3) : ThemeManager.AccentPen1Thickness3);
+                var brush = selectedNotes.Contains(note) ? accentBrush2 : (useTrackColor ? tcolor.AccentColor : (IBrush)ThemeManager.AccentBrush1);
                 var (value, overriden) = phoneme.GetExpression(project, track, Key);
                 double x1 = Math.Round(viewModel.TickToneToPoint(phoneme.position, 0).X);
                 double x2 = Math.Round(viewModel.TickToneToPoint(phoneme.End, 0).X);
@@ -236,10 +238,12 @@ namespace OpenUtau.App.Controls {
                     double zeroHeight = Math.Round(Bounds.Height - Bounds.Height * (0f - descriptor.min) / (descriptor.max - descriptor.min));
                     context.DrawLine(vPen, new Point(x1 + 0.5, zeroHeight + 0.5), new Point(x1 + 0.5, valueHeight + 3));
                     context.DrawLine(hPen, new Point(x1 + 3, valueHeight), new Point(Math.Max(x1 + 3, x2 - 3), valueHeight));
+                    var pointOutlinePen = selectedNotes.Contains(note) ? pointOutlinePenSelected : pointOutlinePenNormal;
                     using (var state = context.PushTransform(Matrix.CreateTranslation(x1 + 0.5, valueHeight))) {
-                        context.DrawGeometry(overriden ? brush : ThemeManager.BackgroundBrush, vPen, pointGeometry);
+                        context.DrawGeometry(overriden ? brush : ThemeManager.BackgroundBrush, pointOutlinePen, pointGeometry);
                     }
                 } else if (descriptor.type == UExpressionType.Options) {
+                    var circleOutlinePen = selectedNotes.Contains(note) ? pointOutlinePenSelected : pointOutlinePenNormal;
                     for (int i = 0; i < descriptor.options.Length; ++i) {
                         double y = optionHeight * (descriptor.options.Length - 1 - i + 0.5);
                         using (var state = context.PushTransform(Matrix.CreateTranslation(x1 + 4.5, y))) {
@@ -247,7 +251,7 @@ namespace OpenUtau.App.Controls {
                                 if (overriden) {
                                     context.DrawGeometry(brush, null, pointGeometry);
                                 }
-                                context.DrawGeometry(null, hPen, circleGeometry);
+                                context.DrawGeometry(null, circleOutlinePen, circleGeometry);
                             } else {
                                 context.DrawGeometry(null, ThemeManager.NeutralAccentPenSemi, circleGeometry);
                             }

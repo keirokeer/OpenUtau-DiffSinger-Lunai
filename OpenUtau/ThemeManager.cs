@@ -63,25 +63,33 @@ namespace OpenUtau.App {
         public static IBrush ExpActiveNameBrush = Brushes.White;
         public static IBrush TrackBackgroundAltBrush = Brushes.Gray;
 
+        /// <summary>Theme values for CenterKey/BlackKey colors, restored when UseTrackColor is off.</summary>
+        private static Color? s_defaultCenterKeyColorLeft;
+        private static Color? s_defaultCenterKeyColorRight;
+        private static Color? s_defaultCenterKeyNameColor;
+        private static Color? s_defaultBlackKeyColorLeft;
+        private static Color? s_defaultBlackKeyColorRight;
+        private static IPen? s_defaultFinalPitchPen;
+
         public static List<TrackColor> TrackColors = new List<TrackColor>(){
-                new TrackColor("Flamingo", "#D491AA", "#E06C96", "#E8B0C6", "#EBCFDC", "#66AC7288", "#C2708E", "#D491AA", "#EBCFDC", "#1AAC7288"), // piano1, piano2, piano3, piano4, note, note pressed, border, border pressed, note empty
-                new TrackColor("Cherry", "#D93A3F", "#C02A2F", "#D9454A", "#F5B7B9", "#669E2E32", "#AF3136", "#C02A2F", "#F5B7B9", "#1A9E2E32"),
-                new TrackColor("Peach", "#FF8A65", "#FF7043", "#FFAB91", "#FFD5C8", "#70F5683D", "#E07352", "#FFAB91", "#FFD5C8", "#1AF5683D"),
-                new TrackColor("Banana", "#FBC13A", "#FBAB32", "#FDD13F", "#FFF4C0", "#70FAC038", "#DFAD49", "#FFD97F", "#FFF4C0", "#1AFAC038"),
-                new TrackColor("Olive", "#CDDC39", "#B0B931", "#DCE775", "#F2F7CE", "#70CDD926", "#99A12B", "#E8F764", "#F2F7CE", "#1ACDD926"),
-                new TrackColor("Mint", "#66BB8A", "#43A06A", "#A5D6BA", "#D2EBDD", "#7033CC73", "#45A16B", "#4DCB82", "#D2EBDD", "#1A33CC73"),
-                new TrackColor("Sky", "#80D9FF", "#3DC7F5", "#9EE3FA", "#C4EFFD", "#5980D9FF", "#4D99B3", "#9EE3FA", "#C4EFFD", "#1A80D9FF"),
-                new TrackColor("Blue", "#7266EE", "#4435E6", "#B1ABFB", "#E4E2FD", "#704C4C7A", "#50509B", "#7B79D9", "#E4E2FD", "#1A4C4C7A"),
-                new TrackColor("Purple", "#BA68C8", "#AB47BC", "#CE93D8", "#E7C9EC", "#70BA68C8", "#AB47BC", "#CE93D8", "#E7C9EC", "#1ABA68C8"),
-                new TrackColor("Barbie", "#E91E63", "#C2185B", "#F06292", "#F8B1C9", "#70DB5781", "#DA3E7A", "#F28CAD", "#F8B1C9", "#1ADB5781"),
-                new TrackColor("Wine", "#AE3442", "#96212F", "#D25664", "#FAA8B1", "#666A252E", "#96212F", "#AE3442", "#FAA8B1", "#1A6A252E"),
-                new TrackColor("Orange", "#EE582B", "#C33C13", "#F06B42", "#FFC2B3", "#70E65427", "#C33C13", "#F06B42", "#FFC2B3", "#1AE65427"),
-                new TrackColor("Gold", "#FF8F00", "#FF7F00", "#FFB300", "#FFE097", "#70EC9A2F", "#C07326", "#FFAF4D", "#FFE097", "#1AEC9A2F"),
-                new TrackColor("BRAT", "#C5E233", "#BAE61A", "#DBF075", "#F3FAD1", "#70BAE61A", "#8BAA0E", "#E1FF4D", "#F3FAD1", "#1AC4E61A"),
-                new TrackColor("Forest", "#2E7D32", "#1B5E20", "#43A047", "#A1D0A3", "#701B5E20", "#2E7D32", "#43A047", "#A1D0A3", "#1A1B5E20"),
-                new TrackColor("Teal", "#0AC2C2", "#008080", "#2196F3", "#90CBF9", "#70008080", "#238B8B", "#14B8B8", "#90CBF9", "#1A008080"),
-                new TrackColor("Violet", "#7B1FA2", "#4A148C", "#AB47BC", "#D5A3DE", "#704A148C", "#7B1FA2", "#AB47BC", "#D5A3DE", "#1A4A148C"),
-                new TrackColor("Moon", "#707070", "#4A4A4A", "#959595", "#C9C9C9", "#6B4A4A47", "#707070", "#808080", "#C9C9C9", "#45454540"),
+                new TrackColor("Flamingo", "#D491AA", "#E06C96", "#EBB7CC", "#F4D4E3", "#66AC7288", "#C2708E", "#D491AA", "#EBCFDC", "#1AAC7288"), // piano1, piano2, piano3, piano4, note, note pressed, border, border pressed, note empty
+                new TrackColor("Cherry", "#D93A3F", "#C02A2F", "#DB555A", "#F8CCCE", "#669E2E32", "#AF3136", "#C02A2F", "#F5B7B9", "#1A9E2E32"),
+                new TrackColor("Peach", "#FF8A65", "#FF7043", "#FFB59E", "#FFE2D9", "#70F5683D", "#E07352", "#FFAB91", "#FFD5C8", "#1AF5683D"),
+                new TrackColor("Banana", "#FBC13A", "#FBAB32", "#FCD569", "#FFF7D7", "#70FAC038", "#DFAD49", "#FFD97F", "#FFF4C0", "#1AFAC038"),
+                new TrackColor("Olive", "#CDDC39", "#B0B931", "#E0EA85", "#F4F9D1", "#70CDD926", "#99A12B", "#E8F764", "#F2F7CE", "#1ACDD926"),
+                new TrackColor("Mint", "#66BB8A", "#43A06A", "#B2E2C7", "#D6F2E2", "#7033CC73", "#45A16B", "#4DCB82", "#D2EBDD", "#1A33CC73"),
+                new TrackColor("Sky", "#80D9FF", "#3DC7F5", "#ACE5F8", "#CBF2FF", "#5980D9FF", "#4D99B3", "#9EE3FA", "#C4EFFD", "#1A80D9FF"),
+                new TrackColor("Blue", "#7266EE", "#4435E6", "#B9B4F9", "#DDDBFD", "#704C4C7A", "#50509B", "#7B79D9", "#E4E2FD", "#1A4C4C7A"),
+                new TrackColor("Purple", "#BA68C8", "#AB47BC", "#D49FDD", "#EBCBF0", "#70BA68C8", "#AB47BC", "#CE93D8", "#E7C9EC", "#1ABA68C8"),
+                new TrackColor("Barbie", "#E91E63", "#C2185B", "#EE89AB", "#FBBED3", "#70DB5781", "#DA3E7A", "#F28CAD", "#F8B1C9", "#1ADB5781"),
+                new TrackColor("Wine", "#AE3442", "#96212F", "#D26F7A", "#FDB8C0", "#666A252E", "#96212F", "#AE3442", "#FAA8B1", "#1A6A252E"),
+                new TrackColor("Orange", "#EE582B", "#C33C13", "#EF9D84", "#FFCEC2", "#70E65427", "#C33C13", "#F06B42", "#FFC2B3", "#1AE65427"),
+                new TrackColor("Gold", "#FF8F00", "#FF7F00", "#F7C859", "#FFE9B8", "#70EC9A2F", "#C07326", "#FFAF4D", "#FFE097", "#1AEC9A2F"),
+                new TrackColor("BRAT", "#C5E233", "#BAE61A", "#E1F292", "#F6FDD1", "#70BAE61A", "#8BAA0E", "#E1FF4D", "#F3FAD1", "#1AC4E61A"),
+                new TrackColor("Forest", "#2E7D32", "#1B5E20", "#63B967", "#C1F2C3", "#701B5E20", "#2E7D32", "#43A047", "#A1D0A3", "#1A1B5E20"),
+                new TrackColor("Teal", "#0AC2C2", "#008080", "#65CACA", "#CAF7F3", "#70008080", "#238B8B", "#14B8B8", "#90CBF9", "#1A008080"),
+                new TrackColor("Violet", "#7B1FA2", "#4A148C", "#B45FC2", "#F6D4F7", "#704A148C", "#7B1FA2", "#AB47BC", "#D5A3DE", "#1A4A148C"),
+                new TrackColor("Moon", "#707070", "#4A4A4A", "#A7A7A7", "#EAEAEA", "#6B4A4A47", "#707070", "#808080", "#C9C9C9", "#45454540"),
             };
 
         public static List<string> GetAvailableThemes() {
@@ -165,6 +173,7 @@ namespace OpenUtau.App {
             if (resDict.TryGetResource("FinalPitchBrush", themeVariant, out outVar)) {
                 FinalPitchBrush = (IBrush)outVar!;
                 FinalPitchPen = new Pen(FinalPitchBrush, 1);
+                s_defaultFinalPitchPen = FinalPitchPen;
             }
             if (resDict.TryGetResource("RealCurveFillBrush", themeVariant, out outVar)) {
                 RealCurveFillBrush = (IBrush)outVar!;
@@ -176,6 +185,11 @@ namespace OpenUtau.App {
             if (resDict.TryGetResource("TrackBackgroundAltBrush", themeVariant, out outVar)) {
                 TrackBackgroundAltBrush = (IBrush)outVar!;
             }
+            if (resDict.TryGetResource("CenterKeyColorLeft", themeVariant, out outVar) && outVar is Color ckl) { s_defaultCenterKeyColorLeft = ckl; }
+            if (resDict.TryGetResource("CenterKeyColorRight", themeVariant, out outVar) && outVar is Color ckr) { s_defaultCenterKeyColorRight = ckr; }
+            if (resDict.TryGetResource("CenterKeyNameColor", themeVariant, out outVar) && outVar is Color ckn) { s_defaultCenterKeyNameColor = ckn; }
+            if (resDict.TryGetResource("BlackKeyColorLeft", themeVariant, out outVar) && outVar is Color bkl) { s_defaultBlackKeyColorLeft = bkl; }
+            if (resDict.TryGetResource("BlackKeyColorRight", themeVariant, out outVar) && outVar is Color bkr) { s_defaultBlackKeyColorRight = bkr; }
             SetKeyboardBrush();
             TextLayoutCache.Clear();
             MessageBus.Current.SendMessage(new ThemeChangedEvent());
@@ -194,6 +208,33 @@ namespace OpenUtau.App {
                 resDict["SelectedTrackAccentLightBrushSemi"] = tcolor.AccentColorLightSemi;
                 resDict["SelectedTrackAccentDarkBrush"] = tcolor.AccentColorDark;
                 resDict["SelectedTrackCenterKeyBrush"] = tcolor.AccentColorCenterKey;
+
+                if (Preferences.Default.UseTrackColor) {
+                    if (IsDarkMode) {
+                        resDict["CenterKeyNameColor"] = BlendColors(tcolor.AccentColorDark.Color, Color.Parse("#2F2F2F"));   // piano2 + dark gray 50/50
+                        resDict["CenterKeyColorLeft"] = BlendColors(tcolor.AccentColorLight.Color, Color.Parse("#C0C0C0"));   // piano3 + gray 50/50
+                        resDict["CenterKeyColorRight"] = BlendColors(tcolor.AccentColorCenterKey.Color, Color.Parse("#F0F0F0")); // piano4 + light gray 50/50
+                        if (s_defaultBlackKeyColorLeft is Color bkl) { resDict["BlackKeyColorLeft"] = bkl; }
+                        if (s_defaultBlackKeyColorRight is Color bkr) { resDict["BlackKeyColorRight"] = bkr; }
+                        if (s_defaultFinalPitchPen != null) { FinalPitchPen = s_defaultFinalPitchPen; }
+                    } else {
+                        resDict["CenterKeyNameColor"] = tcolor.AccentColorDark.Color;       // piano2 (light theme)
+                        resDict["CenterKeyColorLeft"] = tcolor.AccentColorLight.Color;       // piano3 (light theme)
+                        resDict["CenterKeyColorRight"] = tcolor.AccentColorCenterKey.Color;  // piano4 (light theme)
+                    }
+                    if (!IsDarkMode) {
+                        resDict["BlackKeyColorLeft"] = tcolor.AccentColorDark.Color;    // piano2 (light theme)
+                        resDict["BlackKeyColorRight"] = tcolor.AccentColorLight.Color;  // piano3 (light theme)
+                        FinalPitchPen = new Pen(tcolor.AccentColorDark, 1);             // pitch curve = piano2 (light theme)
+                    }
+                } else {
+                    if (s_defaultCenterKeyColorLeft is Color ckl) { resDict["CenterKeyColorLeft"] = ckl; }
+                    if (s_defaultCenterKeyColorRight is Color ckr) { resDict["CenterKeyColorRight"] = ckr; }
+                    if (s_defaultCenterKeyNameColor is Color ckn) { resDict["CenterKeyNameColor"] = ckn; }
+                    if (s_defaultBlackKeyColorLeft is Color bkl) { resDict["BlackKeyColorLeft"] = bkl; }
+                    if (s_defaultBlackKeyColorRight is Color bkr) { resDict["BlackKeyColorRight"] = bkr; }
+                    if (s_defaultFinalPitchPen != null) { FinalPitchPen = s_defaultFinalPitchPen; }
+                }
 
                 NoteBrush = tcolor.NoteColor;
                 NoteBrushPressed = tcolor.NoteColorPressed;
@@ -215,48 +256,39 @@ namespace OpenUtau.App {
             var themeVariant = ThemeVariant.Default;
 
             if (Preferences.Default.UseTrackColor) {
-                if (IsDarkMode) {
-                    if (resDict.TryGetResource("SelectedTrackAccentBrush", themeVariant, out outVar)) {
-                        CenterKeyNameBrush = (IBrush)outVar!;
-                        WhiteKeyBrush = (IBrush)outVar!;
-                    }
-                    if (resDict.TryGetResource("SelectedTrackCenterKeyBrush", themeVariant, out outVar)) {
-                        CenterKeyBrush = (IBrush)outVar!;
-                    }
-                    if (resDict.TryGetResource("WhiteKeyNameBrush", themeVariant, out outVar)) {
-                        WhiteKeyNameBrush = (IBrush)outVar!;
-                    }
-                    if (resDict.TryGetResource("BlackKeyBrush", themeVariant, out outVar)) {
-                        BlackKeyBrush = (IBrush)outVar!;
-                    }
-                    if (resDict.TryGetResource("BlackKeyNameBrush", themeVariant, out outVar)) {
-                        BlackKeyNameBrush = (IBrush)outVar!;
-                    }
-                    ExpBrush = BlackKeyBrush;
-                    ExpNameBrush = BlackKeyNameBrush;
-                    ExpActiveBrush = WhiteKeyBrush;
-                    ExpActiveNameBrush = WhiteKeyNameBrush;
-                    ExpShadowBrush = CenterKeyBrush;
-                    ExpShadowNameBrush = CenterKeyNameBrush;
-                } else { // LightMode
-                    if (resDict.TryGetResource("SelectedTrackAccentBrush", themeVariant, out outVar)) {
-                        CenterKeyNameBrush = (IBrush)outVar!;
-                        WhiteKeyNameBrush = (IBrush)outVar!;
-                        BlackKeyBrush = (IBrush)outVar!;
-                    }
-                    if (resDict.TryGetResource("SelectedTrackCenterKeyBrush", themeVariant, out outVar)) {
-                        CenterKeyBrush = (IBrush)outVar!;
-                    }
-                    if (resDict.TryGetResource("WhiteKeyBrush", themeVariant, out outVar)) {
-                        WhiteKeyBrush = (IBrush)outVar!;
-                    }
-                    if (resDict.TryGetResource("BlackKeyNameBrush", themeVariant, out outVar)) {
-                        BlackKeyNameBrush = (IBrush)outVar!;
-                    }
+                // Staff (piano roll keyboard): use theme colors for white/black keys and labels;
+                // only C key rows use track color: fill = CenterKeyBrush, text = CenterKeyNameBrush (track accent).
+                if (resDict.TryGetResource("WhiteKeyBrush", themeVariant, out outVar)) {
+                    WhiteKeyBrush = (IBrush)outVar!;
+                }
+                if (resDict.TryGetResource("WhiteKeyNameBrush", themeVariant, out outVar)) {
+                    WhiteKeyNameBrush = (IBrush)outVar!;
+                }
+                if (resDict.TryGetResource("SelectedTrackAccentBrush", themeVariant, out outVar)) {
+                    CenterKeyNameBrush = (IBrush)outVar!;
+                }
+                if (resDict.TryGetResource("BlackKeyBrush", themeVariant, out outVar)) {
+                    BlackKeyBrush = (IBrush)outVar!;
+                }
+                if (resDict.TryGetResource("BlackKeyNameBrush", themeVariant, out outVar)) {
+                    BlackKeyNameBrush = (IBrush)outVar!;
+                }
+                // Use gradient CenterKeyBrush (respects CenterKeyColorLeft/Right set in ChangePianorollColor)
+                if (resDict.TryGetResource("CenterKeyBrush", themeVariant, out outVar)) {
+                    CenterKeyBrush = (IBrush)outVar!;
+                }
+                if (!IsDarkMode) {
                     ExpBrush = WhiteKeyBrush;
                     ExpNameBrush = WhiteKeyNameBrush;
                     ExpActiveBrush = BlackKeyBrush;
                     ExpActiveNameBrush = BlackKeyNameBrush;
+                    ExpShadowBrush = CenterKeyBrush;
+                    ExpShadowNameBrush = CenterKeyNameBrush;
+                } else {
+                    ExpBrush = BlackKeyBrush;
+                    ExpNameBrush = BlackKeyNameBrush;
+                    ExpActiveBrush = WhiteKeyBrush;
+                    ExpActiveNameBrush = WhiteKeyNameBrush;
                     ExpShadowBrush = CenterKeyBrush;
                     ExpShadowNameBrush = CenterKeyNameBrush;
                 }
@@ -295,6 +327,15 @@ namespace OpenUtau.App {
                     ExpShadowNameBrush = CenterKeyNameBrush;
                 }
             }
+        }
+
+        /// <summary>Blends two colors 50/50 by component.</summary>
+        private static Color BlendColors(Color a, Color b) {
+            return Color.FromArgb(
+                (byte)((a.A + b.A) / 2),
+                (byte)((a.R + b.R) / 2),
+                (byte)((a.G + b.G) / 2),
+                (byte)((a.B + b.B) / 2));
         }
 
         public static string GetString(string key) {

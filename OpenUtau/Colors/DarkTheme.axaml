@@ -40,8 +40,8 @@
   <Color x:Key="WarningColor">#433519</Color>
 
   <!--Keyboard Background-->
-  <Color x:Key="WhiteKeyColorLeft">#CACACA</Color>
-  <Color x:Key="WhiteKeyColorRight">#E0E0E0</Color>
+  <Color x:Key="WhiteKeyColorLeft">#C0C0C0</Color>
+  <Color x:Key="WhiteKeyColorRight">#F0F0F0</Color>
   <Color x:Key="WhiteKeyNameColor">#2F2F2F</Color>
 
   <Color x:Key="CenterKeyColorLeft">#A9A6CD</Color>
