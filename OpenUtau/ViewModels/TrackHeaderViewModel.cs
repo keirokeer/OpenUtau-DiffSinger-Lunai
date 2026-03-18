@@ -522,7 +522,6 @@ namespace OpenUtau.App.ViewModels {
 
         public void Duplicate() {
             DocManager.Inst.StartUndoGroup("command.track.duplicate");
-            //TODO
             var newTrack = new UTrack(track.TrackName + "_copy") {
                 TrackNo = track.TrackNo + 1,
                 Singer = track.Singer,
@@ -549,7 +548,6 @@ namespace OpenUtau.App.ViewModels {
 
         public void DuplicateSettings() {
             DocManager.Inst.StartUndoGroup("command.track.duplicate");
-            //TODO
             DocManager.Inst.ExecuteCmd(new AddTrackCommand(DocManager.Inst.Project, new UTrack(track.TrackName + "_copy") {
                 TrackNo = track.TrackNo + 1,
                 Singer = track.Singer,

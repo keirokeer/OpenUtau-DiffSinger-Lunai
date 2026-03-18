@@ -16,6 +16,7 @@ using OpenUtau.App.Views;
 using OpenUtau.Core;
 using OpenUtau.Core.Ustx;
 using OpenUtau.Core.Util;
+using OpenUtau.ViewModels;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using Serilog;
@@ -77,6 +78,7 @@ namespace OpenUtau.App.ViewModels {
         [Reactive] public Rect ExpBounds { get; set; }
         [Reactive] public string PrimaryKey { get; set; }
         [Reactive] public bool PrimaryKeyNotSupported { get; set; }
+        [Reactive] public bool ShowCurveToolbox { get; set; }
         [Reactive] public string SecondaryKey { get; set; }
         [Reactive] public double ExpTrackHeight { get; set; }
         [Reactive] public double ExpShadowOpacity { get; set; }
@@ -177,15 +179,16 @@ namespace OpenUtau.App.ViewModels {
                 });
             this.WhenAnyValue(x => x.ExpBounds, x => x.PrimaryKey)
                 .Subscribe(t => {
-                    if (t.Item2 != null &&
-                        Project.expressions.TryGetValue(t.Item2, out var descriptor) &&
-                        descriptor.type == UExpressionType.Options &&
-                        descriptor.options.Length > 0) {
-                        ExpTrackHeight = t.Item1.Height / descriptor.options.Length;
-                        ExpShadowOpacity = 0;
+                    if (t.Item2 != null && Project.expressions.TryGetValue(t.Item2, out var descriptor)) {
+                        if (descriptor.type == UExpressionType.Options && descriptor.options.Length > 0) {
+                            ExpTrackHeight = t.Item1.Height / descriptor.options.Length;
+                            ExpShadowOpacity = 0;
+                        }
+                        ShowCurveToolbox = descriptor.type == UExpressionType.Curve;
                     } else {
                         ExpTrackHeight = 0;
                         ExpShadowOpacity = 0.3;
+                        ShowCurveToolbox = false;
                     }
                 });
             this.WhenAnyValue(x => x.Project)
@@ -365,6 +368,15 @@ namespace OpenUtau.App.ViewModels {
                             LoadTrackColor(Part, Project);
                             break;
                     }
+                });
+            MessageBus.Current.Listen<CurveSelectionEvent>()
+                .Subscribe(e => {
+                    Selection.SelectNone();
+                    MessageBus.Current.SendMessage(new NotesSelectionEvent(Selection));
+                });
+            MessageBus.Current.Listen<CurveCopyEvent>()
+                .Subscribe(e => {
+                    DocManager.Inst.NotesClipboard?.Clear();
                 });
         }
 
@@ -908,7 +920,7 @@ namespace OpenUtau.App.ViewModels {
                 DocManager.Inst.ExecuteCmd(new AddNoteCommand(Part, notes));
                 int minDurTick = Part.GetMinDurTick(Project);
                 if (Part.Duration < minDurTick) {
-                    DocManager.Inst.ExecuteCmd(new ResizePartCommand(Project, Part, minDurTick - Part.Duration, false));
+                    DocManager.Inst.ExecuteCmd(new ResizeVoicePartCommand(Project, Part, minDurTick - Part.Duration, false));
                 }
                 DocManager.Inst.EndUndoGroup();
                 Selection.Select(notes);
@@ -949,7 +961,7 @@ namespace OpenUtau.App.ViewModels {
                 DocManager.Inst.ExecuteCmd(new AddNoteCommand(Part, notes));
                 int minDurTick = Part.GetMinDurTick(Project);
                 if (Part.Duration < minDurTick) {
-                    DocManager.Inst.ExecuteCmd(new ResizePartCommand(Project, Part, minDurTick - Part.Duration, false));
+                    DocManager.Inst.ExecuteCmd(new ResizeVoicePartCommand(Project, Part, minDurTick - Part.Duration, false));
                 }
                 DocManager.Inst.EndUndoGroup();
                 Selection.Select(notes);
@@ -1169,7 +1181,7 @@ namespace OpenUtau.App.ViewModels {
                     if (isUndo && addPart.part == Part) {
                         UnloadPart();
                     }
-                } else if (cmd is ResizePartCommand) {
+                } else if (cmd is ResizeVoicePartCommand) {
                     OnPartModified();
                 } else if (cmd is MovePartCommand) {
                     OnPartModified();
