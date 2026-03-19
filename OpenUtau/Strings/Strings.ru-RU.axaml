@@ -9,12 +9,15 @@
   <system:String x:Key="command.batch.plugin">Изменение плагина</system:String>
   <system:String x:Key="command.batch.reset">Пакетный сброс</system:String>
   <system:String x:Key="command.exp.edit">Редактирование выражения</system:String>
+  <system:String x:Key="command.exp.paste">Вставка кривой выражения</system:String>
   <system:String x:Key="command.exp.reset">Сброс выражения</system:String>
   <system:String x:Key="command.import.audio">Импорт аудио</system:String>
   <system:String x:Key="command.import.track">Импорт трека</system:String>
   <system:String x:Key="command.note.add">Добавление ноты</system:String>
   <system:String x:Key="command.note.delete">Удаление ноты</system:String>
   <system:String x:Key="command.note.edit">Редактирование ноты</system:String>
+  <system:String x:Key="command.part.fadein">Редактирование нарастания партии</system:String>
+  <system:String x:Key="command.part.fadeout">Редактирование затухания партии</system:String>
   <system:String x:Key="command.note.lyric">Редактирование текста</system:String>
   <system:String x:Key="command.note.move">Перемещение ноты</system:String>
   <system:String x:Key="command.note.paste">Вставка ноты</system:String>
@@ -59,12 +62,15 @@
   <system:String x:Key="context.part.merge">Объединить партии</system:String>
   <system:String x:Key="context.part.rename">Переименовать партию</system:String>
   <system:String x:Key="context.part.replaceaudio">Повторный выбор аудиофайла</system:String>
+  <system:String x:Key="context.part.split">Разделить партию в позиции воспроизведения</system:String>
   <system:String x:Key="context.part.transcribe">Транскрибировать аудио для создания нотной партии</system:String>
   <system:String x:Key="context.part.transcribing">Транскрибирование</system:String>
   <system:String x:Key="context.pitch.easein">Плавное начало</system:String>
   <system:String x:Key="context.pitch.easeinout">Плавное начало/конец</system:String>
   <system:String x:Key="context.pitch.easeout">Плавный конец</system:String>
   <system:String x:Key="context.pitch.linear">Линейный</system:String>
+  <system:String x:Key="context.pitch.shape">Кривая форма</system:String>
+  <system:String x:Key="context.pitch.smooth">Сглаживание</system:String>
   <system:String x:Key="context.pitch.pointadd">Добавить точку</system:String>
   <system:String x:Key="context.pitch.pointdel">Удалить точку</system:String>
   <system:String x:Key="context.pitch.pointsnapprev">Привязать к предыдущей ноте</system:String>
@@ -92,10 +98,12 @@ OpenUtau стремится стать средой редактирования
   <system:String x:Key="dialogs.installdll.message">Установка </system:String>
   <system:String x:Key="dialogs.merge.caption">Объединение партий</system:String>
   <system:String x:Key="dialogs.merge.multitracks">Партии на разных треках не могут быть объединены.</system:String>
+  <system:String x:Key="dialogs.splitpart.caption">Разделение партии</system:String>
+  <system:String x:Key="dialogs.splitpart.intheway">Одна или несколько нот пересекаются с курсором воспроизведения. Продолжить разделение в ближайшей позиции после курсора, где нет нот?</system:String>
   <system:String x:Key="dialogs.messagebox.cancel">Отмена</system:String>
   <system:String x:Key="dialogs.messagebox.copy">Копировать ошибку в буфер обмена</system:String>
   <system:String x:Key="dialogs.messagebox.no">Нет</system:String>
-  <system:String x:Key="dialogs.messagebox.ok">Ок</system:String>
+  <system:String x:Key="dialogs.messagebox.ok">ОК</system:String>
   <system:String x:Key="dialogs.messagebox.yes">Да</system:String>
   <system:String x:Key="dialogs.noresampler.caption">Нет ресамплера</system:String>
   <system:String x:Key="dialogs.noresampler.message">Нет ресамплера! Поместите нужный вам ресамплер (.exe или .dll) в папку Resamplers и выберите его в параметрах!</system:String>
@@ -113,6 +121,23 @@ OpenUtau стремится стать средой редактирования
   <system:String x:Key="dialogs.voicecolorremapping">Изменение цвета голоса</system:String>
   <system:String x:Key="dialogs.voicecolorremapping.error">У этого вокалиста нет цветов голоса</system:String>
   <system:String x:Key="dialogs.voicecolorremapping.caption">Применится ко всем нотам в этом треке:</system:String>
+  <system:String x:Key="dialogs.transcribe.caption">Расшифровка аудио</system:String>
+  <system:String x:Key="dialogs.transcribe.midialgorithm">Алгоритм</system:String>
+  <system:String x:Key="dialogs.transcribe.some.notfound">SOME не установлен.</system:String>
+  <system:String x:Key="dialogs.transcribe.game.notfound">GAME не установлен.</system:String>
+  <system:String x:Key="dialogs.transcribe.rmvpe.notfound">RMVPE не установлен. Установите его с помощью Менеджера Пакетов.</system:String>
+  <system:String x:Key="dialogs.transcribe.allnotfound">Модель расшифровки не установлена. Пожалуйста, установите GAME через Менеджер Пакетов или установите вручную отсюда {0}.</system:String>
+  <system:String x:Key="dialogs.transcribe.rmvpe">Определить f0 (PITD) с помощью RMVPE</system:String>
+  <system:String x:Key="dialogs.transcribe.game.options">Параметры GAME</system:String>
+  <system:String x:Key="dialogs.transcribe.game.language">Язык</system:String>
+  <system:String x:Key="dialogs.transcribe.game.language.universal">[универсальный]</system:String>
+  <system:String x:Key="dialogs.transcribe.game.steps">Sampling Steps (Шаги семплирования)</system:String>
+  <system:String x:Key="dialogs.transcribe.game.segthreshold">Boundary Threshold (Порог границы)</system:String>
+  <system:String x:Key="dialogs.transcribe.game.segradius">Boundary Radius (Радиус границы)</system:String>
+  <system:String x:Key="dialogs.transcribe.game.estthreshold">Score Threshold (Порог оценки)</system:String>
+  <system:String x:Key="dialogs.transcribe.game.batchsize">Batch Size (Размер пакета)</system:String>
+  <system:String x:Key="dialogs.transcribe.game.batchduration">Максимальная длительность пакета (в секундах)</system:String>
+  <system:String x:Key="dialogs.transcribe.longchunk.message">Один или несколько аудио-сегментов слишком длинные и могут потреблять много памяти при расшифровке. Обычно это происходит, если в аудио есть аккомпанемент (фоновая музыка). Продолжить?</system:String>
 
   <system:String x:Key="errors.caption">Ошибка</system:String>
   <system:String x:Key="errors.details">Подробности ошибки</system:String>
@@ -149,9 +174,10 @@ OpenUtau стремится стать средой редактирования
   <system:String x:Key="errors.failed.searchsinger">Не удалось найти вокалистов</system:String>
   <system:String x:Key="errors.failed.synth.cutoffbeforeoffset">Ошибка в Oto: конец перед началом</system:String>
   <system:String x:Key="errors.failed.synth.cutoffexceedduration">Ошибка в Oto: конец превышает длину аудио</system:String>
-  <system:String x:Key="errors.failed.transcribe">Ошибка при загрузке SOME. Пожалуйста, установите SOME отсюда {0}</system:String>
+  <system:String x:Key="errors.failed.transcribe.rmvpe">Ошибка при загрузке модели RMVPE ONNX. Установите её с помощью Менеджера Пакетов или поместите rmvpe.onnx в {0}</system:String>
+  <system:String x:Key="errors.failed.transcribe.some">Ошибка при загрузке SOME. Пожалуйста, установите SOME отсюда {0}</system:String>
   <system:String x:Key="errors.install.cpp">Попробуйте установить Visual C++ Redistributable. https://learn.microsoft.com/en-US/cpp/windows/latest-supported-vc-redist?view=msvc-170</system:String>
-  <system:String x:Key="errors.lyrics.regex">Символ не допустим в регулярном выражении</system:String>
+  <system:String x:Key="errors.lyrics.regex">Недопустимый символ в регулярном выражении</system:String>
   <system:String x:Key="errors.lyrics.regexpreview">- ошибка регулярного выражения -</system:String>
 
   <system:String x:Key="exesetup.installing">Установка &quot;{0}&quot;...</system:String>
@@ -470,7 +496,7 @@ OpenUtau стремится стать средой редактирования
   <system:String x:Key="pianoroll.menu.notedefaults">Нота по умолчанию</system:String>
   <system:String x:Key="pianoroll.menu.notes">Ноты</system:String>
   <system:String x:Key="pianoroll.menu.notes.addbreath">Добавить вдох</system:String>
-  <system:String x:Key="pianoroll.menu.notes.addtaildash">Добавить &quot;-&quot; на конец</system:String>
+  <system:String x:Key="pianoroll.menu.notes.addtaildash">Добавить &quot;-&quot; в конец</system:String>
   <system:String x:Key="pianoroll.menu.notes.addtailrest">Добавить &quot;R&quot; на конец</system:String>
   <system:String x:Key="pianoroll.menu.notes.autolegato">Автоматическое легато</system:String>
   <system:String x:Key="pianoroll.menu.notes.bakepitch">Преобразование PITD в контролируемые точки питча</system:String>
@@ -492,7 +518,7 @@ OpenUtau стремится стать средой редактирования
   <system:String x:Key="pianoroll.menu.notes.removetailrest">Удалить хвост &quot;R&quot;</system:String>
   <system:String x:Key="pianoroll.menu.notes.reset.aliases">Сбросить алиасы фонем</system:String>
   <system:String x:Key="pianoroll.menu.notes.reset.all">Сбросить ноты до значений по умолчанию</system:String>
-  <system:String x:Key="pianoroll.menu.notes.reset.allparameters">Сбросить все настройки</system:String>
+  <system:String x:Key="pianoroll.menu.notes.reset.allparameters">Сбросить все параметры</system:String>
   <system:String x:Key="pianoroll.menu.notes.reset.exps">Сбросить все выражения</system:String>
   <system:String x:Key="pianoroll.menu.notes.reset.phonemetimings">Сбросить тайминги фонем</system:String>
   <system:String x:Key="pianoroll.menu.notes.reset.pitchbends">Сбросить кривые питча</system:String>
@@ -503,6 +529,7 @@ OpenUtau стремится стать средой редактирования
   <system:String x:Key="pianoroll.menu.plugin.openfolder">Открыть папку</system:String>
   <system:String x:Key="pianoroll.menu.plugin.reload">Перезагрузить</system:String>
   <system:String x:Key="pianoroll.menu.reset">Сбросить</system:String>
+  <system:String x:Key="pianoroll.menu.external">Внешний</system:String>
   <system:String x:Key="pianoroll.menu.searchnote">Найти ноту</system:String>
   <system:String x:Key="pianoroll.menu.searchnote.alias">Алиас</system:String>
   <system:String x:Key="pianoroll.menu.searchnote.all">Выделить все</system:String>
@@ -525,37 +552,40 @@ OpenUtau стремится стать средой редактирования
   <system:String x:Key="pianoroll.toggle.waveform">Отображать форму волны (W)</system:String>
   <system:String x:Key="pianoroll.toggle.expressions">Показать выражения (L)</system:String>
   <system:String x:Key="pianoroll.tool.drawlinepitch">Инструмент для рисования питча линией (Shift + 4)
-    Левая кнопка для рисования (прямая линия)
-    Правая кнопка для сбрасывания
-    Удерживайте Ctrl, чтобы выбрать
+    ЛКМ, чтобы рисовать (прямая линия)
+    ПКМ, чтобы сбросить
+    Удерживайте Ctrl, чтобы выделить
     Удерживайте Alt, чтобы сгладить</system:String>
   <system:String x:Key="pianoroll.tool.drawpitch">Инструмент для рисования питча (4)
-    Левая кнопка для рисования
-    Правая кнопка для сбрасывания
-    Удерживайте Ctrl, чтобы выбрать
+    ЛКМ, чтобы рисовать
+    ПКМ, чтобы сбросить
+    Удерживайте Ctrl, чтобы выделить
     Удерживайте Alt, чтобы сгладить</system:String>
   <system:String x:Key="pianoroll.tool.eraser">Ластик (3)</system:String>
   <system:String x:Key="pianoroll.tool.knife">Нож (5)</system:String>
   <system:String x:Key="pianoroll.tool.overwritepitch">Инструмент переписывания питча (Ctrl + 4)
-    Левая кнопка для рисования (игнорирует вибрато и mod+)
-    Правая кнопка для сбрасывания
-    Удерживайте Ctrl, чтобы выбрать
+    ЛКМ, чтобы рисовать (игнорирует вибрато и mod+)
+    ПКМ, чтобы сбросить
+    Удерживайте Ctrl, чтобы выделить
     Удерживайте Alt, чтобы сгладить</system:String>
-    <system:String x:Key="pianoroll.tool.overwritelinepitch">
-        Инструмент для рисования питча линией (Ctrl + Shift + 4)
-        Левая кнопка для рисования 
-        (прямая линия, которая игнорирует вибрато и mod+)
-        Правая кнопка для сбрасывания
-        Удерживайте Ctrl, чтобы выбрать
-        Удерживайте Alt, чтобы сгладить
-    </system:String>
+  <system:String x:Key="pianoroll.tool.overwritelinepitch">
+    Инструмент для рисования питча линией (Ctrl + Shift + 4)
+    ЛКМ, чтобы рисовать 
+    (прямая линия, которая игнорирует вибрато и mod+)
+    Удерживайте Ctrl, чтобы рисовать синусоидальную кривую
+    Удерживайте Alt + Shift, чтобы настроить S-образную кривую
+    Удерживайте Alt, чтобы рисовать S-образную кривую
+    ПКМ, чтобы сбросить
+    Удерживайте Ctrl, чтобы выделить
+    Удерживайте Alt, чтобы сгладить
+  </system:String>
   <system:String x:Key="pianoroll.tool.penplus">Карандаш Плюс (Ctrl + 2)
-    Левая кнопка для рисования
-    Правая кнопка для сбрасывания
-    Удерживайте Ctrl, чтобы выбрать</system:String>
+    ЛКМ, чтобы рисовать
+    ПКМ, чтобы сбросить
+    Удерживайте Ctrl, чтобы выделить</system:String>
   <system:String x:Key="pianoroll.tool.penv2">Карандаш (2)
-    Левая кнопка для рисования
-    Удерживайте Ctrl, чтобы выбрать</system:String>
+    ЛКМ, чтобы рисовать
+    Удерживайте Ctrl, чтобы выделить</system:String>
   <system:String x:Key="pianoroll.tool.selectionv2">Инструмент выделения (1)</system:String>
 
   <system:String x:Key="prefs.advanced">Дополнительно</system:String>
@@ -783,7 +813,7 @@ OpenUtau стремится стать средой редактирования
     T: Отобразить подсказку (то что вы видите сейчас)
     Перетаскивание ноты: Перемещение ноты
     Перетаскивание конца ноты: Изменение длины ноты
-    Alt + Перетаксивание конца ноты: Изменение размера соседних нот
+    Alt + Перетаскивание конца ноты: Изменение размера соседних нот
     Пробел: Воспроизведение</system:String>
   <system:String x:Key="tip.notes.zoomx">◀ Прокрутите здесь для горизонтального масштабирования ▶</system:String>
   <system:String x:Key="tip.notes.zoomy">Прокрутите здесь для вертикального масштабирования ▶</system:String>
@@ -810,7 +840,7 @@ OpenUtau стремится стать средой редактирования
   <system:String x:Key="tracks.solo">Соло</system:String>
   <system:String x:Key="tracks.solo.add">Соло дополнительно (не удаляет соло из других треков)</system:String>
   <system:String x:Key="tracks.solo.only">Соло только для этого трека (удаляет соло из других треков)</system:String>
-  <system:String x:Key="tracks.solo.unsoloall">Убрать соло для всего</system:String>
+  <system:String x:Key="tracks.solo.unsoloall">Снять соло со всех</system:String>
   <system:String x:Key="tracks.trackcolor">Изменить цвет трека</system:String>
   <system:String x:Key="tracks.tracksettings">Настройки трека</system:String>
 
@@ -826,7 +856,7 @@ OpenUtau стремится стать средой редактирования
   <system:String x:Key="updater.update">Обновить</system:String>
 
   <system:String x:Key="warning">Предупреждение</system:String>
-  <system:String x:Key="warning.asciipath">Ваш путь к OpenUtau (&quot;{0}&quot;) содержит символы, не являющимися символами ASCII. EXE-ресамплеры могут не работать.</system:String>
+  <system:String x:Key="warning.asciipath">Ваш путь к OpenUtau (&quot;{0}&quot;) содержит символы, не являющиеся символами ASCII. EXE-ресамплеры могут не работать.</system:String>
   <system:String x:Key="warning.renderer">Для этого типа рендера нет настроек.</system:String>
 
   <system:String x:Key="welcome.new">Новый</system:String>
