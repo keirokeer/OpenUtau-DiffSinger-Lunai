@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Reactive;
+using System.Threading;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
@@ -1124,7 +1125,7 @@ namespace OpenUtau.App.Views {
                         viewModel.TracksViewModel.SelectPart(partControl.part);
                     }
                     if (PartsContextMenu != null && viewModel.TracksViewModel.SelectedParts.Count > 0) {
-                        PartsContextMenu.DataContext = new PartsContextMenuArgs {
+                        var menuArgs = new PartsContextMenuArgs {
                             Part = partControl.part,
                             PartDeleteCommand = viewModel.PartDeleteCommand,
                             PartGotoFileCommand = PartGotoFileCommand,
@@ -1134,6 +1135,22 @@ namespace OpenUtau.App.Views {
                             PartMergeCommand = PartMergeCommand,
                             PartSplitCommand = PartSplitCommand
                         };
+                        if (partControl.part is UVoicePart voicePart) {
+                            menuArgs.PartApplyPitchMenuItems = DocManager.Inst.Project.parts
+                                .OfType<UWavePart>()
+                                .OrderBy(p => p.trackNo)
+                                .ThenBy(p => p.position)
+                                .Select(p => new MenuItemViewModel {
+                                    Header = $"{DocManager.Inst.Project.tracks[p.trackNo].TrackName} - {p.DisplayName}",
+                                    Command = ReactiveCommand.CreateFromTask(async () => await ApplyPitchFrom(voicePart, p))
+                                })
+                                .DefaultIfEmpty(new MenuItemViewModel {
+                                    Header = ThemeManager.GetString("context.part.nopitchsource"),
+                                    IsEnabled = false
+                                })
+                                .ToList();
+                        }
+                        PartsContextMenu.DataContext = menuArgs;
                         shouldOpenPartsContextMenu = true;
                     }
                 } else {
@@ -1356,6 +1373,122 @@ namespace OpenUtau.App.Views {
             }
         }
 
+        async Task ApplyPitchFrom(UVoicePart target, UWavePart source) {
+            if (!RmvpeTranscriber.IsInstalled()) {
+                await MessageBox.Show(
+                    this,
+                    ThemeManager.GetString("dialogs.transcribe.rmvpe.notfound"),
+                    ThemeManager.GetString("errors.caption"),
+                    MessageBox.MessageBoxButtons.Ok);
+                return;
+            }
+            var project = DocManager.Inst.Project;
+            if (!project.expressions.ContainsKey(Ustx.PITD)) {
+                await MessageBox.Show(
+                    this,
+                    $"Expression '{Ustx.PITD}' not found.",
+                    ThemeManager.GetString("errors.caption"),
+                    MessageBox.MessageBoxButtons.Ok);
+                return;
+            }
+            if (target.notes.Count == 0) {
+                await MessageBox.Show(
+                    this,
+                    ThemeManager.GetString("lyrics.nonote"),
+                    ThemeManager.GetString("errors.caption"),
+                    MessageBox.MessageBoxButtons.Ok);
+                return;
+            }
+
+            bool cancelled = false;
+            using var cts = new CancellationTokenSource();
+            MessageBox? msgbox = null;
+            EventHandler? closedHandler = null;
+            try {
+                string text = ThemeManager.GetString("context.part.extractingpitch");
+                msgbox = MessageBox.ShowModal(this, $"{text} {source.DisplayName}", text);
+                closedHandler = (_, __) => {
+                    cancelled = true;
+                    cts.Cancel();
+                };
+                msgbox.Closed += closedHandler;
+
+                double srcStartMs = project.timeAxis.TickPosToMsPos(source.position);
+                double srcSkipMs = source.GetSkipMs(project);
+                double targetStartMs = project.timeAxis.TickPosToMsPos(target.position);
+                double targetEndMs = project.timeAxis.TickPosToMsPos(target.End);
+                double targetDurMs = targetEndMs - targetStartMs;
+
+                double startSrcFileMs = Math.Max(0, targetStartMs - srcStartMs + srcSkipMs - 1000);
+                double endSrcFileMs = Math.Min(source.fileDurationMs, targetEndMs - srcStartMs + srcSkipMs + 1000);
+
+                if (endSrcFileMs <= startSrcFileMs) {
+                    await MessageBox.Show(
+                        this,
+                        ThemeManager.GetString("context.part.nopitchregion"),
+                        ThemeManager.GetString("errors.caption"),
+                        MessageBox.MessageBoxButtons.Ok);
+                    return;
+                }
+                endSrcFileMs = Math.Max(0, endSrcFileMs);
+
+                RmvpeResult? srcResult = await Task.Run(() => {
+                    using var rmvpe = new RmvpeTranscriber();
+                    using (cts.Token.Register(() => rmvpe.Interrupt())) {
+                        if (cts.Token.IsCancellationRequested) {
+                            return null;
+                        }
+                        return rmvpe.Infer(source, startSrcFileMs, endSrcFileMs);
+                    }
+                });
+
+                if (srcResult != null && !cancelled) {
+                    var frameMs = srcResult.TimeStepSeconds * 1000.0;
+                    int targetFrames = (int)Math.Ceiling(targetDurMs / frameMs) + 1;
+                    var targetMidi = new float[targetFrames];
+
+                    for (int i = 0; i < targetFrames; i++) {
+                        double currentTargetMs = i * frameMs;
+                        double absMs = targetStartMs + currentTargetMs;
+                        double srcFileMs = absMs - srcStartMs + srcSkipMs;
+
+                        int srcIdx = (int)Math.Round((srcFileMs - startSrcFileMs) / frameMs);
+                        if (srcIdx >= 0 && srcIdx < srcResult.MidiPitch.Length) {
+                            targetMidi[i] = srcResult.MidiPitch[srcIdx];
+                        } else {
+                            targetMidi[i] = float.NaN;
+                        }
+                    }
+
+                    if (targetMidi.All(float.IsNaN)) {
+                        await Dispatcher.UIThread.InvokeAsync(() => MessageBox.Show(
+                            this,
+                            ThemeManager.GetString("context.part.nopitchdetected"),
+                            ThemeManager.GetString("errors.caption"),
+                            MessageBox.MessageBoxButtons.Ok));
+                    } else {
+                        var targetResult = new RmvpeResult {
+                            TimeStepSeconds = srcResult.TimeStepSeconds,
+                            MidiPitch = targetMidi
+                        };
+
+                        DocManager.Inst.StartUndoGroup("context.part.applypitch");
+                        targetResult.ApplyToPart(project, target);
+                        DocManager.Inst.EndUndoGroup();
+                    }
+                }
+            } catch (Exception e) {
+                DocManager.Inst.ExecuteCmd(new ErrorMessageNotification(e));
+            } finally {
+                if (msgbox != null) {
+                    if (closedHandler != null) {
+                        msgbox.Closed -= closedHandler;
+                    }
+                    msgbox.Close();
+                }
+            }
+        }
+
         public void PartsContextMenuClosing(object sender, CancelEventArgs args) {
             if (PartsContextMenu != null) {
                 PartsContextMenu.DataContext = null;
@@ -1425,9 +1558,19 @@ namespace OpenUtau.App.Views {
                     return;
                 }
 
+                bool cancelled = false;
+                using var cts = new CancellationTokenSource();
+                MessageBox? msgbox = null;
+                EventHandler? closedHandler = null;
                 try {
-                    string text = ThemeManager.GetString("context.part.transcribing");
-                    var msgbox = MessageBox.ShowModal(this, $"{text} {part.name}", text);
+                    string midiText = ThemeManager.GetString("context.part.transcribing");
+                    string pitchText =  ThemeManager.GetString("context.part.extractingpitch");
+                    msgbox = MessageBox.ShowModal(this, $"{midiText} {part.name}", midiText);
+                    closedHandler = (_, __) => {
+                        cancelled = true;
+                        cts.Cancel();
+                    };
+                    msgbox.Closed += closedHandler;
                     Func<bool> confirmLongChunk = () => {
                         return Dispatcher.UIThread.InvokeAsync(async () => {
                             var result = await MessageBox.Show(
@@ -1442,12 +1585,17 @@ namespace OpenUtau.App.Views {
                     if (transcribeVm.SelectedAlgorithm == TranscribeAlgorithm.SOME) {
                         voicePart = await Task.Run(() => {
                             using (var some = new Some()) {
-                                return some.Transcribe(DocManager.Inst.Project, wavePart,
-                                    null, null,
-                                    confirmLongChunk,
-                                    (processedS, totalS) => {
-                                        msgbox.SetText(string.Format("{0} {1}\n{2}s / {3}s", text, part.name, processedS, totalS));
-                                    });
+                                using (cts.Token.Register(() => some.Interrupt())) {
+                                    if (cts.Token.IsCancellationRequested) {
+                                        return null;
+                                    }
+                                    return some.Transcribe(DocManager.Inst.Project, wavePart,
+                                        null, null,
+                                        confirmLongChunk,
+                                        (processedS, totalS) => {
+                                            msgbox.SetText(string.Format("{0} {1}\n{2}s / {3}s", midiText, part.name, processedS, totalS));
+                                        });
+                                }
                             }
                         });
                     } else {
@@ -1455,28 +1603,34 @@ namespace OpenUtau.App.Views {
                         var batchingStrategy = transcribeVm.BuildBatchingStrategy();
                         voicePart = await Task.Run(() => {
                             using (var game = new Game()) {
-                                return game.Transcribe(DocManager.Inst.Project, wavePart,
-                                    gameOptions, batchingStrategy,
-                                    confirmLongChunk,
-                                    (processedS, totalS) => {
-                                        msgbox.SetText(string.Format("{0} {1}\n{2}s / {3}s", text, part.name, processedS, totalS));
-                                    });
+                                using (cts.Token.Register(() => game.Interrupt())) {
+                                    if (cts.Token.IsCancellationRequested) {
+                                        return null;
+                                    }
+                                    return game.Transcribe(DocManager.Inst.Project, wavePart,
+                                        gameOptions, batchingStrategy,
+                                        confirmLongChunk,
+                                        (processedS, totalS) => {
+                                            msgbox.SetText(string.Format("{0} {1}\n{2}s / {3}s", midiText, part.name, processedS, totalS));
+                                        });
+                                }
                             }
                         });
                     }
                     RmvpeResult? rmvpeResult = null;
-                    if (voicePart != null && transcribeVm.PredictPitd) {
-                        msgbox.SetText($"{text} {part.name}\nPredicting f0...");
+                    if (voicePart != null && transcribeVm.PredictPitd && !cancelled) {
+                        msgbox.SetText($"{pitchText} {part.name}");
                         rmvpeResult = await Task.Run(() => {
                             using var rmvpe = new RmvpeTranscriber();
-                            return rmvpe.Infer(wavePart);
+                            using (cts.Token.Register(() => rmvpe.Interrupt())) {
+                                if (cts.Token.IsCancellationRequested) {
+                                    return null;
+                                }
+                                return rmvpe.Infer(wavePart);
+                            }
                         });
                     }
-                    msgbox?.Close();
-                    if (voicePart != null) {
-                        if (rmvpeResult != null) {
-                            rmvpeResult.ApplyToPart(DocManager.Inst.Project, voicePart);
-                        }
+                    if (voicePart != null && !cancelled) {
                         var project = DocManager.Inst.Project;
                         var track = new UTrack(project);
                         track.TrackNo = project.tracks.Count;
@@ -1484,11 +1638,27 @@ namespace OpenUtau.App.Views {
                         DocManager.Inst.StartUndoGroup("command.part.transcribe");
                         DocManager.Inst.ExecuteCmd(new AddTrackCommand(project, track));
                         DocManager.Inst.ExecuteCmd(new AddPartCommand(project, voicePart));
+                        if (rmvpeResult != null) {
+                            var wavePosMs = project.timeAxis.TickPosToMsPos(wavePart.position);
+                            var voicePosMs = project.timeAxis.TickPosToMsPos(voicePart.position);
+                            var skipMs = wavePart.GetSkipMs(project);
+                            rmvpeResult.ApplyToPart(project, voicePart, wavePosMs - voicePosMs - skipMs);
+                        }
                         DocManager.Inst.EndUndoGroup();
                     }
                 } catch (Exception e) {
+                    if (cancelled) {
+                        return;
+                    }
                     Log.Error(e, $"Failed to transcribe part {part.name}");
                     _ = MessageBox.ShowError(this, e);
+                } finally {
+                    if (msgbox != null) {
+                        if (closedHandler != null) {
+                            msgbox.Closed -= closedHandler;
+                        }
+                        msgbox.Close();
+                    }
                 }
             }
         }
