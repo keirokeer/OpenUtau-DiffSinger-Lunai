@@ -669,17 +669,32 @@ namespace OpenUtau.App.Controls {
                 return;
             }
             var noteHitInfo = ViewModel.NotesViewModel.HitTest.HitTestNote(point.Position);
+            bool lyricEditMode = ViewModel.NotesViewModel.LyricEditMode;
             if (noteHitInfo.hitBody) {
                 if (noteHitInfo.hitResizeArea) {
+                    bool resizeNeighbor = args.KeyModifiers == KeyModifiers.Alt;
+                    if (lyricEditMode) {
+                        if (args.KeyModifiers == KeyModifiers.None) {
+                            resizeNeighbor = true;
+                        } else if (args.KeyModifiers == KeyModifiers.Alt) {
+                            resizeNeighbor = false;
+                        }
+                    }
                     editState = new NoteResizeEditState(
                         control, ViewModel, this, noteHitInfo.note,
-                        args.KeyModifiers == KeyModifiers.Alt,
+                        resizeNeighbor,
                         fromStart: noteHitInfo.hitResizeAreaFromStart);
                     Cursor = ViewConstants.cursorSizeWE;
                 } else if (args.KeyModifiers == cmdKey) {
                     ViewModel.NotesViewModel.ToggleSelectNote(noteHitInfo.note);
                 } else if (args.KeyModifiers == KeyModifiers.Shift) {
                     ViewModel.NotesViewModel.SelectNotesUntil(noteHitInfo.note);
+                } else if (lyricEditMode && args.KeyModifiers == KeyModifiers.Alt) {
+                    ViewModel.NotesViewModel.DeselectNotes();
+                    editState = new NoteSplitEditState(
+                            control, ViewModel, this, noteHitInfo.note, shiftLyricsFromFollowing: true);
+                } else if (lyricEditMode && args.KeyModifiers == KeyModifiers.None) {
+                    editState = new NoteLyricInsertEditState(control, ViewModel, this, noteHitInfo.note);
                 } else if (ViewModel.NotesViewModel.KnifeTool) {
                     ViewModel.NotesViewModel.DeselectNotes();
                     editState = new NoteSplitEditState(

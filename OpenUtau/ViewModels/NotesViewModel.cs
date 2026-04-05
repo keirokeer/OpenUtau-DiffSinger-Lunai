@@ -64,6 +64,7 @@ namespace OpenUtau.App.ViewModels {
         [Reactive] public bool KnifeTool { get; set; }
         public ReactiveCommand<string, Unit> SelectToolCommand { get; }
         [Reactive] public bool ShowTips { get; set; }
+        [Reactive] public bool LyricEditMode { get; set; }
         [Reactive] public bool PlayTone { get; set; }
         [Reactive] public bool ShowVibrato { get; set; }
         [Reactive] public bool ShowPitch { get; set; }
@@ -249,6 +250,7 @@ namespace OpenUtau.App.ViewModels {
             });
 
             ShowTips = Preferences.Default.ShowTips;
+            LyricEditMode = false;
             IsSnapOn = true;
             SnapDivText = string.Empty;
             KeyText = string.Empty;

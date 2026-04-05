@@ -387,8 +387,48 @@ namespace OpenUtau.App.Views {
         }
     }
 
+    class NoteLyricInsertEditState : NoteEditState {
+        public readonly UNote note;
+        protected override bool ShowValueTip => false;
+        protected override string? commandNameKey => "command.note.lyric";
+
+        public NoteLyricInsertEditState(
+            Control control,
+            PianoRollViewModel vm,
+            IValueTip valueTip,
+            UNote note) : base(control, vm, valueTip) {
+            this.note = note;
+        }
+
+        public override void Begin(IPointer pointer, Point point) {
+            base.Begin(pointer, point);
+            var notesVm = vm.NotesViewModel;
+            var part = notesVm.Part;
+            if (part == null) {
+                return;
+            }
+            var orderedNotes = part.notes.ToList();
+            int noteIndex = orderedNotes.IndexOf(note);
+            if (noteIndex < 0) {
+                return;
+            }
+            var notesToUpdate = orderedNotes.Skip(noteIndex).ToArray();
+            if (notesToUpdate.Length == 0) {
+                return;
+            }
+            var oldLyrics = notesToUpdate.Select(n => n.lyric).ToArray();
+            var newLyrics = new string[oldLyrics.Length];
+            newLyrics[0] = "+~";
+            for (int i = 1; i < newLyrics.Length; ++i) {
+                newLyrics[i] = oldLyrics[i - 1];
+            }
+            DocManager.Inst.ExecuteCmd(new ChangeNoteLyricCommand(part, notesToUpdate, newLyrics));
+        }
+    }
+
     class NoteSplitEditState : NoteEditState {
         public readonly UNote note;
+        private readonly bool shiftLyricsFromFollowing;
         private UNote? newNote;
         private int oldDur;
         private float oldVibLength;
@@ -405,8 +445,10 @@ namespace OpenUtau.App.Views {
             Control control,
             PianoRollViewModel vm,
             IValueTip valueTip,
-            UNote note) : base(control, vm, valueTip) {
+            UNote note,
+            bool shiftLyricsFromFollowing = false) : base(control, vm, valueTip) {
             this.note = note;
+            this.shiftLyricsFromFollowing = shiftLyricsFromFollowing;
             var notesVm = vm.NotesViewModel;
             if (!notesVm.Selection.Contains(note)) {
                 notesVm.DeselectNotes();
@@ -434,7 +476,22 @@ namespace OpenUtau.App.Views {
             if (newNote == null) {
                 return;
             }
-            DocManager.Inst.ExecuteCmd(new ChangeNoteLyricCommand(part, newNote, NotePresets.Default.SplittedLyric));
+            if (!shiftLyricsFromFollowing) {
+                DocManager.Inst.ExecuteCmd(new ChangeNoteLyricCommand(part, newNote, NotePresets.Default.SplittedLyric));
+                return;
+            }
+            var orderedNotes = part.notes.ToList();
+            int newNoteIndex = orderedNotes.IndexOf(newNote);
+            if (newNoteIndex >= 0 && newNoteIndex + 1 < orderedNotes.Count) {
+                var notesToUpdate = orderedNotes.Skip(newNoteIndex).ToArray();
+                var shiftedLyrics = notesToUpdate.Select(n => n.lyric).ToArray();
+                for (int i = 0; i < shiftedLyrics.Length - 1; ++i) {
+                    shiftedLyrics[i] = shiftedLyrics[i + 1];
+                }
+                DocManager.Inst.ExecuteCmd(new ChangeNoteLyricCommand(part, notesToUpdate, shiftedLyrics));
+            } else {
+                DocManager.Inst.ExecuteCmd(new ChangeNoteLyricCommand(part, newNote, NotePresets.Default.SplittedLyric));
+            }
         }
 
         public override void Update(IPointer pointer, Point point) {

@@ -361,6 +361,13 @@
                            Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}"/>
               </Grid>
             </ToggleButton>
+            <ToggleButton Classes="toolbar" Margin="0" Padding="1" Height="20" Width="20" IsChecked="{Binding NotesViewModel.LyricEditMode}"
+                          ToolTip.Tip="{DynamicResource pianoroll.toggle.lyricedit}">
+              <Grid Width="18" Height="18">
+                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Text="Ly" FontSize="10" FontWeight="Bold"
+                           Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}"/>
+              </Grid>
+            </ToggleButton>
             <Border Width="12"/>
             <ToggleButton Classes="toolbar" Margin="0" Padding="1" Height="20" Width="20"
                           IsChecked="{Binding NotesViewModel.CursorTool}"
