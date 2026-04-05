@@ -38,6 +38,11 @@ namespace OpenUtau.Core {
         public PhonemizerFactory[] PhonemizerFactories { get; private set; }
         public UProject Project { get; private set; }
         public bool HasOpenUndoGroup => undoGroup != null;
+        public bool HasDeferredValidationChanges =>
+            undoGroup != null && undoGroup.DeferValidate && undoGroup.Commands.Count > 0;
+        public bool HasDeferredLyricsValidationChanges =>
+            (IsLyricsUndoGroup(undoGroup) && undoGroup!.DeferValidate && undoGroup.Commands.Count > 0) ||
+            suspendedUndoGroups.Any(group => IsLyricsUndoGroup(group) && group.DeferValidate && group.Commands.Count > 0);
         public List<UPart>? PartsClipboard { get; set; }
         public List<UNote>? NotesClipboard { get; set; }
         public CurveSelection? CurvesClipboard { get; set; }
@@ -121,10 +126,14 @@ namespace OpenUtau.Core {
 
         readonly Deque<UCommandGroup> undoQueue = new Deque<UCommandGroup>();
         readonly Deque<UCommandGroup> redoQueue = new Deque<UCommandGroup>();
+        readonly Stack<UCommandGroup> suspendedUndoGroups = new Stack<UCommandGroup>();
+        const string LyricsUndoGroupName = "command.note.lyric";
         UCommandGroup? undoGroup = null;
         UCommandGroup? savedPoint = null;
         UCommandGroup? autosavedPoint = null;
         public bool Recovered { get; set; } = false; // Flag to not overwrite backup file
+
+        static bool IsLyricsUndoGroup(UCommandGroup? group) => group != null && group.NameKey == LyricsUndoGroupName;
 
         public bool ChangesSaved {
             get {
@@ -211,6 +220,7 @@ namespace OpenUtau.Core {
                 } else if (cmd is LoadProjectNotification notification) {
                     undoQueue.Clear();
                     redoQueue.Clear();
+                    suspendedUndoGroups.Clear();
                     undoGroup = null;
                     savedPoint = null;
                     autosavedPoint = null;
@@ -237,6 +247,13 @@ namespace OpenUtau.Core {
                 }
                 return;
             }
+            if (IsLyricsUndoGroup(undoGroup) && cmd is not ChangeNoteLyricCommand) {
+                // Keep lyrics preview rollback scope clean when lyrics dialog is non-modal.
+                StartUndoGroup();
+                ExecuteCmd(cmd);
+                EndUndoGroup();
+                return;
+            }
             if (undoGroup == null) {
                 Log.Error($"No active UndoGroup {cmd}");
                 return;
@@ -256,8 +273,14 @@ namespace OpenUtau.Core {
 
         public void StartUndoGroup(string? nameKey = null, bool deferValidate = false) {
             if (undoGroup != null) {
-                Log.Error("undoGroup already started");
-                EndUndoGroup();
+                if (IsLyricsUndoGroup(undoGroup) && nameKey != LyricsUndoGroupName) {
+                    suspendedUndoGroups.Push(undoGroup);
+                    undoGroup = null;
+                    Log.Information("Lyrics undoGroup suspended.");
+                } else {
+                    Log.Error("undoGroup already started");
+                    EndUndoGroup();
+                }
             }
             undoGroup = new UCommandGroup(nameKey, deferValidate);
             Log.Information("undoGroup started");
@@ -280,6 +303,10 @@ namespace OpenUtau.Core {
             }
             undoGroup.Merge();
             undoGroup = null;
+            if (suspendedUndoGroups.Count > 0) {
+                undoGroup = suspendedUndoGroups.Pop();
+                Log.Information("Lyrics undoGroup restored.");
+            }
             Log.Information("undoGroup ended");
             ExecuteCmd(new PreRenderNotification());
         }
@@ -387,5 +414,4 @@ namespace OpenUtau.Core {
         #endregion
     }
 }
-
 

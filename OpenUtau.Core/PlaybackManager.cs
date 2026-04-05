@@ -1,5 +1,6 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -188,6 +189,35 @@ namespace OpenUtau.Core {
         double startMs;
         public int StartTick => DocManager.Inst.Project.timeAxis.MsPosToTickPos(startMs);
         CancellationTokenSource renderCancellation;
+        private static readonly TimeSpan DeferredValidationRenderWait = TimeSpan.FromSeconds(10);
+
+        private UVoicePart[] PrepareDeferredValidationForRender(UProject project, int tick, int endTick, int trackNo) {
+            if (!DocManager.Inst.HasDeferredLyricsValidationChanges) {
+                return Array.Empty<UVoicePart>();
+            }
+            Log.Information("Render requested with deferred validation changes. Validating before render.");
+            DocManager.Inst.ExecuteCmd(new ValidateProjectNotification());
+            return project.parts
+                .Where(part => part is UVoicePart)
+                .OfType<UVoicePart>()
+                .Where(part => trackNo == -1 || part.trackNo == trackNo)
+                .Where(part => part.End > tick && (endTick == -1 || part.position < endTick))
+                .ToArray();
+        }
+
+        private void WaitForPhonemizerIfNeeded(UVoicePart[] parts) {
+            if (parts.Length == 0) {
+                return;
+            }
+            var sw = Stopwatch.StartNew();
+            while (parts.Any(part => !part.PhonemesUpToDate)) {
+                if (sw.Elapsed >= DeferredValidationRenderWait) {
+                    Log.Warning("Timed out waiting for phonemizer before render.");
+                    return;
+                }
+                Thread.Sleep(10);
+            }
+        }
 
         public Audio.IAudioOutput AudioOutput { get; set; } = new Audio.DummyAudioOutput();
         public bool OutputActive => AudioOutput.PlaybackState == PlaybackState.Playing;
@@ -255,7 +285,8 @@ namespace OpenUtau.Core {
                 return;
             }
             AudioOutput.Stop();
-            Render(project, tick, endTick, trackNo);
+            var partsToWait = PrepareDeferredValidationForRender(project, tick, endTick, trackNo);
+            Render(project, tick, endTick, trackNo, partsToWait);
             StartingToPlay = true;
         }
 
@@ -281,9 +312,10 @@ namespace OpenUtau.Core {
             AudioOutput.Play();
         }
 
-        private void Render(UProject project, int tick, int endTick, int trackNo) {
+        private void Render(UProject project, int tick, int endTick, int trackNo, UVoicePart[] partsToWait) {
             Task.Run(() => {
                 try {
+                    WaitForPhonemizerIfNeeded(partsToWait);
                     RenderEngine engine = new RenderEngine(project, startTick: tick, endTick: endTick, trackNo: trackNo);
                     var result = engine.RenderProject(DocManager.Inst.MainScheduler, ref renderCancellation);
                     if (result.Item1.IsPlayable()) {
@@ -315,8 +347,10 @@ namespace OpenUtau.Core {
 
         // Exporting mixdown
         public async Task RenderMixdown(UProject project, string exportPath) {
+            var partsToWait = PrepareDeferredValidationForRender(project, 0, -1, -1);
             await Task.Run(() => {
                 try {
+                    WaitForPhonemizerIfNeeded(partsToWait);
                     RenderEngine engine = new RenderEngine(project);
                     var projectMix = engine.RenderMixdown(DocManager.Inst.MainScheduler, ref renderCancellation, wait: true).Item1;
                     DocManager.Inst.ExecuteCmd(new ProgressBarNotification(0, $"Exporting to {exportPath}."));
@@ -338,9 +372,11 @@ namespace OpenUtau.Core {
 
         // Exporting each tracks
         public async Task RenderToFiles(UProject project, string exportPath) {
+            var partsToWait = PrepareDeferredValidationForRender(project, 0, -1, -1);
             await Task.Run(() => {
                 string file = "";
                 try {
+                    WaitForPhonemizerIfNeeded(partsToWait);
                     RenderEngine engine = new RenderEngine(project);
                     var trackMixes = engine.RenderTracks(DocManager.Inst.MainScheduler, ref renderCancellation);
                     for (int i = 0; i < trackMixes.Count; ++i) {
@@ -414,3 +450,4 @@ namespace OpenUtau.Core {
         #endregion
     }
 }
+

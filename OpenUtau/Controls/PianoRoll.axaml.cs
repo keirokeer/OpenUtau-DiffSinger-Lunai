@@ -46,6 +46,7 @@ namespace OpenUtau.App.Controls {
         private ReactiveCommand<Unit, Unit>? lyricsDialogCommand;
         private ReactiveCommand<Unit, Unit>? noteDefaultsCommand;
         private ReactiveCommand<BatchEdit, Unit>? noteBatchEditCommand;
+        private LyricsDialog? lyricsDialog;
 
         private Window RootWindow => (Window) TopLevel.GetTopLevel(this)!;
 
@@ -387,13 +388,19 @@ namespace OpenUtau.App.Controls {
                 return;
             }
 
+            if (lyricsDialog is { IsVisible: true }) {
+                lyricsDialog.Activate();
+                return;
+            }
+
             var vm = new LyricsViewModel();
             var (notes, selection) = ViewModel.NotesViewModel.PrepareInsertLyrics();
             vm.Start(ViewModel.NotesViewModel.Part, notes, selection);
-            var dialog = new LyricsDialog() {
+            lyricsDialog = new LyricsDialog() {
                 DataContext = vm,
             };
-            dialog.ShowDialog(RootWindow);
+            lyricsDialog.Closed += (_, _) => lyricsDialog = null;
+            lyricsDialog.Show(RootWindow);
         }
 
         void OnMenuNoteDefaults(object sender, RoutedEventArgs args) {
@@ -2018,3 +2025,4 @@ namespace OpenUtau.App.Controls {
         }
     }
 }
+
