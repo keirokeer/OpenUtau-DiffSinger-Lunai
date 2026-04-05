@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using OpenUtau.Core;
 using OpenUtau.Core.Ustx;
@@ -43,7 +44,7 @@ namespace OpenUtau.App.ViewModels {
             UpdateTotalCount();
             CurrentCount = TotalCount;
             Text = SplitLyrics.Join(startLyrics!);
-            DocManager.Inst.StartUndoGroup("command.note.lyric");
+            DocManager.Inst.StartUndoGroup("command.note.lyric", deferValidate: true);
         }
 
         private void Preview(bool update) {
@@ -51,15 +52,27 @@ namespace OpenUtau.App.ViewModels {
             if (startLyrics == null || notes == null || part == null) {
                 return;
             }
-            DocManager.Inst.RollBackUndoGroup();
+            // Roll back previous preview quickly and defer expensive validate until finish/cancel.
+            DocManager.Inst.RollBackUndoGroup(validate: false);
             var lyrics = SplitLyrics.Split(Text);
             CurrentCount = lyrics.Count;
-            if (update) {
-                for (int i = 0; i < lyrics.Count && i < notes.Length; ++i) {
-                    if (notes[i].lyric != lyrics[i]) {
-                        DocManager.Inst.ExecuteCmd(new ChangeNoteLyricCommand(part, notes[i], lyrics[i]));
-                    }
+            if (!update) {
+                return;
+            }
+
+            var changedNotes = new List<UNote>();
+            var changedLyrics = new List<string>();
+            for (int i = 0; i < lyrics.Count && i < notes.Length; ++i) {
+                if (notes[i].lyric != lyrics[i]) {
+                    changedNotes.Add(notes[i]);
+                    changedLyrics.Add(lyrics[i]);
                 }
+            }
+            if (changedNotes.Count > 0) {
+                DocManager.Inst.ExecuteCmd(new ChangeNoteLyricCommand(
+                    part,
+                    changedNotes.ToArray(),
+                    changedLyrics.ToArray()));
             }
         }
 
@@ -77,12 +90,12 @@ namespace OpenUtau.App.ViewModels {
             if (startLyrics == null) {
                 return;
             }
-            DocManager.Inst.RollBackUndoGroup();
+            DocManager.Inst.RollBackUndoGroup(validate: false);
             Text = SplitLyrics.Join(startLyrics);
         }
 
         public void Cancel() {
-            DocManager.Inst.RollBackUndoGroup();
+            DocManager.Inst.RollBackUndoGroup(validate: false);
             DocManager.Inst.EndUndoGroup();
         }
 

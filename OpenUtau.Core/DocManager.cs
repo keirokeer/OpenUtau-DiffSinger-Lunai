@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -284,7 +284,7 @@ namespace OpenUtau.Core {
             ExecuteCmd(new PreRenderNotification());
         }
 
-        public void RollBackUndoGroup() {
+        public void RollBackUndoGroup(bool validate = true) {
             if (undoGroup == null) {
                 Log.Error("No active undoGroup to rollback.");
                 return;
@@ -292,7 +292,7 @@ namespace OpenUtau.Core {
             for (int i = undoGroup.Commands.Count - 1; i >= 0; i--) {
                 var cmd = undoGroup.Commands[i];
                 cmd.Unexecute();
-                if (i == 0) {
+                if (validate && i == 0) {
                     Project.ValidateFull();
                 }
                 Publish(cmd, true);
@@ -387,3 +387,5 @@ namespace OpenUtau.Core {
         #endregion
     }
 }
+
+
