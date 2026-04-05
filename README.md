@@ -1,3 +1,28 @@
+# Fork说明
+
+本Fork在[keirokeer/OpenUtau-DiffSinger-Lunai
+](https://github.com/keirokeer/OpenUtau-DiffSinger-Lunai)基础上增加了歌词快捷编辑功能，同时优化了歌词编辑窗口，减少歌词编辑时的卡顿，详见下方提示词。
+
+# Vibe Code 说明
+使用GPT5.4-Codex进行Vibe Code。
+
+Prompt:
+(1)
+1、点击音符，把该音符的歌词换为“+~”，原来此位置的歌词不要去掉而是所有音符往后顺延；
+2、按住某个键（可以定为Alt，如果被占用你换一个），点击音符某处，使用分割工具在此处将此音符拆开，与分割工具不同的是拆出来的第二个音不要变为“+”而是后面的歌词向前顺延补进来；
+3、在拖动音符边界时，如果是音和音的边界，自动编辑相邻两个音的长度，即把Alt+拖动的行为和直接拖动的行为对调。
+该模式的开关放在显示提示按钮的旁边。
+(2)
+编辑歌词面板中编辑/插入/删除歌词会卡几秒中，试优化。
+(3)
+使得渲染时进行重校验/重算，实现编辑不卡顿，开始渲染再卡一下（被视为可接受的），同时点击应用/取消仍保持原有逻辑，即取消可回退。另外，在Windows下（其他平台未测试不知晓），编辑歌词窗口强制最前，下方的界面无法操作，去掉这一限制。评估这一需求在全局和具体的的合理性，若合理，开始修改。
+(4)
+审阅Commit：这两个更改，以最小更改原则、代码可读性原则以及全局影响原则评价代码质量，我们是在别人的仓库上fork并修改，对未来pull(rebase)主仓库代码更新是否阻碍较小？就这几点进行最小改动版修正优化。
+
+# 编译指南
+
+$ver=(git describe --tags --match '[0-9]*' --abbrev=0).Trim(); $sha=(git rev-parse --short HEAD).Trim(); $env:APPVEYOR_BUILD_VERSION=$ver; dotnet publish OpenUtau/OpenUtau.csproj -c Release -r win-x64 --self-contained true -o bin/win-x64 /p:Version=$ver /p:FileVersion=$ver /p:AssemblyVersion=$ver /p:InformationalVersion="$ver+$sha"u-DiffSinger-Lunai\OpenUtau.Plugin.Builtin\SyllableBasedPhonemizer.cs
+
 
 # OpenUtau
 
