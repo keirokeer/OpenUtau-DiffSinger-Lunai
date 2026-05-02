@@ -27,6 +27,8 @@ namespace OpenUtau.Core.DiffSinger
         DiffSingerSpeakerEmbedManager speakerEmbedManager;
         const string PEXP = DiffSingerUtils.PEXP;
 
+        public float FrameMs => frameMs;
+
         public DsPitch(string rootPath)
         {
             this.rootPath = rootPath;
@@ -107,7 +109,7 @@ namespace OpenUtau.Core.DiffSinger
             return token;
         }
         
-        public RenderPitchResult Process(RenderPhrase phrase, double? pitchStepsOverride = null, bool fastRealtime = false){
+        public RenderPitchResult Process(RenderPhrase phrase, double? pitchStepsOverride = null, bool fastRealtime = false, HashSet<int>? retakeNoteIndexes = null, float[]? existingPitch = null) {
             var startMs = phrase.phones[0].positionMs - DiffSingerUtils.GetHeadMs(frameMs);
             int headFrames = DiffSingerUtils.headFrames;
             int tailFrames = DiffSingerUtils.tailFrames;
@@ -253,6 +255,29 @@ namespace OpenUtau.Core.DiffSinger
                 .ToList();
             var pitch = Enumerable.Repeat(60f, totalFrames).ToArray();
             var retake = Enumerable.Repeat(true, totalFrames).ToArray();
+            if (retakeNoteIndexes != null && existingPitch != null) {
+                int frameOffset = 0;
+                for (int noteIdx = 0; noteIdx < note_dur.Count; noteIdx++) {
+                    bool shouldRetake;
+                    if (noteIdx == 0) {
+                        shouldRetake = retakeNoteIndexes.Contains(0);
+                    } else if (noteIdx == note_dur.Count - 1) {
+                        shouldRetake = retakeNoteIndexes.Contains(phrase.notes.Length - 1);
+                    } else {
+                        shouldRetake = retakeNoteIndexes.Contains(noteIdx - 1);
+                    }
+                    for (int f = 0; f < note_dur[noteIdx]; f++) {
+                        int fi = frameOffset + f;
+                        if (fi < totalFrames) {
+                            retake[fi] = shouldRetake;
+                        }
+                    }
+                    frameOffset += note_dur[noteIdx];
+                }
+                for (int i = 0; i < totalFrames && i < existingPitch.Length; i++) {
+                    pitch[i] = existingPitch[i];
+                }
+            }
             var pitchInputs = new List<NamedOnnxValue>();
             pitchInputs.Add(NamedOnnxValue.CreateFromTensor("encoder_out", encoder_out));
             pitchInputs.Add(NamedOnnxValue.CreateFromTensor("note_midi",
@@ -328,14 +353,16 @@ namespace OpenUtau.Core.DiffSinger
                     .Select(i=>(float)phrase.timeAxis.MsPosToTickPos(startMs + i*frameMs) - phrase.position)
                     .Append((float)phrase.duration + 1)
                     .ToArray(),
-                    tones = pitch_out.Append(pitch_out[^1]).ToArray()
+                    tones = pitch_out.Append(pitch_out[^1]).ToArray(),
+                    retakeMask = retakeNoteIndexes != null ? retake.Append(retake[^1]).ToArray() : null,
                 };
             }else{
                 return new RenderPitchResult{
                     ticks = Enumerable.Range(0,totalFrames)
                     .Select(i=>(float)phrase.timeAxis.MsPosToTickPos(startMs + i*frameMs) - phrase.position)
                     .ToArray(),
-                    tones = pitch_out
+                    tones = pitch_out,
+                    retakeMask = retakeNoteIndexes != null ? retake : null,
                 };
             }
         }
