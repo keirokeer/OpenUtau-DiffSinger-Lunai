@@ -21,6 +21,7 @@ using OpenUtau.Core.Util;
 using OpenUtau.ViewModels;
 using ReactiveUI;
 using Serilog;
+using Avalonia.Threading;
 
 namespace OpenUtau.App.Controls {
     interface IValueTip {
@@ -2009,6 +2010,10 @@ namespace OpenUtau.App.Controls {
                 } else {
                     LoadingWindow.EndLoading();
                 }
+            } else if (cmd is WaveformReadyNotification) {
+                Dispatcher.UIThread.Post(() => {
+                    MessageBus.Current.SendMessage(new WaveformRefreshEvent());
+                }, Avalonia.Threading.DispatcherPriority.Normal);
             }
         }
     }
