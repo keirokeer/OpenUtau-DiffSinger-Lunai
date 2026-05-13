@@ -60,6 +60,9 @@ namespace OpenUtau.App.ViewModels {
         [Reactive] public int PlaybackAutoScroll { get; set; }
         [Reactive] public double PlayPosMarkerMargin { get; set; }
         [Reactive] public bool UseSolidPlaybackLine { get; set; }
+        [Reactive] public int MetronomeVolume { get; set; }
+        [Reactive] public int MetronomeHighFrequency { get; set; }
+        [Reactive] public int MetronomeLowFrequency { get; set; }
 
         // Paths
         public string SingerPath => PathManager.Inst.SingersPath;
@@ -145,6 +148,9 @@ namespace OpenUtau.App.ViewModels {
             PlaybackAutoScroll = Preferences.Default.PlaybackAutoScroll;
             PlayPosMarkerMargin = Preferences.Default.PlayPosMarkerMargin;
             UseSolidPlaybackLine = Preferences.Default.UseSolidPlaybackLine;
+            MetronomeVolume = Preferences.Default.MetronomeVolume;
+            MetronomeHighFrequency = Preferences.Default.MetronomeHighFrequency;
+            MetronomeLowFrequency = Preferences.Default.MetronomeLowFrequency;
             LockStartTime = Preferences.Default.LockStartTime;
             InstallToAdditionalSingersPath = Preferences.Default.InstallToAdditionalSingersPath;
             LoadDeepFolders = Preferences.Default.LoadDeepFolderSinger;
@@ -239,6 +245,21 @@ namespace OpenUtau.App.ViewModels {
                     Preferences.Default.UseSolidPlaybackLine = useSolidPlaybackLine;
                     Preferences.Save();
                     MessageBus.Current.SendMessage(new NotesViewModel.PlaybackLineModeChangedEvent(useSolidPlaybackLine));
+                });
+            this.WhenAnyValue(vm => vm.MetronomeVolume)
+                .Subscribe(metronomeVolume => {
+                    Preferences.Default.MetronomeVolume = metronomeVolume;
+                    Preferences.Save();
+                });
+            this.WhenAnyValue(vm => vm.MetronomeHighFrequency)
+                .Subscribe(metronomeHighFrequency => {
+                    Preferences.Default.MetronomeHighFrequency = metronomeHighFrequency;
+                    Preferences.Save();
+                });
+            this.WhenAnyValue(vm => vm.MetronomeLowFrequency)
+                .Subscribe(metronomeLowFrequency => {
+                    Preferences.Default.MetronomeLowFrequency = metronomeLowFrequency;
+                    Preferences.Save();
                 });
             this.WhenAnyValue(vm => vm.LockStartTime)
                 .Subscribe(lockStartTime => {
@@ -429,6 +450,26 @@ namespace OpenUtau.App.ViewModels {
                 Log.Error(e, "Failed to play test sound.");
                 DocManager.Inst.ExecuteCmd(new ErrorMessageNotification("Failed to play test sound.", e));
             }
+        }
+        public void TestMetronome() {
+            try {
+                PlaybackManager.Inst.PlayMetronomeClick();
+            } catch (Exception e) {
+                Log.Error(e, "Failed to play metronome preview.");
+                DocManager.Inst.ExecuteCmd(new ErrorMessageNotification("Failed to play metronome preview.", e));
+            }
+        }
+
+        public void ResetMetronomeVolume() {
+            MetronomeVolume = new Preferences.SerializablePreferences().MetronomeVolume;
+        }
+
+        public void ResetMetronomeHighFrequency() {
+            MetronomeHighFrequency = new Preferences.SerializablePreferences().MetronomeHighFrequency;
+        }
+
+        public void ResetMetronomeLowFrequency() {
+            MetronomeLowFrequency = new Preferences.SerializablePreferences().MetronomeLowFrequency;
         }
 
         public void OpenResamplerLocation() {
