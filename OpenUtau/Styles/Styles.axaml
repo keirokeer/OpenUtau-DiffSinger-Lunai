@@ -165,6 +165,7 @@
   </Style>
 
   <Style Selector="ToggleButton.toolbar">
+    <Setter Property="CornerRadius" Value="4"/>
     <Setter Property="BorderThickness" Value="0"/>
     <Setter Property="FontSize" Value="12"/>
     <Setter Property="Height" Value="20"/>
@@ -310,6 +311,16 @@
     <Setter Property="Width" Value="21"/>
     <Setter Property="Height" Value="19"/>
     <Setter Property="Background" Value="Transparent"/>
+  </Style>
+  <Style Selector="Border.playback ToggleButton">
+    <Setter Property="Margin" Value="0"/>
+    <Setter Property="Padding" Value="0"/>
+    <Setter Property="Width" Value="21"/>
+    <Setter Property="Height" Value="19"/>
+    <Setter Property="VerticalAlignment" Value="Center"/>
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="HorizontalContentAlignment" Value="Center"/>
+    <Setter Property="VerticalContentAlignment" Value="Center"/>
   </Style>
 
   <Style Selector="Border.tips">
