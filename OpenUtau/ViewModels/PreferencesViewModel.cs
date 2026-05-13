@@ -187,7 +187,6 @@ namespace OpenUtau.App.ViewModels {
             DiffSingerPhonemePanelMode = Preferences.Default.DiffSingerPhonemePanelMode;
             SkipRenderingMutedTracks = Preferences.Default.SkipRenderingMutedTracks;
             ThemeName = Preferences.Default.ThemeName;
-            PenPlusDefault = Preferences.Default.PenPlusDefault;
             DegreeStyle = Preferences.Default.DegreeStyle;
             UseTrackColor = Preferences.Default.UseTrackColor;
             ShowPortrait = Preferences.Default.ShowPortrait;
@@ -279,11 +278,6 @@ namespace OpenUtau.App.ViewModels {
             this.WhenAnyValue(vm => vm.PreRender)
                 .Subscribe(preRender => {
                     Preferences.Default.PreRender = preRender;
-                    Preferences.Save();
-                });
-            this.WhenAnyValue(vm => vm.PenPlusDefault)
-                .Subscribe(penPlusDefault => {
-                    Preferences.Default.PenPlusDefault = penPlusDefault;
                     Preferences.Save();
                 });
             this.WhenAnyValue(vm => vm.Language)
