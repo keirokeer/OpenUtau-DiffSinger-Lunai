@@ -251,9 +251,10 @@ namespace OpenUtau.App.Controls {
                 bool isTransition = !isContinuation && ((note.Prev == null && !isCurrentDefault) || (note.Prev != null && currentPh != prevPh));
                 
                 if (isTransition) {
+                    // Match note face colors (track-colored when UseTrackColor / ChangePianorollColor is active).
                     var badgeBrush = selectedNotes.Contains(note)
-                        ? (note.Error ? ThemeManager.AccentBrush2Semi : ThemeManager.AccentBrush2)
-                        : (note.Error ? ThemeManager.AccentBrush1Semi : ThemeManager.AccentBrush1);
+                        ? ThemeManager.NoteBrushPressed
+                        : (note.Error ? ThemeManager.NoteBrushPressed : ThemeManager.NoteBrush);
 
                     if (isCurrentDefault) {
                         // Due to the limitation, we'll display a dot to inndicate

@@ -88,7 +88,8 @@
         <Border Name="PART_LayoutRoot"
                 Background="{TemplateBinding Background}"
                 BorderBrush="{TemplateBinding BorderBrush}"
-                BorderThickness="{TemplateBinding BorderThickness}">
+                BorderThickness="{TemplateBinding BorderThickness}"
+                CornerRadius="4">
           <Grid Width="18" Height="18" HorizontalAlignment="Center" VerticalAlignment="Center">
             <Path Name="PART_ToolIcon" Classes="filled">
               <Path.RenderTransform>
