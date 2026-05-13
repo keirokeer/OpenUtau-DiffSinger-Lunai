@@ -484,6 +484,10 @@ namespace OpenUtau.App.Controls {
             dialog.ShowDialog(RootWindow);
         }
 
+        private void LyricBoxLostFocus(object sender, RoutedEventArgs e) {
+            this.Focus();
+        }
+
         public void OnExpButtonClick(object sender, RoutedEventArgs args) {
             var notesVM = ViewModel.NotesViewModel;
             if (notesVM.Part == null) {
@@ -1134,6 +1138,12 @@ namespace OpenUtau.App.Controls {
                     }
                 }
                 var hitTestPoint = GetPhonemeHitTestPoint(args, control);
+                // Plain click on errored phoneme alias shows error details
+                var clickAliasInfo = ViewModel.NotesViewModel.HitTest.HitTestAlias(hitTestPoint);
+                if (clickAliasInfo.hit && clickAliasInfo.phoneme.Error && clickAliasInfo.phoneme.ErrorException != null) {
+                    _ = MessageBox.ShowError(RootWindow, clickAliasInfo.phoneme.ErrorException);
+                    return;
+                }
                 var hitInfo = ViewModel.NotesViewModel.HitTest.HitTestPhoneme(hitTestPoint);
                 if (hitInfo.hit) {
                     var phoneme = hitInfo.phoneme;
