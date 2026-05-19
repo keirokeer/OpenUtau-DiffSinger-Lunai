@@ -5,6 +5,7 @@
 
   <Color x:Key="BackgroundColor">#FCFCFC</Color>
   <Color x:Key="BackgroundColorPointerOver">#F0F0F0</Color>
+  <Color x:Key="TransportToolbarOffHoverColor">#F6F6F6</Color>
   <Color x:Key="BackgroundColorPressed">#E0E0E0</Color>
   <Color x:Key="BackgroundColorDisabled">#D0D0D0</Color>
 
@@ -39,16 +40,30 @@
 
   <Color x:Key="WarningColor">#FFF4CE</Color>
 
+  <Color x:Key="ToolbarCheckedHoverColor">#E0E0E0</Color>
+  <Color x:Key="ToolTipForegroundColor">#FFFFFF</Color>
+  <Color x:Key="WorkspaceCanvasColor">#E4E4E8</Color>
+  <Color x:Key="WorkspaceCardColor">#FCFCFC</Color>
+  <Color x:Key="WorkspaceElevatedSurfaceColor">#E8E8EC</Color>
+  <Color x:Key="MutedIconColor">#808080</Color>
+  <Color x:Key="PianoRollToolbarStripColor">#202020</Color>
+  <Color x:Key="PianoRollToolbarButtonHoverColor">#313131</Color>
+  <Color x:Key="AppTopBarTransportStripColor">#E8E8EC</Color>
+  <Color x:Key="AppTopBarTransportHoverColor">#F4F4F8</Color>
+  <Color x:Key="AppTopBarValueStripColor">#D8D8DE</Color>
+  <Color x:Key="AppTopBarValueDividerColor">#C0C0C8</Color>
+
   <!--Keyboard Background-->
-  <Color x:Key="WhiteKeyColorLeft">Transparent</Color>
-  <Color x:Key="WhiteKeyColorRight">Transparent</Color>
+  <Color x:Key="WhiteKeyColorLeft">#FCFCFC</Color>
+  <Color x:Key="WhiteKeyColorRight">#FCFCFC</Color>
+  <Color x:Key="ToolbarCheckedPianoLightColor">#FCFCFC</Color>
   <Color x:Key="WhiteKeyNameColor">#343434</Color>
 
   <Color x:Key="CenterKeyColorLeft">#A9A6CD</Color>
   <Color x:Key="CenterKeyColorRight">#D3CFFF</Color>
   <Color x:Key="CenterKeyNameColor">#111111</Color>
 
-  <Color x:Key="BlackKeyColorLeft">#59586F</Color>
+  <Color x:Key="BlackKeyColorLeft">#45445C</Color>
   <Color x:Key="BlackKeyColorRight">#45445C</Color>
   <Color x:Key="BlackKeyNameColor">#FCFCFC</Color>
 </ResourceDictionary>

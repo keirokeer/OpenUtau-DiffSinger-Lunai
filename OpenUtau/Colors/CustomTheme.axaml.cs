@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -87,6 +87,10 @@ public class CustomTheme {
             SetResourceColor("WhiteKeyColorLeft", Default.WhiteKeyColorLeft);
             SetResourceColor("WhiteKeyColorRight", Default.WhiteKeyColorRight);
             SetResourceColor("WhiteKeyNameColor", Default.WhiteKeyNameColor);
+            var pianoLight = string.IsNullOrWhiteSpace(Default.ToolbarCheckedPianoLightColor)
+                ? Default.BackgroundColor
+                : Default.ToolbarCheckedPianoLightColor;
+            SetResourceColor("ToolbarCheckedPianoLightColor", pianoLight);
 
             SetResourceColor("CenterKeyColorLeft", Default.CenterKeyColorLeft);
             SetResourceColor("CenterKeyColorRight", Default.CenterKeyColorRight);
@@ -95,6 +99,26 @@ public class CustomTheme {
             SetResourceColor("BlackKeyColorLeft", Default.BlackKeyColorLeft);
             SetResourceColor("BlackKeyColorRight", Default.BlackKeyColorRight);
             SetResourceColor("BlackKeyNameColor", Default.BlackKeyNameColor);
+
+            SetResourceColor("ToolTipForegroundColor", "#FFFFFF");
+            SetResourceColor("WorkspaceElevatedSurfaceColor",
+                string.IsNullOrWhiteSpace(Default.WorkspaceElevatedSurfaceColor)
+                    ? "#E8E8EC"
+                    : Default.WorkspaceElevatedSurfaceColor);
+            SetResourceColor("MutedIconColor",
+                string.IsNullOrWhiteSpace(Default.MutedIconColor)
+                    ? "#808080"
+                    : Default.MutedIconColor);
+
+            var strip = string.IsNullOrWhiteSpace(Default.PianoRollToolbarStripColor)
+                ? "#202020"
+                : Default.PianoRollToolbarStripColor;
+            SetResourceColor("PianoRollToolbarStripColor", strip);
+
+            var toolbarHover = string.IsNullOrWhiteSpace(Default.PianoRollToolbarButtonHoverColor)
+                ? "#313131"
+                : Default.PianoRollToolbarButtonHoverColor;
+            SetResourceColor("PianoRollToolbarButtonHoverColor", toolbarHover);
         }
     }
 
@@ -138,9 +162,13 @@ public class CustomTheme {
         public string BarNumberColor = "#AFA3B5";
         public string FinalPitchColor = "#C0C0C0";
         public string TrackBackgroundAltColor = "#F0F0F0";
+        public string WorkspaceElevatedSurfaceColor = "";
+        public string MutedIconColor = "";
 
         public string WhiteKeyColorLeft = "Transparent";
         public string WhiteKeyColorRight = "Transparent";
+        /// <summary>Toolbar checked face; empty = use BackgroundColor.</summary>
+        public string ToolbarCheckedPianoLightColor = "";
         public string WhiteKeyNameColor = "#FF347c";
             
         public string CenterKeyColorLeft = "#FFDDE6";
@@ -150,6 +178,11 @@ public class CustomTheme {
         public string BlackKeyColorLeft = "#FF71A3";
         public string BlackKeyColorRight = "#FF347C";
         public string BlackKeyNameColor = "#FFFFFF";
+
+        /// <summary>Background for grouped piano-roll toolbar strips; empty = #202020.</summary>
+        public string PianoRollToolbarStripColor = "";
+        /// <summary>Hover face for toolbar buttons inside strips; empty = #313131.</summary>
+        public string PianoRollToolbarButtonHoverColor = "";
     }
 }
 

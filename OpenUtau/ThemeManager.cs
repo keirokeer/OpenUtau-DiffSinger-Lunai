@@ -11,6 +11,15 @@ using ReactiveUI;
 namespace OpenUtau.App {
     class ThemeChangedEvent { }
 
+    /// <summary>Raised when timeline/tick grid line style (dashed vs solid) preference changes.</summary>
+    class TickGridLinesStyleChangedEvent { }
+
+    /// <summary>Raised when expression-panel curve line style (dashed vs solid) preference changes.</summary>
+    class ExpressionCurveStyleChangedEvent { }
+
+    /// <summary>Raised when classic vs overlay scrollbar preference changes.</summary>
+    class ScrollbarsStyleChangedEvent { }
+
     class ThemeManager {
         public static bool IsDarkMode = false;
         public static IBrush ForegroundBrush = Brushes.Black;
@@ -62,6 +71,8 @@ namespace OpenUtau.App {
         public static IBrush ExpActiveBrush = Brushes.Black;
         public static IBrush ExpActiveNameBrush = Brushes.White;
         public static IBrush TrackBackgroundAltBrush = Brushes.Gray;
+        public static IBrush WorkspaceElevatedSurfaceBrush = Brushes.Gray;
+        public static IBrush MutedIconBrush = Brushes.Gray;
 
         /// <summary>Theme values for CenterKey/BlackKey colors, restored when UseTrackColor is off.</summary>
         private static Color? s_defaultCenterKeyColorLeft;
@@ -185,6 +196,12 @@ namespace OpenUtau.App {
             if (resDict.TryGetResource("TrackBackgroundAltBrush", themeVariant, out outVar)) {
                 TrackBackgroundAltBrush = (IBrush)outVar!;
             }
+            if (resDict.TryGetResource("WorkspaceElevatedSurfaceBrush", themeVariant, out outVar)) {
+                WorkspaceElevatedSurfaceBrush = (IBrush)outVar!;
+            }
+            if (resDict.TryGetResource("MutedIconBrush", themeVariant, out outVar)) {
+                MutedIconBrush = (IBrush)outVar!;
+            }
             if (resDict.TryGetResource("CenterKeyColorLeft", themeVariant, out outVar) && outVar is Color ckl) { s_defaultCenterKeyColorLeft = ckl; }
             if (resDict.TryGetResource("CenterKeyColorRight", themeVariant, out outVar) && outVar is Color ckr) { s_defaultCenterKeyColorRight = ckr; }
             if (resDict.TryGetResource("CenterKeyNameColor", themeVariant, out outVar) && outVar is Color ckn) { s_defaultCenterKeyNameColor = ckn; }
@@ -204,11 +221,13 @@ namespace OpenUtau.App {
                 TrackColor tcolor = GetTrackColor(color);
                 
                 resDict["SelectedTrackAccentBrush"] = tcolor.AccentColor;
+                var accentSemi = new SolidColorBrush(tcolor.AccentColor.Color);
+                accentSemi.Opacity = 0.5;
+                resDict["SelectedTrackAccentBrushSemi"] = accentSemi;
                 resDict["SelectedTrackAccentLightBrush"] = tcolor.AccentColorLight;
                 resDict["SelectedTrackAccentLightBrushSemi"] = tcolor.AccentColorLightSemi;
                 resDict["SelectedTrackAccentDarkBrush"] = tcolor.AccentColorDark;
                 resDict["SelectedTrackCenterKeyBrush"] = tcolor.AccentColorCenterKey;
-
                 if (Preferences.Default.UseTrackColor) {
                     if (IsDarkMode) {
                         resDict["CenterKeyNameColor"] = BlendColors(tcolor.AccentColorDark.Color, Color.Parse("#2F2F2F"));   // piano2 + dark gray 50/50
