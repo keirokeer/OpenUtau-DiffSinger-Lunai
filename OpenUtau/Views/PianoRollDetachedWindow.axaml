@@ -10,6 +10,7 @@
         Icon="/Assets/open-utau.ico"
         Title="{Binding NotesViewModel.WindowTitle}" MinWidth="300" MinHeight="200" Width="{Binding Width}" Height="{Binding Height}"
         Focusable="True" GotFocus="WindowGotFocus" TransparencyLevelHint="None"
+        Background="{DynamicResource WorkspaceCanvasBrush}"
         Closing="WindowClosing" Deactivated="WindowDeactivated">
     <ContentControl Name="PianoRollContainer"/>
 </Window>

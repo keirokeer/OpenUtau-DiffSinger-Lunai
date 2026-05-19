@@ -1,0 +1,29 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="clr-namespace:OpenUtau.App.Controls"
+             x:Class="OpenUtau.App.Controls.PianoRollViewToggles">
+  <Grid RowDefinitions="*,Auto,Auto,Auto,Auto">
+    <c:PianoRollMainViewToggles Grid.Row="0" LayoutOrientation="Vertical"/>
+    <Border Grid.Row="1" Height="1" Margin="6,6,6,4" Background="{DynamicResource TickLineBrushLow}"/>
+    <c:PianoRollDiffSingerQualityToggles Grid.Row="2" LayoutOrientation="Vertical"/>
+    <Border Grid.Row="3" Height="1" Margin="6,6,6,4" Background="{DynamicResource TickLineBrushLow}"/>
+    <ToggleButton Grid.Row="4" Classes="sideToolbarToggle appearanceToggle" Margin="0" Padding="0"
+                  IsChecked="{Binding ShowAppearancePanel}">
+      <ToolTip.Tip>
+        <TextBlock Text="{DynamicResource pianoroll.toggle.appearance}" Foreground="{DynamicResource ToolTipForegroundBrush}"/>
+      </ToolTip.Tip>
+      <Grid Classes="toolbarIconHostSide">
+        <Grid Classes="toolbarIconHostSideLayout">
+          <Path Classes="filled" Data="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4M12,6A6,6 0 0,0 6,12A6,6 0 0,0 12,18A6,6 0 0,0 18,12A6,6 0 0,0 12,6M12,8A4,4 0 0,1 16,12A4,4 0 0,1 12,16A4,4 0 0,1 8,12A4,4 0 0,1 12,8Z">
+            <Path.RenderTransform>
+              <TransformGroup>
+                <ScaleTransform ScaleX=".55" ScaleY=".55"/>
+                <TranslateTransform X="-1" Y="-1"/>
+              </TransformGroup>
+            </Path.RenderTransform>
+          </Path>
+        </Grid>
+      </Grid>
+    </ToggleButton>
+  </Grid>
+</UserControl>

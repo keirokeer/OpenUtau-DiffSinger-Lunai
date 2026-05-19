@@ -1,5 +1,6 @@
-﻿<Styles xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:c="clr-namespace:OpenUtau.App.Controls">
 
   <Style Selector="Button,ToggleButton">
     <Setter Property="Focusable" Value="False"/>
@@ -32,7 +33,29 @@
     <Setter Property="Background" Value="{DynamicResource SelectedTrackAccentLightBrushSemi}"/>
   </Style>
 
-  <Style Selector="ListBox.toolbar">
+  <Style Selector="Grid.toolbarIconHost, Border.toolbarIconHost">
+    <Setter Property="Width" Value="24" />
+    <Setter Property="Height" Value="24" />
+  </Style>
+  <!-- Side panel icons are authored for 18×18; layout grid keeps edge-aligned dots stable when scaling the outer host. -->
+  <Style Selector="Grid.toolbarIconHostSideLayout">
+    <Setter Property="Width" Value="18" />
+    <Setter Property="Height" Value="18" />
+    <Setter Property="HorizontalAlignment" Value="Center" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
+  <Style Selector="Grid.toolbarIconHostSide, Border.toolbarIconHostSide">
+    <Setter Property="Width" Value="22" />
+    <Setter Property="Height" Value="22" />
+  </Style>
+  <Style Selector="ToggleButton.sideToolbarToggle Grid.toolbarIconHostSide,
+          ToggleButton.sideToolbarToggle Border.toolbarIconHostSide">
+    <Setter Property="RenderTransformOrigin" Value="50%,50%" />
+    <Setter Property="RenderTransform">
+      <ScaleTransform ScaleX="1.1" ScaleY="1.1" />
+    </Setter>
+  </Style>
+  <Style Selector="ListBox.toolbar:not(.toolbarStrip)">
     <Setter Property="FontSize" Value="12"/>
     <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundAltHighBrush}" />
   </Style>
@@ -42,36 +65,38 @@
   </Style>
 
   <Style Selector="ListBoxItem.toolbar">
+    <Setter Property="Foreground" Value="{DynamicResource ToolTipForegroundBrush}"/>
     <Setter Property="BorderThickness" Value="0"/>
     <Setter Property="MinHeight" Value="20"/>
     <Setter Property="Height" Value="20"/>
     <Setter Property="Width" Value="20"/>
     <Setter Property="Padding" Value="1"/>
     <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundAltHighBrush}" />
-    <Setter Property="ContextFlyout" Value="{Binding $self.(FlyoutBase.AttachedFlyout)}" />
 
     <Style Selector="^:pointerover /template/ Border#PART_LayoutRoot">
-        <Setter Property="Background" Value="{DynamicResource NeutralAccentBrush}"/>
+        <Setter Property="Background" Value="{DynamicResource TransportToolbarOffHoverBrush}"/>
     </Style>
     <Style Selector="^:pressed /template/ Border#PART_LayoutRoot">
-        <Setter Property="Background" Value="{DynamicResource NeutralAccentBrushPointerOver}"/>
+        <Setter Property="Background" Value="{DynamicResource TransportToolbarOffPressedBrush}"/>
     </Style>
     <Style Selector="^:selected /template/ Border#PART_LayoutRoot">
-        <Setter Property="Background" Value="{DynamicResource NeutralAccentBrushSemi}"/>
+        <Setter Property="Background" Value="{DynamicResource SystemControlForegroundBaseHighBrush}"/>
     </Style>
     <Style Selector="^:selected:pointerover /template/ Border#PART_LayoutRoot">
-        <Setter Property="Background" Value="{DynamicResource NeutralAccentBrush}"/>
+        <Setter Property="Background" Value="{DynamicResource TransportToolbarOnHoverBrush}"/>
     </Style>
     <Style Selector="^:selected:pressed /template/ Border#PART_LayoutRoot">
-        <Setter Property="Background" Value="{DynamicResource NeutralAccentBrushPointerOver}"/>
+        <Setter Property="Background" Value="{DynamicResource TransportToolbarOnHoverBrush}"/>
     </Style>
+    <!-- Sub-tool chevron: do not use class "filled" — global ^ Path.filled would override Fill after :selected rules and hide the glyph on the dark chip. -->
     <Style Selector="^.hasSubTool /template/ Path#PART_SubToolArrow">
         <Setter Property="Opacity" Value="0.7" />
+        <Setter Property="Fill" Value="{DynamicResource SystemControlForegroundBaseHighBrush}" />
     </Style>
     <Style Selector="^.hasSubTool:pointerover /template/ Path#PART_SubToolArrow">
         <Setter Property="Opacity" Value="1.0" />
     </Style>
-    <Style Selector="^ Path.filled">
+    <Style Selector="^ /template/ Path#PART_ToolIcon.filled">
         <Setter Property="Fill" Value="{DynamicResource SystemControlForegroundBaseHighBrush}" />
     </Style>
     <Style Selector="^ Ellipse.stroked">
@@ -82,6 +107,17 @@
         <Setter Property="StrokeThickness" Value="1"/>
         <Setter Property="Stroke" Value="{DynamicResource SystemControlForegroundBaseHighBrush}" />
     </Style>
+    <Style Selector="^:selected /template/ Path#PART_ToolIcon">
+        <Setter Property="Fill" Value="{DynamicResource SystemControlBackgroundAltHighBrush}" />
+    </Style>
+    <!-- When selected, keep sub-tool chevron visible (default template Opacity=0; :pointerover-only rules are not enough). -->
+    <Style Selector="^.hasSubTool:selected /template/ Path#PART_SubToolArrow">
+        <Setter Property="Opacity" Value="0.7" />
+        <Setter Property="Fill" Value="{DynamicResource SystemControlBackgroundAltHighBrush}" />
+    </Style>
+    <Style Selector="^.hasSubTool:selected:pointerover /template/ Path#PART_SubToolArrow">
+        <Setter Property="Opacity" Value="1.0" />
+    </Style>
 
     <Setter Property="Template">
       <ControlTemplate>
@@ -89,23 +125,23 @@
                 Background="{TemplateBinding Background}"
                 BorderBrush="{TemplateBinding BorderBrush}"
                 BorderThickness="{TemplateBinding BorderThickness}"
-                CornerRadius="4">
-          <Grid Width="18" Height="18" HorizontalAlignment="Center" VerticalAlignment="Center">
+                CornerRadius="6">
+          <Grid Classes="toolbarIconHost" HorizontalAlignment="Center" VerticalAlignment="Center">
             <Path Name="PART_ToolIcon" Classes="filled">
               <Path.RenderTransform>
                 <TransformGroup>
-                  <ScaleTransform ScaleX=".55" ScaleY=".55" />
-                  <TranslateTransform X="-2" Y="-2"/>
+                  <ScaleTransform ScaleX=".92" ScaleY=".92" />
+                  <TranslateTransform X="-1" Y="-1"/>
                 </TransformGroup>
               </Path.RenderTransform>
             </Path>
             <Path Name="PART_SubToolArrow" 
                 Data="M 0,4 L 4,4 L 4,0 Z" 
-                Classes="filled"
                 HorizontalAlignment="Right" 
                 VerticalAlignment="Bottom"
                 Margin="0,0,-1,-1"
-                Opacity="0">
+                Opacity="0"
+                ZIndex="1">
              <Path.RenderTransform>
                  <ScaleTransform ScaleX="0.8" ScaleY="0.8"/>
              </Path.RenderTransform>
@@ -118,6 +154,187 @@
         <Setter Property="Padding" Value="0" />
         <Setter Property="MinWidth" Value="0" />
     </Style>
+  </Style>
+  <Style Selector="ListBoxItem.toolbar:pointerover, ListBoxItem.toolbar:selected, ListBoxItem.toolbar:selected:pointerover, ListBoxItem.toolbar:pressed, ListBoxItem.toolbar:selected:pressed">
+    <Setter Property="Foreground" Value="{DynamicResource ToolTipForegroundBrush}"/>
+  </Style>
+
+  <!-- Strip behind selection→knife: must follow ListBoxItem.toolbar so item Background stays transparent and strip shows. -->
+  <Style Selector="ListBox.toolbar.toolbarStrip">
+    <Setter Property="Background" Value="{DynamicResource PianoRollToolbarStripBackgroundBrush}" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Padding" Value="0" />
+  </Style>
+  <Style Selector="ListBox.toolbar.toolbarStrip ListBoxItem.toolbar">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="MinHeight" Value="32" />
+    <Setter Property="Height" Value="32" />
+    <Setter Property="MinWidth" Value="32" />
+    <Setter Property="Width" Value="32" />
+    <Setter Property="Padding" Value="0" />
+  </Style>
+  <Style Selector="ListBox.toolbar.toolbarStrip">
+    <Setter Property="MinHeight" Value="32" />
+    <Setter Property="MaxHeight" Value="32" />
+  </Style>
+  <!-- Piano roll top bar: separate 32×32 tool chips (no shared strip background). -->
+  <Style Selector="ListBox.topBarToolStrip">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="MinHeight" Value="32" />
+    <Setter Property="MaxHeight" Value="32" />
+  </Style>
+  <Style Selector="ListBox.topBarToolStrip ListBoxItem.toolbar">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="MinHeight" Value="32" />
+    <Setter Property="MaxHeight" Value="32" />
+    <Setter Property="Height" Value="32" />
+    <Setter Property="MinWidth" Value="32" />
+    <Setter Property="MaxWidth" Value="32" />
+    <Setter Property="Width" Value="32" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="Margin" Value="0" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
+  <Style Selector="ListBox.topBarToolStrip ListBoxItem.toolbar /template/ Grid">
+    <Setter Property="Width" Value="18" />
+    <Setter Property="Height" Value="18" />
+    <Setter Property="HorizontalAlignment" Value="Center" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
+  <Style Selector="ListBox.topBarToolStrip ListBoxItem.toolbar /template/ Path#PART_ToolIcon">
+    <Setter Property="RenderTransform">
+      <TransformGroup>
+        <ScaleTransform ScaleX="0.72" ScaleY="0.72" />
+        <TranslateTransform X="-2.5" Y="-2.5" />
+      </TransformGroup>
+    </Setter>
+  </Style>
+  <Style Selector="ListBox.topBarToolStrip ListBoxItem.toolbar /template/ Border#PART_LayoutRoot">
+    <Setter Property="CornerRadius" Value="4" />
+    <Setter Property="Background" Value="Transparent" />
+  </Style>
+  <Style Selector="ListBox.topBarToolStrip ListBoxItem.toolbar:pointerover:not(:selected) /template/ Border#PART_LayoutRoot">
+    <Setter Property="Background" Value="{DynamicResource PianoRollSideHoverBackgroundBrush}" />
+  </Style>
+  <Style Selector="ListBox.topBarToolStrip ListBoxItem.toolbar:selected /template/ Border#PART_LayoutRoot,
+          ListBox.topBarToolStrip ListBoxItem.toolbar:selected:pointerover /template/ Border#PART_LayoutRoot">
+    <Setter Property="Background" Value="{DynamicResource SelectedTrackAccentBrushSemi}" />
+  </Style>
+  <Style Selector="ListBox.topBarToolStrip ListBoxItem.toolbar /template/ Path#PART_ToolIcon,
+          ListBox.topBarToolStrip ListBoxItem.toolbar:selected /template/ Path#PART_ToolIcon,
+          ListBox.topBarToolStrip ListBoxItem.toolbar:pointerover /template/ Path#PART_ToolIcon">
+    <Setter Property="Fill" Value="{DynamicResource ToolbarToolIconOnAccentBrush}" />
+  </Style>
+  <Style Selector="ListBox.topBarToolStrip ListBoxItem.toolbar.hasSubTool /template/ Path#PART_SubToolArrow,
+          ListBox.topBarToolStrip ListBoxItem.toolbar.hasSubTool:pointerover /template/ Path#PART_SubToolArrow,
+          ListBox.topBarToolStrip ListBoxItem.toolbar.hasSubTool:selected /template/ Path#PART_SubToolArrow">
+    <Setter Property="Fill" Value="{DynamicResource ToolbarToolIconOnAccentBrush}" />
+    <Setter Property="Opacity" Value="0.7" />
+  </Style>
+  <Style Selector="ListBox.toolbar.toolbarStrip ListBoxItem.toolbar /template/ Border#PART_LayoutRoot">
+    <Setter Property="CornerRadius" Value="0" />
+  </Style>
+  <Style Selector="ListBox.toolbar.toolbarStrip ListBoxItem.toolbar:pointerover:not(:selected) /template/ Border#PART_LayoutRoot">
+    <Setter Property="Background" Value="{DynamicResource PianoRollToolbarButtonHoverBrush}" />
+  </Style>
+
+  <!-- Expression panel tools: same chips as top bar, 24×24, workspace card / transport hover fills. -->
+  <Style Selector="ListBox.expToolStrip">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="MinHeight" Value="24" />
+    <Setter Property="MaxHeight" Value="24" />
+  </Style>
+  <Style Selector="ListBox.expToolStrip ListBoxItem.toolbar">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="MinHeight" Value="24" />
+    <Setter Property="MaxHeight" Value="24" />
+    <Setter Property="Height" Value="24" />
+    <Setter Property="MinWidth" Value="24" />
+    <Setter Property="MaxWidth" Value="24" />
+    <Setter Property="Width" Value="24" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="Margin" Value="0" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
+  <Style Selector="ListBox.expToolStrip ListBoxItem.toolbar /template/ Grid.toolbarIconHost">
+    <Setter Property="Width" Value="12" />
+    <Setter Property="Height" Value="12" />
+    <Setter Property="HorizontalAlignment" Value="Center" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
+  <Style Selector="ListBox.expToolStrip ListBoxItem.toolbar /template/ Path#PART_ToolIcon">
+    <Setter Property="Width" Value="12" />
+    <Setter Property="Height" Value="12" />
+    <Setter Property="Stretch" Value="Uniform" />
+    <Setter Property="HorizontalAlignment" Value="Center" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="RenderTransform" Value="{x:Null}" />
+  </Style>
+  <Style Selector="ListBox.expToolStrip ListBoxItem.cursorTool /template/ Path#PART_ToolIcon">
+    <Setter Property="RenderTransform">
+      <TranslateTransform X="2" Y="0" />
+    </Setter>
+  </Style>
+  <Style Selector="ListBox.expToolStrip ListBoxItem.toolbar /template/ Border#PART_LayoutRoot">
+    <Setter Property="CornerRadius" Value="4" />
+    <Setter Property="Background" Value="{DynamicResource WorkspaceCardBrush}" />
+  </Style>
+  <Style Selector="ListBox.expToolStrip ListBoxItem.toolbar:pointerover:not(:selected) /template/ Border#PART_LayoutRoot">
+    <Setter Property="Background" Value="{DynamicResource PianoRollSideHoverBackgroundBrush}" />
+  </Style>
+  <Style Selector="ListBox.expToolStrip ListBoxItem.toolbar:selected /template/ Border#PART_LayoutRoot,
+          ListBox.expToolStrip ListBoxItem.toolbar:selected:pointerover /template/ Border#PART_LayoutRoot">
+    <Setter Property="Background" Value="{DynamicResource AppTopBarTransportHoverBrush}" />
+  </Style>
+  <Style Selector="ListBox.expToolStrip ListBoxItem.toolbar /template/ Path#PART_ToolIcon,
+          ListBox.expToolStrip ListBoxItem.toolbar:selected /template/ Path#PART_ToolIcon,
+          ListBox.expToolStrip ListBoxItem.toolbar:pointerover /template/ Path#PART_ToolIcon">
+    <Setter Property="Fill" Value="{DynamicResource ToolbarToolIconOnAccentBrush}" />
+  </Style>
+  <Style Selector="ListBox.expToolStrip ListBoxItem.toolbar:pointerover,
+          ListBox.expToolStrip ListBoxItem.toolbar:selected,
+          ListBox.expToolStrip ListBoxItem.toolbar:selected:pointerover,
+          ListBox.expToolStrip ListBoxItem.toolbar:pressed,
+          ListBox.expToolStrip ListBoxItem.toolbar:selected:pressed">
+    <Setter Property="Foreground" Value="{DynamicResource ToolTipForegroundBrush}" />
+  </Style>
+  <Style Selector="ListBox.expToolStrip ListBoxItem.toolbar:pressed:not(:selected) /template/ Border#PART_LayoutRoot">
+    <Setter Property="Background" Value="{DynamicResource PianoRollSideHoverBackgroundBrush}" />
+  </Style>
+  <Style Selector="ListBox.expToolStrip ListBoxItem.toolbar:selected:pressed /template/ Border#PART_LayoutRoot">
+    <Setter Property="Background" Value="{DynamicResource AppTopBarTransportHoverBrush}" />
+  </Style>
+
+  <Style Selector="Button.expToolButton">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="CornerRadius" Value="4" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+  </Style>
+  <Style Selector="Button.expToolButton /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource WorkspaceCardBrush}" />
+    <Setter Property="CornerRadius" Value="4" />
+  </Style>
+  <Style Selector="Button.expToolButton:pointerover /template/ ContentPresenter#PART_ContentPresenter,
+          Button.expToolButton:pressed /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource AppTopBarTransportStripBrush}" />
+  </Style>
+  <Style Selector="Button.expToolButton Path.filled">
+    <Setter Property="Fill" Value="{DynamicResource TransportChipIconOffBrush}" />
+    <Setter Property="Transitions">
+      <Transitions>
+        <BrushTransition Property="Fill" Duration="0:0:0.15" />
+      </Transitions>
+    </Setter>
+  </Style>
+  <Style Selector="Button.expToolButton:pressed Path.filled">
+    <Setter Property="Fill" Value="{DynamicResource ToolbarToolIconOnAccentBrush}" />
   </Style>
 
   <Style Selector="ListBoxItem.cursorTool /template/ Path#PART_ToolIcon">
@@ -257,4 +474,282 @@
       <Setter Property="Fill" Value="{DynamicResource SystemControlBackgroundAltHighBrush}" />
     </Style>
   </Style>
+
+  <Style Selector="c|PianoRollTopBarViewToggles">
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="HorizontalAlignment" Value="Left" />
+  </Style>
+  <Style Selector="c|PianoRollTopBarViewToggles ToggleButton.sideToolbarToggle,
+          c|PianoRollTopBarViewToggles Button.sideToolbarAction">
+    <Setter Property="ToolTip.Placement" Value="Bottom" />
+    <Setter Property="ToolTip.HorizontalOffset" Value="0" />
+    <Setter Property="ToolTip.VerticalOffset" Value="4" />
+  </Style>
+
+  <Style Selector="Border.sideToolbarSeparator">
+    <Setter Property="Background" Value="{DynamicResource TickLineBrushLow}"/>
+  </Style>
+  <Style Selector="StackPanel[Orientation=Vertical] > Border.sideToolbarSeparator">
+    <Setter Property="Height" Value="1"/>
+    <Setter Property="Margin" Value="6,6,6,4"/>
+    <Setter Property="HorizontalAlignment" Value="Stretch"/>
+  </Style>
+  <Style Selector="StackPanel[Orientation=Horizontal] > Border.sideToolbarSeparator">
+    <Setter Property="Width" Value="1"/>
+    <Setter Property="Height" Value="20"/>
+    <Setter Property="Margin" Value="4,0"/>
+    <Setter Property="VerticalAlignment" Value="Center"/>
+  </Style>
+
+  <!-- Left sidebar view/layer toggles -->
+  <Style Selector="ToggleButton.sideToolbarToggle">
+    <Setter Property="Width" Value="32" />
+    <Setter Property="Height" Value="32" />
+    <Setter Property="MinWidth" Value="32" />
+    <Setter Property="MinHeight" Value="32" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="Margin" Value="0" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="CornerRadius" Value="4" />
+    <Setter Property="Background" Value="{DynamicResource WorkspaceCardBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource ToolTipForegroundBrush}" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="ToolTip.Placement" Value="Right" />
+    <Setter Property="ToolTip.HorizontalOffset" Value="4" />
+    <Setter Property="ToolTip.VerticalOffset" Value="0" />
+  </Style>
+  <Style Selector="ToggleButton.sideToolbarToggle /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource WorkspaceCardBrush}" />
+    <Setter Property="CornerRadius" Value="4" />
+    <Setter Property="Margin" Value="0" />
+  </Style>
+  <Style Selector="ToggleButton.sideToolbarToggle:pointerover:not(:checked) /template/ ContentPresenter#PART_ContentPresenter,
+          ToggleButton.sideToolbarToggle:pressed:not(:checked) /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource PianoRollSideHoverBackgroundBrush}" />
+  </Style>
+  <!-- Checked: 5% accent fill inset 2px (card shows in the margin ring). -->
+  <Style Selector="ToggleButton.sideToolbarToggle:checked:not(.noteParamsToggle) /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Margin" Value="2" />
+    <Setter Property="CornerRadius" Value="2" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="ClipToBounds" Value="True" />
+  </Style>
+  <Style Selector="ToggleButton.sideToolbarToggle.tipsToggle:checked /template/ ContentPresenter#PART_ContentPresenter,
+          ToggleButton.sideToolbarToggle.tipsToggle:checked:pointerover /template/ ContentPresenter#PART_ContentPresenter,
+          ToggleButton.sideToolbarToggle.tipsToggle:checked:pressed /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource PianoRollSideAccentTipsCheckedBrush}" />
+  </Style>
+  <Style Selector="ToggleButton.sideToolbarToggle.playToneToggle:checked /template/ ContentPresenter#PART_ContentPresenter,
+          ToggleButton.sideToolbarToggle.playToneToggle:checked:pointerover /template/ ContentPresenter#PART_ContentPresenter,
+          ToggleButton.sideToolbarToggle.playToneToggle:checked:pressed /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource PianoRollSideAccentPlayToneCheckedBrush}" />
+  </Style>
+  <Style Selector="ToggleButton.sideToolbarToggle.livePitchToggle:checked /template/ ContentPresenter#PART_ContentPresenter,
+          ToggleButton.sideToolbarToggle.livePitchToggle:checked:pointerover /template/ ContentPresenter#PART_ContentPresenter,
+          ToggleButton.sideToolbarToggle.livePitchToggle:checked:pressed /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource PianoRollSideAccentLivePitchCheckedBrush}" />
+  </Style>
+  <Style Selector="ToggleButton.sideToolbarToggle.livePitchFastToggle:checked /template/ ContentPresenter#PART_ContentPresenter,
+          ToggleButton.sideToolbarToggle.livePitchFastToggle:checked:pointerover /template/ ContentPresenter#PART_ContentPresenter,
+          ToggleButton.sideToolbarToggle.livePitchFastToggle:checked:pressed /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource PianoRollSideAccentLivePitchFastCheckedBrush}" />
+  </Style>
+  <Style Selector="ToggleButton.sideToolbarToggle.vibratoToggle:checked /template/ ContentPresenter#PART_ContentPresenter,
+          ToggleButton.sideToolbarToggle.vibratoToggle:checked:pointerover /template/ ContentPresenter#PART_ContentPresenter,
+          ToggleButton.sideToolbarToggle.vibratoToggle:checked:pressed /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource PianoRollSideAccentVibratoCheckedBrush}" />
+  </Style>
+  <Style Selector="ToggleButton.sideToolbarToggle.pitchToggle:checked /template/ ContentPresenter#PART_ContentPresenter,
+          ToggleButton.sideToolbarToggle.pitchToggle:checked:pointerover /template/ ContentPresenter#PART_ContentPresenter,
+          ToggleButton.sideToolbarToggle.pitchToggle:checked:pressed /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource PianoRollSideAccentPitchCheckedBrush}" />
+  </Style>
+  <Style Selector="ToggleButton.sideToolbarToggle.finalPitchToggle:checked /template/ ContentPresenter#PART_ContentPresenter,
+          ToggleButton.sideToolbarToggle.finalPitchToggle:checked:pointerover /template/ ContentPresenter#PART_ContentPresenter,
+          ToggleButton.sideToolbarToggle.finalPitchToggle:checked:pressed /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource PianoRollSideAccentFinalPitchCheckedBrush}" />
+  </Style>
+  <Style Selector="ToggleButton.sideToolbarToggle.waveformToggle:checked /template/ ContentPresenter#PART_ContentPresenter,
+          ToggleButton.sideToolbarToggle.waveformToggle:checked:pointerover /template/ ContentPresenter#PART_ContentPresenter,
+          ToggleButton.sideToolbarToggle.waveformToggle:checked:pressed /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource PianoRollSideAccentWaveformCheckedBrush}" />
+  </Style>
+  <Style Selector="ToggleButton.sideToolbarToggle.phonemeToggle:checked /template/ ContentPresenter#PART_ContentPresenter,
+          ToggleButton.sideToolbarToggle.phonemeToggle:checked:pointerover /template/ ContentPresenter#PART_ContentPresenter,
+          ToggleButton.sideToolbarToggle.phonemeToggle:checked:pressed /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource PianoRollSideAccentPhonemeCheckedBrush}" />
+  </Style>
+  <Style Selector="ToggleButton.sideToolbarToggle.expressionsToggle:checked /template/ ContentPresenter#PART_ContentPresenter,
+          ToggleButton.sideToolbarToggle.expressionsToggle:checked:pointerover /template/ ContentPresenter#PART_ContentPresenter,
+          ToggleButton.sideToolbarToggle.expressionsToggle:checked:pressed /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource PianoRollSideAccentExpressionsCheckedBrush}" />
+  </Style>
+  <Style Selector="ToggleButton.sideToolbarToggle.snapToggle:checked /template/ ContentPresenter#PART_ContentPresenter,
+          ToggleButton.sideToolbarToggle.snapToggle:checked:pointerover /template/ ContentPresenter#PART_ContentPresenter,
+          ToggleButton.sideToolbarToggle.snapToggle:checked:pressed /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource PianoRollSideAccentSnapCheckedBrush}" />
+  </Style>
+  <Style Selector="ToggleButton.sideToolbarToggle.phonemizerTagsToggle:checked /template/ ContentPresenter#PART_ContentPresenter,
+          ToggleButton.sideToolbarToggle.phonemizerTagsToggle:checked:pointerover /template/ ContentPresenter#PART_ContentPresenter,
+          ToggleButton.sideToolbarToggle.phonemizerTagsToggle:checked:pressed /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource PianoRollSideAccentPhonemizerTagsCheckedBrush}" />
+  </Style>
+  <Style Selector="ToggleButton.sideToolbarToggle.appearanceToggle:checked /template/ ContentPresenter#PART_ContentPresenter,
+          ToggleButton.sideToolbarToggle.appearanceToggle:checked:pointerover /template/ ContentPresenter#PART_ContentPresenter,
+          ToggleButton.sideToolbarToggle.appearanceToggle:checked:pressed /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource PianoRollSideAccentExpressionsCheckedBrush}" />
+  </Style>
+  <Style Selector="Button.sideToolbarAction">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="HorizontalAlignment" Value="Stretch" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="MinWidth" Value="32" />
+    <Setter Property="MinHeight" Value="32" />
+    <Setter Property="MaxWidth" Value="32" />
+    <Setter Property="MaxHeight" Value="32" />
+  </Style>
+  <Style Selector="Button.sideToolbarAction /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="CornerRadius" Value="4" />
+  </Style>
+  <Style Selector="Button.sideToolbarAction:pointerover /template/ ContentPresenter#PART_ContentPresenter,
+          Button.sideToolbarAction:pressed /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource PianoRollSideHoverBackgroundBrush}" />
+  </Style>
+  <Style Selector="Button.sideToolbarAction TextBlock.sideToolbarGlyph">
+    <Setter Property="Foreground" Value="{DynamicResource PianoRollSideIconOffBrush}" />
+    <Setter Property="FontSize" Value="11" />
+    <Setter Property="FontWeight" Value="Bold" />
+    <Setter Property="HorizontalAlignment" Value="Center" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
+  <Style Selector="Button.sideToolbarAction:pointerover TextBlock.sideToolbarGlyph">
+    <Setter Property="Foreground" Value="{DynamicResource PianoRollSideIconOffBrush}" />
+  </Style>
+  <Style Selector="Button.sideToolbarAction:pressed TextBlock.sideToolbarGlyph">
+    <Setter Property="Foreground" Value="{DynamicResource ToolTipForegroundBrush}" />
+  </Style>
+  <!-- Checked + hover: outer 2px ring on full chip (no inset). -->
+  <Style Selector="ToggleButton.sideToolbarToggle:checked:pointerover:not(.noteParamsToggle) /template/ ContentPresenter#PART_ContentPresenter,
+          ToggleButton.sideToolbarToggle:checked:pressed:not(.noteParamsToggle) /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Margin" Value="0" />
+    <Setter Property="CornerRadius" Value="4" />
+    <Setter Property="BorderThickness" Value="2" />
+    <Setter Property="BorderBrush" Value="{DynamicResource AppTopBarTransportStripBrush}" />
+  </Style>
+  <Style Selector="ToggleButton.sideToolbarToggle Path.filled">
+    <Setter Property="Transitions">
+      <Transitions>
+        <BrushTransition Property="Fill" Duration="0:0:0.15" />
+      </Transitions>
+    </Setter>
+  </Style>
+  <Style Selector="ToggleButton.sideToolbarToggle Path.stroked,
+          ToggleButton.sideToolbarToggle Ellipse.stroked">
+    <Setter Property="Transitions">
+      <Transitions>
+        <BrushTransition Property="Stroke" Duration="0:0:0.15" />
+      </Transitions>
+    </Setter>
+  </Style>
+  <Style Selector="ToggleButton.sideToolbarToggle TextBlock.sideToolbarGlyph">
+    <Setter Property="Transitions">
+      <Transitions>
+        <BrushTransition Property="Foreground" Duration="0:0:0.15" />
+      </Transitions>
+    </Setter>
+  </Style>
+  <Style Selector="ToggleButton.sideToolbarToggle Path.filled">
+    <Setter Property="Fill" Value="{DynamicResource PianoRollSideIconOffBrush}" />
+  </Style>
+  <Style Selector="ToggleButton.sideToolbarToggle Path.stroked,
+          ToggleButton.sideToolbarToggle Ellipse.stroked">
+    <Setter Property="StrokeThickness" Value="1" />
+    <Setter Property="Stroke" Value="{DynamicResource PianoRollSideIconOffBrush}" />
+    <Setter Property="Fill" Value="Transparent" />
+  </Style>
+  <Style Selector="ToggleButton.sideToolbarToggle TextBlock.sideToolbarGlyph">
+    <Setter Property="Foreground" Value="{DynamicResource PianoRollSideIconOffBrush}" />
+    <Setter Property="FontSize" Value="15" />
+    <Setter Property="FontWeight" Value="Bold" />
+    <Setter Property="HorizontalAlignment" Value="Center" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
+  <Style Selector="ToggleButton.sideToolbarToggle:pointerover:not(:checked) Path.filled">
+    <Setter Property="Fill" Value="{DynamicResource PianoRollSideIconOffBrush}" />
+  </Style>
+  <Style Selector="ToggleButton.sideToolbarToggle:pointerover:not(:checked) Path.stroked,
+          ToggleButton.sideToolbarToggle:pointerover:not(:checked) Ellipse.stroked">
+    <Setter Property="Stroke" Value="{DynamicResource PianoRollSideIconOffBrush}" />
+  </Style>
+  <Style Selector="ToggleButton.sideToolbarToggle:pointerover:not(:checked) TextBlock.sideToolbarGlyph">
+    <Setter Property="Foreground" Value="{DynamicResource PianoRollSideIconOffBrush}" />
+  </Style>
+  <Style Selector="ToggleButton.sideToolbarToggle.tipsToggle TextBlock.sideToolbarGlyph">
+    <Setter Property="Margin" Value="0,-4,0,0" />
+  </Style>
+  <Style Selector="ToggleButton.sideToolbarToggle:checked.tipsToggle TextBlock.sideToolbarGlyph">
+    <Setter Property="Foreground" Value="{DynamicResource PianoRollSideAccentTipsBrush}" />
+  </Style>
+  <Style Selector="ToggleButton.sideToolbarToggle:checked.playToneToggle Path.filled">
+    <Setter Property="Fill" Value="{DynamicResource PianoRollSideAccentPlayToneBrush}" />
+  </Style>
+  <Style Selector="ToggleButton.sideToolbarToggle:checked.livePitchToggle TextBlock.sideToolbarGlyph">
+    <Setter Property="Foreground" Value="{DynamicResource PianoRollSideAccentLivePitchBrush}" />
+  </Style>
+  <Style Selector="ToggleButton.sideToolbarToggle:checked.livePitchFastToggle TextBlock.sideToolbarGlyph">
+    <Setter Property="Foreground" Value="{DynamicResource PianoRollSideAccentLivePitchFastBrush}" />
+  </Style>
+  <Style Selector="ToggleButton.sideToolbarToggle:checked.vibratoToggle Path.stroked">
+    <Setter Property="Stroke" Value="{DynamicResource PianoRollSideAccentVibratoBrush}" />
+  </Style>
+  <Style Selector="ToggleButton.sideToolbarToggle:checked.pitchToggle Path.stroked,
+          ToggleButton.sideToolbarToggle:checked.pitchToggle Ellipse.stroked">
+    <Setter Property="Stroke" Value="{DynamicResource PianoRollSideAccentPitchBrush}" />
+  </Style>
+  <Style Selector="ToggleButton.sideToolbarToggle:checked.finalPitchToggle Path.stroked">
+    <Setter Property="Stroke" Value="{DynamicResource PianoRollSideAccentFinalPitchBrush}" />
+  </Style>
+  <Style Selector="ToggleButton.sideToolbarToggle:checked.waveformToggle Path.filled">
+    <Setter Property="Fill" Value="{DynamicResource PianoRollSideAccentWaveformBrush}" />
+  </Style>
+  <Style Selector="ToggleButton.sideToolbarToggle:checked.phonemeToggle Path.stroked">
+    <Setter Property="Stroke" Value="{DynamicResource PianoRollSideAccentPhonemeBrush}" />
+  </Style>
+  <Style Selector="ToggleButton.sideToolbarToggle:checked.expressionsToggle Path.stroked,
+          ToggleButton.sideToolbarToggle:checked.expressionsToggle Ellipse.stroked">
+    <Setter Property="Stroke" Value="{DynamicResource PianoRollSideAccentExpressionsBrush}" />
+  </Style>
+  <Style Selector="ToggleButton.sideToolbarToggle:checked.snapToggle Path.stroked">
+    <Setter Property="Stroke" Value="{DynamicResource PianoRollSideAccentSnapBrush}" />
+  </Style>
+  <Style Selector="ToggleButton.sideToolbarToggle:checked.phonemizerTagsToggle Path.filled">
+    <Setter Property="Fill" Value="{DynamicResource PianoRollSideAccentPhonemizerTagsBrush}" />
+  </Style>
+  <Style Selector="ToggleButton.sideToolbarToggle:checked.appearanceToggle Path.filled">
+    <Setter Property="Fill" Value="{DynamicResource ToolbarToolIconOnAccentBrush}" />
+  </Style>
+  <Style Selector="ToggleButton.sideToolbarToggle.noteParamsToggle:checked Path.filled,
+          ToggleButton.sideToolbarToggle.noteParamsToggle:checked:pointerover Path.filled">
+    <Setter Property="Fill" Value="{DynamicResource ToolbarToolIconOnAccentBrush}" />
+  </Style>
+  <!-- noteParams: local styles override Fluent :checked (PianoRoll StyleInclude > App). -->
+  <Style Selector="ToggleButton.noteParamsToggle:checked /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Margin" Value="0" />
+    <Setter Property="CornerRadius" Value="4" />
+    <Setter Property="BorderThickness" Value="0" />
+  </Style>
+  <Style Selector="ToggleButton.noteParamsToggle:pointerover /template/ ContentPresenter#PART_ContentPresenter,
+          ToggleButton.noteParamsToggle:pressed /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource PianoRollSideHoverBackgroundBrush}" />
+    <Setter Property="Margin" Value="0" />
+    <Setter Property="CornerRadius" Value="4" />
+    <Setter Property="BorderThickness" Value="0" />
+  </Style>
+
 </Styles>

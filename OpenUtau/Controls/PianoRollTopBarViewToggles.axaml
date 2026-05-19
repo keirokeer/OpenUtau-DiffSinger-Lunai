@@ -1,0 +1,11 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="clr-namespace:OpenUtau.App.Controls"
+             x:Class="OpenUtau.App.Controls.PianoRollTopBarViewToggles">
+  <StackPanel Orientation="Horizontal" Spacing="0" VerticalAlignment="Center">
+    <c:PianoRollMainViewToggles LayoutOrientation="Horizontal"/>
+    <Border Width="1" Height="20" Margin="4,0" VerticalAlignment="Center"
+            Background="{DynamicResource TickLineBrushLow}"/>
+    <c:PianoRollDiffSingerQualityToggles LayoutOrientation="Horizontal"/>
+  </StackPanel>
+</UserControl>
