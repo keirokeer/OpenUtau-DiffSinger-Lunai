@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -272,8 +272,8 @@ namespace OpenUtau.Core.Ustx {
                     phoneme.Validate(options, project, track, this, note);
                 }
             }
-            renderPhrases.Clear();
             if (PhonemesUpToDate) {
+                renderPhrases.Clear();
                 renderPhrases.AddRange(RenderPhrase.FromPart(project, track, this));
             }
         }

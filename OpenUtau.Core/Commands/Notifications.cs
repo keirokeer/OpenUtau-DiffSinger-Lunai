@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using OpenUtau.Core.Ustx;
 
 namespace OpenUtau.Core {
@@ -84,6 +84,10 @@ namespace OpenUtau.Core {
     }
 
     public class PhonemizedNotification : UNotification {
+        public readonly UVoicePart part;
+        public PhonemizedNotification(UVoicePart part) {
+            this.part = part;
+        }
         public override string ToString() => "Phonemized";
     }
 

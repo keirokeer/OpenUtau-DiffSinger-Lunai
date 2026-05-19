@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -82,7 +82,7 @@ namespace OpenUtau.Api {
                     Part = response.part,
                     SkipPhonemizer = true,
                 });
-                DocManager.Inst.ExecuteCmd(new PhonemizedNotification());
+                DocManager.Inst.ExecuteCmd(new PhonemizedNotification(response.part));
             }, null, CancellationToken.None, TaskCreationOptions.None, mainScheduler);
         }
 
