@@ -265,7 +265,8 @@ namespace OpenUtau.App.ViewModels {
 
                 BlackKeyColorLeft = BlackKeyColorLeft.ToString(),
                 BlackKeyColorRight = BlackKeyColorRight.ToString(),
-                BlackKeyNameColor = BlackKeyNameColor.ToString()
+                BlackKeyNameColor = BlackKeyNameColor.ToString(),
+                ToolbarCheckedPianoLightColor = WhiteKeyColorRight.ToString()
             };
 
             File.WriteAllText(customThemePath, Yaml.DefaultSerializer.Serialize(themeYaml), Encoding.UTF8);
