@@ -1,0 +1,129 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <Style Selector="Expander.notePropsExpander ToggleSwitch">
+    <Setter Property="Margin" Value="0"/>
+  </Style>
+  <Style Selector="Expander.notePropsExpander /template/ Border#ExpandCollapseChevronBorder">
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="BorderThickness" Value="0"/>
+  </Style>
+  <Style Selector="Expander.notePropsExpander /template/ ToggleButton#ExpanderHeader:pointerover /template/ Border#ExpandCollapseChevronBorder,
+          Expander.notePropsExpander /template/ ToggleButton#ExpanderHeader:pressed /template/ Border#ExpandCollapseChevronBorder,
+          Expander.notePropsExpander /template/ ToggleButton#ExpanderHeader:checked:pointerover /template/ Border#ExpandCollapseChevronBorder,
+          Expander.notePropsExpander /template/ ToggleButton#ExpanderHeader:checked:pressed /template/ Border#ExpandCollapseChevronBorder">
+    <Setter Property="Background" Value="Transparent"/>
+  </Style>
+  <Style Selector="Expander.notePropsExpander">
+    <Setter Property="Padding" Value="8"/>
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="BorderBrush" Value="Transparent"/>
+    <Setter Property="BorderThickness" Value="0"/>
+    <Setter Property="Template">
+      <ControlTemplate TargetType="Expander">
+        <Border CornerRadius="4"
+                BorderThickness="0"
+                Background="Transparent"
+                ClipToBounds="True">
+          <DockPanel LastChildFill="True">
+            <ToggleButton x:Name="ExpanderHeader"
+                          DockPanel.Dock="Top"
+                          Theme="{x:Null}"
+                          MinHeight="32"
+                          HorizontalAlignment="Stretch"
+                          HorizontalContentAlignment="Stretch"
+                          VerticalContentAlignment="Center"
+                          Padding="8,0,0,0"
+                          FontWeight="Bold"
+                          Background="Transparent"
+                          BorderThickness="0"
+                          Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}"
+                          CornerRadius="4"
+                          IsChecked="{TemplateBinding IsExpanded, Mode=TwoWay}"
+                          Content="{TemplateBinding Header}"
+                          ContentTemplate="{TemplateBinding HeaderTemplate}">
+              <ToggleButton.Template>
+                <ControlTemplate TargetType="ToggleButton">
+                  <Border x:Name="ToggleButtonBackground"
+                          Background="Transparent"
+                          BorderThickness="0"
+                          CornerRadius="{TemplateBinding CornerRadius}">
+                    <Grid ColumnDefinitions="*,Auto">
+                      <ContentPresenter x:Name="PART_ContentPresenter"
+                                        Grid.Column="0"
+                                        Content="{TemplateBinding Content}"
+                                        ContentTemplate="{TemplateBinding ContentTemplate}"
+                                        HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                        VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                                        Foreground="{TemplateBinding Foreground}"
+                                        Margin="{TemplateBinding Padding}"/>
+                      <Border x:Name="ExpandCollapseChevronBorder"
+                              Grid.Column="1"
+                              Width="32"
+                              Height="32"
+                              Margin="8,0,4,0"
+                              Background="Transparent"
+                              BorderThickness="0">
+                        <Path x:Name="ExpandCollapseChevron"
+                              HorizontalAlignment="Center"
+                              VerticalAlignment="Center"
+                              Data="M 0 0 L 7 7 L 14 0"
+                              RenderTransformOrigin="50%,50%"
+                              Stretch="None"
+                              Stroke="{DynamicResource SystemControlForegroundBaseHighBrush}"
+                              StrokeThickness="1">
+                          <Path.RenderTransform>
+                            <RotateTransform/>
+                          </Path.RenderTransform>
+                        </Path>
+                      </Border>
+                    </Grid>
+                  </Border>
+                </ControlTemplate>
+              </ToggleButton.Template>
+            </ToggleButton>
+            <Border x:Name="ExpanderContent"
+                    IsVisible="{TemplateBinding IsExpanded}"
+                    Padding="{TemplateBinding Padding}"
+                    Background="Transparent"
+                    BorderBrush="Transparent"
+                    BorderThickness="0"
+                    CornerRadius="0,0,4,4">
+              <ContentPresenter x:Name="PART_ContentPresenter"
+                                Content="{TemplateBinding Content}"
+                                ContentTemplate="{TemplateBinding ContentTemplate}"
+                                HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"/>
+            </Border>
+          </DockPanel>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+  </Style>
+  <Style Selector="Expander.notePropsExpander:not(:expanded) /template/ ToggleButton#ExpanderHeader">
+    <Setter Property="CornerRadius" Value="4"/>
+  </Style>
+  <Style Selector="Expander.notePropsExpander:not(:expanded) /template/ ToggleButton#ExpanderHeader /template/ Border#ToggleButtonBackground">
+    <Setter Property="CornerRadius" Value="4"/>
+  </Style>
+  <Style Selector="Expander.notePropsExpander:expanded /template/ ToggleButton#ExpanderHeader">
+    <Setter Property="CornerRadius" Value="4,4,0,0"/>
+  </Style>
+  <Style Selector="Expander.notePropsExpander:expanded /template/ ToggleButton#ExpanderHeader /template/ Border#ToggleButtonBackground">
+    <Setter Property="CornerRadius" Value="4,4,0,0"/>
+  </Style>
+  <Style Selector="Expander.notePropsExpander:expanded /template/ Path#ExpandCollapseChevron">
+    <Setter Property="RotateTransform.Angle" Value="180"/>
+  </Style>
+  <Style Selector="Expander.notePropsExpander:not(:expanded) /template/ Path#ExpandCollapseChevron">
+    <Setter Property="RotateTransform.Angle" Value="0"/>
+  </Style>
+  <Style Selector="Expander.notePropsExpander /template/ Border#ExpanderContent">
+    <Setter Property="BorderBrush" Value="Transparent"/>
+    <Setter Property="BorderThickness" Value="0"/>
+    <Setter Property="BoxShadow" Value="0 0 0 0 Transparent"/>
+  </Style>
+  <Style Selector="Expander.notePropsExpander /template/ Border#ExpanderContent /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="BorderBrush" Value="Transparent"/>
+    <Setter Property="BorderThickness" Value="0"/>
+  </Style>
+</Styles>
