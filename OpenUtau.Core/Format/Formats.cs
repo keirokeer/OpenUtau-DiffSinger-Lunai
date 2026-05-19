@@ -1,11 +1,11 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using OpenUtau.Classic;
 using OpenUtau.Core.Ustx;
 
 namespace OpenUtau.Core.Format {
-    public enum ProjectFormats { Unknown, Vsq3, Vsq4, Ust, Ustx, Midi, Ufdata, Musicxml };
+    public enum ProjectFormats { Unknown, Vsq3, Vsq4, Ust, Ustx, Midi, Ufdata, Musicxml, Svp };
 
     public static class Formats {
         const string ustMatch = "[#SETTING]";
@@ -16,8 +16,13 @@ namespace OpenUtau.Core.Format {
         const string midiMatch = "MThd";
         const string ufdataMatch = "\"formatVersion\":";
         const string musicxmlMatch = "score-partwise";
+        const string svpMatch = "\"version\"";
 
         public static ProjectFormats DetectProjectFormat(string file) {
+            var ext = Path.GetExtension(file).ToLowerInvariant();
+            if (ext == ".svp") {
+                return ProjectFormats.Svp;
+            }
             var lines = new List<string>();
             using (var reader = new StreamReader(file)) {
                 for (int i = 0; i < 10 && !reader.EndOfStream; ++i) {
@@ -39,6 +44,8 @@ namespace OpenUtau.Core.Format {
                 return ProjectFormats.Ufdata;
             } else if (contents.Contains(musicxmlMatch)) {
                 return ProjectFormats.Musicxml;
+            } else if (ext == ".svp" || contents.Contains(svpMatch)) {
+                return ProjectFormats.Svp;
             } else {
                 return ProjectFormats.Unknown;
             }
@@ -48,7 +55,8 @@ namespace OpenUtau.Core.Format {
         /// Read project from files to a new UProject object, used by LoadProject and ImportTracks.
         /// </summary>
         /// <param name="files">Names of the files to be loaded</param>
-        public static UProject? ReadProject(string[] files){
+        /// <param name="options">Format-specific import options (used for SVP)</param>
+        public static UProject? ReadProject(string[] files, ProjectImportOptions? options = null){
             if (files.Length < 1) {
                 return null;
             }
@@ -74,6 +82,9 @@ namespace OpenUtau.Core.Format {
                 case ProjectFormats.Musicxml:
                     project = MusicXML.LoadProject(files[0]);
                     break;
+                case ProjectFormats.Svp:
+                    project = Svp.Load(files[0], options ?? ProjectImportOptions.CreateDefault());
+                    break;
                 default:
                     throw new FileFormatException("Unknown file format");
             }
@@ -84,8 +95,8 @@ namespace OpenUtau.Core.Format {
         /// Load project from files.
         /// </summary>
         /// <param name="files">Names of the files to be loaded</param>
-        public static void LoadProject(string[] files) {
-            UProject project = ReadProject(files);
+        public static void LoadProject(string[] files, ProjectImportOptions? options = null) {
+            UProject project = ReadProject(files, options);
             if (project != null) {
                 DocManager.Inst.ExecuteCmd(new LoadProjectNotification(project));
             }
@@ -97,12 +108,16 @@ namespace OpenUtau.Core.Format {
         /// </summary>
         /// <param name="files">Names of the files to be loaded</param>
         /// <returns></returns>
-        public static UProject[] ReadProjects(string[] files){
+        public static UProject[] ReadProjects(string[] files, ProjectImportOptions? options = null){
             if (files == null || files.Length < 1) {
                 return new UProject[0];
             }
             return files
-                .Select(file => ReadProject(new string[] { file }))
+                .Select(file => {
+                    var format = DetectProjectFormat(file);
+                    var fileOptions = format == ProjectFormats.Svp ? options : null;
+                    return ReadProject(new string[] { file }, fileOptions);
+                })
                 .Where(p => p != null)
                 .Cast<UProject>()
                 .ToArray();
