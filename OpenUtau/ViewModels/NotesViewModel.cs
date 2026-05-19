@@ -53,8 +53,12 @@ namespace OpenUtau.App.ViewModels {
         [Reactive] public double PlayPosHighlightWidth { get; set; }
         [Reactive] public bool PlayPosWaitingRendering { get; set; }
         [Reactive] public bool UseSolidPlaybackLine { get; set; }
+        public bool ShowWidePlaybackHighlight => !UseSolidPlaybackLine;
         [Reactive] public bool ShowTips { get; set; }
         [Reactive] public bool PlayTone { get; set; }
+        [Reactive] public bool LivePitchNormal { get; set; }
+        [Reactive] public bool LivePitchSuperFast { get; set; }
+        bool livePitchSyncing;
         [Reactive] public bool ShowVibrato { get; set; }
         [Reactive] public bool ShowPitch { get; set; }
         [Reactive] public bool ShowFinalPitch { get; set; }
@@ -79,8 +83,23 @@ namespace OpenUtau.App.ViewModels {
         [Reactive] public double PhonemePanelHeightMax { get; set; }
         // Tag strip (20px) only in DiffSinger panel mode; in normal mode never add it (avoids white strip, keeps height)
         public double PhonemePanelTagStripHeight => (Preferences.Default.DiffSingerPhonemePanelMode && !Preferences.Default.DiffSingerLangCodeHide) ? ViewConstants.PhonemeTagStripHeight : 0;
-        public Thickness PhonemePanelBottomMargin => new Thickness(0, 0, 0, ViewConstants.PhonemePanelResizeHandleHeight + PhonemePanelHeight + PhonemePanelTagStripHeight);
+        public Thickness PhonemePanelBottomMargin => ShowPhoneme
+            ? new Thickness(0, 0, 0, ViewConstants.PhonemePanelResizeHandleHeight + PhonemePanelHeight + PhonemePanelTagStripHeight)
+            : new Thickness(0);
+        public Thickness PianoRollHScrollBottomMargin {
+            get {
+                var phoneme = PhonemePanelBottomMargin;
+                const double gapAbovePhoneme = 4;
+                return new Thickness(phoneme.Left, phoneme.Top, phoneme.Right,
+                    phoneme.Bottom + gapAbovePhoneme);
+            }
+        }
+        public GridLength ExpGapGridLength => ShowExpressions ? new GridLength(8) : new GridLength(0);
+        public GridLength ExpPanelGridLength => ShowExpressions ? new GridLength(ViewConstants.ExpPanelHeightDefault) : new GridLength(0);
         public GridLength PhonemePanelHeightGridLength => new GridLength(PhonemePanelHeight + PhonemePanelTagStripHeight);
+        public GridLength NotePropsGapGridLength => ShowNoteParams ? new GridLength(8) : new GridLength(0);
+        public GridLength NotePropsColumnWidth => ShowNoteParams ? new GridLength(400) : new GridLength(0);
+        public bool NotePropsHidden => !ShowNoteParams;
         [Reactive] public UVoicePart? Part { get; set; }
         [Reactive] public Bitmap? Avatar { get; set; }
         [Reactive] public Bitmap? Portrait { get; set; }
@@ -219,10 +238,33 @@ namespace OpenUtau.App.ViewModels {
 
             PlayTone = Preferences.Default.PlayTone;
             this.WhenAnyValue(x => x.PlayTone)
-             .Subscribe(playTone => {
+                .Subscribe(playTone => {
                  Preferences.Default.PlayTone = playTone;
                  Preferences.Save();
              });
+            ApplyLivePitchModeFromPreferences();
+            this.WhenAnyValue(x => x.LivePitchNormal)
+                .Subscribe(checkedNormal => {
+                    if (livePitchSyncing) {
+                        return;
+                    }
+                    if (checkedNormal) {
+                        SetLivePitchMode(LivePitchMode.Normal);
+                    } else if (Preferences.Default.RealTimePitchMode == (int)LivePitchMode.Normal) {
+                        SetLivePitchMode(LivePitchMode.Off);
+                    }
+                });
+            this.WhenAnyValue(x => x.LivePitchSuperFast)
+                .Subscribe(checkedFast => {
+                    if (livePitchSyncing) {
+                        return;
+                    }
+                    if (checkedFast) {
+                        SetLivePitchMode(LivePitchMode.SuperFast);
+                    } else if (Preferences.Default.RealTimePitchMode == (int)LivePitchMode.SuperFast) {
+                        SetLivePitchMode(LivePitchMode.Off);
+                    }
+                });
             ShowVibrato = Preferences.Default.ShowVibrato;
             this.WhenAnyValue(x => x.ShowVibrato)
             .Subscribe(showVibrato => {
@@ -254,18 +296,22 @@ namespace OpenUtau.App.ViewModels {
             this.WhenAnyValue(x => x.PhonemePanelHeight)
                 .Subscribe(_ => {
                     this.RaisePropertyChanged(nameof(PhonemePanelBottomMargin));
+                    this.RaisePropertyChanged(nameof(PianoRollHScrollBottomMargin));
                     this.RaisePropertyChanged(nameof(PhonemePanelHeightGridLength));
                 });
             MessageBus.Current.Listen<NotesRefreshEvent>()
                 .Subscribe(_ => {
                     this.RaisePropertyChanged(nameof(PhonemePanelTagStripHeight));
                     this.RaisePropertyChanged(nameof(PhonemePanelBottomMargin));
+                    this.RaisePropertyChanged(nameof(PianoRollHScrollBottomMargin));
                     this.RaisePropertyChanged(nameof(PhonemePanelHeightGridLength));
                 });
             this.WhenAnyValue(x => x.ShowPhoneme)
             .Subscribe(showPhoneme => {
                 Preferences.Default.ShowPhoneme = showPhoneme;
                 Preferences.Save();
+                this.RaisePropertyChanged(nameof(PhonemePanelBottomMargin));
+                this.RaisePropertyChanged(nameof(PianoRollHScrollBottomMargin));
             });
             ShowExpressions = Preferences.Default.ShowExpressions;
             this.WhenAnyValue(x => x.ShowExpressions)
@@ -276,17 +322,23 @@ namespace OpenUtau.App.ViewModels {
                     ? ViewConstants.ExpHeightMax : 0;
                 Preferences.Default.ShowExpressions = showExpressions;
                 Preferences.Save();
+                this.RaisePropertyChanged(nameof(ExpGapGridLength));
+                this.RaisePropertyChanged(nameof(ExpPanelGridLength));
             });
             ShowNoteParams = Preferences.Default.ShowNoteParams;
             this.WhenAnyValue(x => x.ShowNoteParams)
             .Subscribe(showNoteParams => {
                 Preferences.Default.ShowNoteParams = showNoteParams;
                 Preferences.Save();
+                this.RaisePropertyChanged(nameof(NotePropsGapGridLength));
+                this.RaisePropertyChanged(nameof(NotePropsColumnWidth));
+                this.RaisePropertyChanged(nameof(NotePropsHidden));
             });
             UseSolidPlaybackLine = Preferences.Default.UseSolidPlaybackLine;
             MessageBus.Current.Listen<PlaybackLineModeChangedEvent>()
                 .Subscribe(e => {
                     UseSolidPlaybackLine = e.UseSolidLine;
+                    this.RaisePropertyChanged(nameof(ShowWidePlaybackHighlight));
                     if (Part != null) {
                         SetPlayPos(DocManager.Inst.playPosTick, false);
                     }
@@ -314,6 +366,9 @@ namespace OpenUtau.App.ViewModels {
 
             HitTest = new NotesViewModelHitTest(this);
             DocManager.Inst.AddSubscriber(this);
+
+            this.WhenAnyValue(x => x.Part)
+                .Subscribe(p => MessageBus.Current.SendMessage(new PianoRollOpenPartChangedEvent(p)));
 
             MessageBus.Current.Listen<PianorollRefreshEvent>()
                 .Subscribe(e => {
@@ -1249,6 +1304,23 @@ namespace OpenUtau.App.ViewModels {
                 return (positionX - leftMargin) * playPosXToTickOffset;
             }
             return 0;
+        }
+
+        void ApplyLivePitchModeFromPreferences() {
+            livePitchSyncing = true;
+            var mode = (LivePitchMode)Preferences.Default.RealTimePitchMode;
+            LivePitchNormal = mode == LivePitchMode.Normal;
+            LivePitchSuperFast = mode == LivePitchMode.SuperFast;
+            livePitchSyncing = false;
+        }
+
+        void SetLivePitchMode(LivePitchMode mode) {
+            livePitchSyncing = true;
+            LivePitchNormal = mode == LivePitchMode.Normal;
+            LivePitchSuperFast = mode == LivePitchMode.SuperFast;
+            Preferences.Default.RealTimePitchMode = (int)mode;
+            Preferences.Save();
+            livePitchSyncing = false;
         }
     }
 }

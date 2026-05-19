@@ -4,6 +4,8 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive.Linq;
 using Avalonia.Media;
+using OpenUtau.App;
+using OpenUtau.App.Controls;
 using OpenUtau.Core;
 using OpenUtau.Core.Format;
 using OpenUtau.Core.Ustx;
@@ -35,6 +37,10 @@ namespace OpenUtau.App.ViewModels {
         [Reactive] public float AutoVibratoNoteLength { get; set; }
         [Reactive] public bool AutoVibratoToggle { get; set; }
         [Reactive] public bool IsNoteSelected { get; set; } = false;
+        [Reactive] public IBrush SectionHeaderBackground { get; private set; } = Brushes.Transparent;
+        [Reactive] public IBrush SectionHeaderBackgroundPointerOver { get; private set; } = Brushes.Transparent;
+        [Reactive] public IBrush SectionHeaderBackgroundPressed { get; private set; } = Brushes.Transparent;
+        [Reactive] public IBrush SectionContentBackground { get; private set; } = Brushes.Transparent;
         [Reactive] public IReadOnlyList<MenuItemViewModel>? PhonemizerMenuItems { get; set; }
         public ReactiveCommand<string?, System.Reactive.Unit> SelectPhonemizerCommand { get; }
         [Reactive] public bool IsPhonemizerEnabled { get; set; } = true;
@@ -159,7 +165,32 @@ namespace OpenUtau.App.ViewModels {
                 });
 
             DocManager.Inst.AddSubscriber(this);
+
+            MessageBus.Current.Listen<PianorollRefreshEvent>()
+                .Subscribe(_ => UpdateSectionHeaderBrushes());
+            MessageBus.Current.Listen<ThemeChangedEvent>()
+                .Subscribe(_ => UpdateSectionHeaderBrushes());
+
+            UpdateSectionHeaderBrushes();
         }
+
+        public void UpdateSectionHeaderBrushes() {
+            Color noteColor = ThemeManager.GetTrackColor(GetTrackColorName()).NoteColor.Color;
+            SectionHeaderBackground = new SolidColorBrush(NoteColorWithOpacity(noteColor, 0.25));
+            SectionHeaderBackgroundPointerOver = new SolidColorBrush(NoteColorWithOpacity(noteColor, 0.55));
+            SectionHeaderBackgroundPressed = new SolidColorBrush(NoteColorWithOpacity(noteColor, 0.80));
+            SectionContentBackground = ThemeManager.WorkspaceElevatedSurfaceBrush;
+        }
+
+        string GetTrackColorName() {
+            if (Part != null && DocManager.Inst.Project != null) {
+                return DocManager.Inst.Project.tracks[Part.trackNo].TrackColor;
+            }
+            return "Blue";
+        }
+
+        static Color NoteColorWithOpacity(Color color, double opacity) =>
+            Controls.WorkspaceSectionExpanderChrome.NoteColorWithOpacity(color, opacity);
 
         // note -> panel
         private void OnSelectNotes() {
@@ -245,6 +276,7 @@ namespace OpenUtau.App.ViewModels {
             } else {
                 this.Part = null;
             }
+            UpdateSectionHeaderBrushes();
         }
 
         private string GetPhonemizerDisplayName(string? targetId) {
@@ -259,6 +291,14 @@ namespace OpenUtau.App.ViewModels {
 
         public void RefreshPhonemizers() {
             var items = new List<MenuItemViewModel>();
+            USinger? singer = null;
+            if (Part != null) {
+                var track = DocManager.Inst.Project.tracks[Part.trackNo];
+                singer = track.Singer;
+            }
+            var available = PhonemizerFactory.EnumerateForSinger(singer).ToArray();
+            var availableTypes = available.Select(factory => factory.type).ToHashSet();
+            bool isDiffSinger = singer != null && singer.Found && singer.SingerType == USingerType.DiffSinger;
 
             string defaultHeader = "Default";
             if (Part != null) {
@@ -273,29 +313,59 @@ namespace OpenUtau.App.ViewModels {
             });
 
             items.Add(new MenuItemViewModel() { Header = "-", Height = 1 });
-            items.AddRange(Preferences.Default.RecentPhonemizers
+            var recentItems = Preferences.Default.RecentPhonemizers
                 .Select(name => PhonemizerFactory.Get(name))
                 .OfType<PhonemizerFactory>()
+                .Where(factory => availableTypes.Contains(factory.type))
                 .OrderBy(factory => factory.tag)
                 .Select(factory => new MenuItemViewModel() {
                     Header = factory.ToString(),
                     Command = SelectPhonemizerCommand,
                     CommandParameter = factory.name,
-                }));
+                })
+                .ToArray();
+            items.AddRange(recentItems);
 
-            items.Add(new MenuItemViewModel() {
-                Header = $"{ThemeManager.GetString("tracks.more")} ...",
-                Items = PhonemizerFactory.GetAll().GroupBy(factory => factory.language)
-                .OrderBy(group => group.Key)
-                .Select(group => new MenuItemViewModel() {
-                    Header = GetPhonemizerGroupHeader(group.Key),
-                    Items = group.Select(factory => new MenuItemViewModel() {
+            if (isDiffSinger) {
+                var listed = items
+                    .Select(item => item.CommandParameter)
+                    .OfType<string>()
+                    .Select(name => PhonemizerFactory.Get(name))
+                    .OfType<PhonemizerFactory>()
+                    .Select(factory => factory.type)
+                    .ToHashSet();
+                var remaining = available
+                    .Where(factory => !listed.Contains(factory.type))
+                    .OrderBy(factory => factory.tag)
+                    .ThenBy(factory => factory.name)
+                    .Select(factory => new MenuItemViewModel() {
                         Header = factory.ToString(),
                         Command = SelectPhonemizerCommand,
                         CommandParameter = factory.name,
-                    }).ToArray(),
-                }).ToArray()
-            });
+                    })
+                    .ToArray();
+                if (remaining.Length > 0 && items.Count > 0) {
+                    items.Add(new MenuItemViewModel() { Header = "-", Height = 1 });
+                }
+                items.AddRange(remaining);
+            } else {
+                if (items.Count > 0) {
+                    items.Add(new MenuItemViewModel() { Header = "-", Height = 1 });
+                }
+                items.Add(new MenuItemViewModel() {
+                    Header = $"{ThemeManager.GetString("tracks.more")} ...",
+                    Items = available.GroupBy(factory => factory.language)
+                    .OrderBy(group => group.Key)
+                    .Select(group => new MenuItemViewModel() {
+                        Header = GetPhonemizerGroupHeader(group.Key),
+                        Items = group.Select(factory => new MenuItemViewModel() {
+                            Header = factory.ToString(),
+                            Command = SelectPhonemizerCommand,
+                            CommandParameter = factory.name,
+                        }).ToArray(),
+                    }).ToArray()
+                });
+            }
 
             PhonemizerMenuItems = items;
         }
