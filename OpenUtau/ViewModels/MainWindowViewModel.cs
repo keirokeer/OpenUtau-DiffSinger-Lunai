@@ -6,6 +6,7 @@ using System.Reactive;
 using System.Threading.Tasks;
 using Avalonia.Threading;
 using DynamicData.Binding;
+using OpenUtau.App;
 using OpenUtau.App.Views;
 using OpenUtau.Core;
 using OpenUtau.Core.Ustx;
@@ -78,6 +79,7 @@ namespace OpenUtau.App.ViewModels {
         [Reactive] public bool ShowPianoRoll { get; set; }
         [Reactive] public double PianoRollMaxHeight { get; set; }
         [Reactive] public double PianoRollMinHeight { get; set; }
+        [Reactive] public bool UseClassicScrollbars { get; private set; }
         public ReactiveCommand<UPart, Unit> PartDeleteCommand { get; set; }
         public ReactiveCommand<int, Unit>? AddTempoChangeCmd { get; set; }
         public ReactiveCommand<int, Unit>? DelTempoChangeCmd { get; set; }
@@ -136,6 +138,13 @@ namespace OpenUtau.App.ViewModels {
                     PianoRollMaxHeight = x ? double.PositiveInfinity : 0;
                     PianoRollMinHeight = x ? ViewConstants.PianoRollMinHeight : 0;
                 });
+            RefreshScrollbarStylePreference();
+            MessageBus.Current.Listen<ScrollbarsStyleChangedEvent>()
+                .Subscribe(_ => RefreshScrollbarStylePreference());
+        }
+
+        public void RefreshScrollbarStylePreference() {
+            UseClassicScrollbars = Preferences.Default.UseClassicScrollbars;
         }
 
         public void Undo() {
@@ -222,14 +231,14 @@ namespace OpenUtau.App.ViewModels {
 
 
 
-        public void OpenProject(string[] files) {
+        public void OpenProject(string[] files, Core.Format.ProjectImportOptions? importOptions = null) {
             if (files == null) {
                 return;
             }
             DocManager.Inst.ExecuteCmd(new LoadingNotification(typeof(MainWindow), true, "project"));
             try {
 
-                Core.Format.Formats.LoadProject(files);
+                Core.Format.Formats.LoadProject(files, importOptions);
                 DocManager.Inst.ExecuteCmd(new VoiceColorRemappingNotification(-1, true));
                 this.RaisePropertyChanged(nameof(Title));
             } finally {

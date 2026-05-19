@@ -1,14 +1,14 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Controls;
-using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 using OpenUtau.App.ViewModels;
 using OpenUtau.Colors;
 using OpenUtau.Core;
+using Avalonia.Input;
 
 namespace OpenUtau.App.Views {
     public partial class PreferencesDialog : Window {
@@ -18,26 +18,35 @@ namespace OpenUtau.App.Views {
             InitializeComponent();
         }
 
-        void OnMetronomeSliderPointerPressed(object? sender, PointerPressedEventArgs e) {
-            if (sender is not Slider slider || viewModel == null) {
+        protected override void OnKeyDown(KeyEventArgs e) {
+            if (DataContext is PreferencesViewModel vm && vm.ActiveShortcut != null) {
+                // If they hit escape without modifiers, cancel listening
+                if (e.Key == Key.Escape && e.KeyModifiers == KeyModifiers.None) {
+                    vm.ActiveShortcut.IsListening = false;
+                    vm.ActiveShortcut.RefreshDisplay();
+                    vm.ActiveShortcut = null;
+                    e.Handled = true;
+                    return;
+                }
+
+                vm.AssignShortcut(e.Key, e.KeyModifiers);
+                e.Handled = true;
                 return;
             }
-            var point = e.GetCurrentPoint(slider);
-            if (!point.Properties.IsRightButtonPressed) {
-                return;
+
+            base.OnKeyDown(e);
+        }
+
+        public void OnShortcutRightClick(object sender, PointerReleasedEventArgs e) {
+            if (e.InitialPressMouseButton == MouseButton.Right && 
+                sender is Button btn && 
+                btn.DataContext is ShortcutItemViewModel item) {
+                
+                if (DataContext is PreferencesViewModel vm) {
+                    vm.ResetShortcut(item);
+                    e.Handled = true;
+                }
             }
-            switch (slider.Tag as string) {
-                case "MetronomeVolume":
-                    viewModel.ResetMetronomeVolume();
-                    break;
-                case "MetronomeHighFrequency":
-                    viewModel.ResetMetronomeHighFrequency();
-                    break;
-                case "MetronomeLowFrequency":
-                    viewModel.ResetMetronomeLowFrequency();
-                    break;
-            }
-            e.Handled = true;
         }
 
         void OpenSingersFolder(object sender, RoutedEventArgs e) {
@@ -143,47 +152,5 @@ namespace OpenUtau.App.Views {
             ((PreferencesViewModel)DataContext!).SetWinePath(winePath);
         }
 
-        void OpenCustomThemeEditor(object sender, RoutedEventArgs e) {
-            ThemeEditorWindow.Show(CustomTheme.Themes[viewModel!.ThemeName]);
-        }
-
-        void OnCustomThemeCreate(object sender, RoutedEventArgs e) {
-            var dialog = new TypeInDialog {
-                Title = ThemeManager.GetString("prefs.appearance.customtheme.create.title")
-            };
-            dialog.SetPrompt(ThemeManager.GetString("prefs.appearance.customtheme.create.prompt"));
-            dialog.onFinish = s => {
-                if (string.IsNullOrEmpty(s)) {
-                    MessageBox.ShowModal(this, 
-                        ThemeManager.GetString("prefs.appearance.customtheme.create.empty"),
-                        ThemeManager.GetString("prefs.appearance.customtheme.create.title"));
-                    return;
-                }
-
-                string filename = string.Join("", s.Where(c => Char.IsLetterOrDigit(c) || c == ' '))
-                                        .Replace(" ", "-").ToLower() + ".yaml";
-
-                var themeYaml = new CustomTheme.ThemeYaml { Name = s };
-
-                File.WriteAllText(Path.Join(PathManager.Inst.ThemesPath, filename),
-                    Yaml.DefaultSerializer.Serialize(themeYaml));
-                viewModel!.RefreshThemes();
-            };
-            dialog.ShowDialog(this);
-        }
-
-        async void OnCustomThemeDelete(object sender, RoutedEventArgs e) {
-            var result = await MessageBox.Show(
-                this,
-                ThemeManager.GetString("prefs.appearance.customtheme.delete.message"),
-                ThemeManager.GetString("prefs.appearance.customtheme.delete.title"),
-                MessageBox.MessageBoxButtons.YesNo);
-            if (result == MessageBox.MessageBoxResult.Yes) {
-                string previousTheme = viewModel!.ThemeItems.TakeWhile(x => x != viewModel!.ThemeName).LastOrDefault()!;
-                File.Delete(CustomTheme.Themes[viewModel!.ThemeName]);
-                viewModel!.RefreshThemes();
-                viewModel!.ThemeName = previousTheme;
-            }
-        }
     }
 }
