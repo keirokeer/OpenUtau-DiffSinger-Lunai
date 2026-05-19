@@ -49,10 +49,18 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - uses: repolevedavaj/install-nsis@v1.0.3
-        with:
-          nsis-version: '3.11'
-        if: ${{ matrix.arch.os == 'win' }}
+      - name: Install NSIS
+        if: matrix.arch.os == 'win'
+        shell: pwsh
+        run: |
+          if (Test-Path 'C:\Program Files (x86)\NSIS\makensis.exe') {
+            Write-Host 'NSIS already present on runner image.'
+          } else {
+            choco install nsis --version=3.11.0 -y --no-progress
+          }
+          Add-Content $env:GITHUB_PATH 'C:\Program Files (x86)\NSIS\Bin'
+          Add-Content $env:GITHUB_PATH 'C:\Program Files (x86)\NSIS'
+          & 'C:\Program Files (x86)\NSIS\makensis.exe' /VERSION
       - uses: justalemon/VersionPatcher@v0.7.1
         with:
           version: ${{ inputs.version }}
