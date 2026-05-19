@@ -58,10 +58,19 @@ jobs:
         with:
           node-version: 20
 
-      - uses: repolevedavaj/install-nsis@v1.0.3
-        with:
-          nsis-version: '3.11'
-        if: ${{ matrix.arch.os == 'win' }}
+      # SourceForge mirror used by repolevedavaj/install-nsis often returns a corrupt file on windows-2025.
+      - name: Install NSIS
+        if: matrix.arch.os == 'win'
+        shell: pwsh
+        run: |
+          if (Test-Path 'C:\Program Files (x86)\NSIS\makensis.exe') {
+            Write-Host 'NSIS already present on runner image.'
+          } else {
+            choco install nsis --version=3.11.0 -y --no-progress
+          }
+          Add-Content $env:GITHUB_PATH 'C:\Program Files (x86)\NSIS\Bin'
+          Add-Content $env:GITHUB_PATH 'C:\Program Files (x86)\NSIS'
+          & 'C:\Program Files (x86)\NSIS\makensis.exe' /VERSION
 
       - name: Patch Version
         uses: justalemon/VersionPatcher@v0.8
