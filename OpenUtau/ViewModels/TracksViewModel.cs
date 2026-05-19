@@ -54,6 +54,14 @@ namespace OpenUtau.App.ViewModels {
         public PartRedrawEvent(UPart part) { this.part = part; }
     }
 
+    /// <summary>Raised when the voice part loaded in the piano roll changes (including null).</summary>
+    public class PianoRollOpenPartChangedEvent {
+        public readonly UPart? Part;
+        public PianoRollOpenPartChangedEvent(UPart? part) {
+            Part = part;
+        }
+    }
+
     public class TracksViewModel : ViewModelBase, ICmdSubscriber {
         public UProject Project => DocManager.Inst.Project;
         [Reactive] public Rect Bounds { get; set; }
@@ -72,6 +80,12 @@ namespace OpenUtau.App.ViewModels {
         [Reactive] public double PlayPosHighlightX { get; set; }
         [Reactive] public double PlayPosHighlightWidth { get; set; }
         [Reactive] public bool PlayPosWaitingRendering { get; set; }
+        [Reactive] public bool UseSolidPlaybackLine { get; set; }
+        public bool ShowWidePlaybackHighlight => !UseSolidPlaybackLine;
+        /// <summary>Track row that has the part currently open in the piano roll; -1 if none.</summary>
+        [Reactive] public int PianoRollHighlightTrackNo { get; set; } = -1;
+        /// <summary>Voice part currently open in the piano roll; null if none.</summary>
+        [Reactive] public UPart? PianoRollOpenPart { get; set; }
         public double ViewportTicks => viewportTicks.Value;
         public double ViewportTracks => viewportTracks.Value;
         public double SmallChangeX => smallChangeX.Value;
@@ -135,6 +149,17 @@ namespace OpenUtau.App.ViewModels {
             TickWidth = ViewConstants.TickWidthDefault;
             TrackHeight = ViewConstants.TrackHeightDefault;
             Notify();
+
+            MessageBus.Current.Listen<PianoRollOpenPartChangedEvent>()
+                .Subscribe(e => PianoRollOpenPart = e.Part);
+
+            UseSolidPlaybackLine = Preferences.Default.UseSolidPlaybackLine;
+            MessageBus.Current.Listen<NotesViewModel.PlaybackLineModeChangedEvent>()
+                .Subscribe(e => {
+                    UseSolidPlaybackLine = e.UseSolidLine;
+                    this.RaisePropertyChanged(nameof(ShowWidePlaybackHighlight));
+                    SetPlayPos(DocManager.Inst.playPosTick, false);
+                });
 
             DocManager.Inst.AddSubscriber(this);
         }
@@ -422,9 +447,14 @@ namespace OpenUtau.App.ViewModels {
                 return;
             }
             PlayPosX = TickTrackToPoint(tick, 0).X;
-            TickToLineTick(tick, out int left, out int right);
-            PlayPosHighlightX = TickTrackToPoint(left, 0).X;
-            PlayPosHighlightWidth = (right - left) * TickWidth;
+            if (UseSolidPlaybackLine) {
+                PlayPosHighlightX = PlayPosX - 1;
+                PlayPosHighlightWidth = 2;
+            } else {
+                TickToLineTick(tick, out int left, out int right);
+                PlayPosHighlightX = TickTrackToPoint(left, 0).X;
+                PlayPosHighlightWidth = (right - left) * TickWidth;
+            }
         }
 
         public void OnNext(UCommand cmd, bool isUndo) {
@@ -484,6 +514,8 @@ namespace OpenUtau.App.ViewModels {
                     Tracks.Clear();
                     Tracks.AddRange(loadProjectNotif.project.tracks);
                     SelectedTracks.Clear();
+                    PianoRollHighlightTrackNo = -1;
+                    PianoRollOpenPart = null;
                     MessageBus.Current.SendMessage(new TracksRefreshEvent());
                     MessageBus.Current.SendMessage(new TrackSelectionEvent(SelectedTracks.ToArray()));
                 } else if (cmd is SetPlayPosTickNotification setPlayPosTick) {
@@ -499,6 +531,10 @@ namespace OpenUtau.App.ViewModels {
                     if (0 <= loadPartNotif.part.trackNo && loadPartNotif.part.trackNo < Project.tracks.Count) {
                         SelectTrack(Project.tracks[loadPartNotif.part.trackNo]);
                     }
+                    PianoRollHighlightTrackNo =
+                        loadPartNotif.part != null && loadPartNotif.part.trackNo >= 0 && loadPartNotif.part.trackNo < Project.tracks.Count
+                            ? loadPartNotif.part.trackNo
+                            : -1;
                 }
                 Notify();
             }

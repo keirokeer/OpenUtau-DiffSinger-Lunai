@@ -115,6 +115,7 @@ namespace OpenUtau.App.Controls {
         private Geometry pointGeometry;
 
         public readonly UPart part;
+        private readonly PartsCanvas partsCanvas;
         private readonly Pen notePen = new Pen(Brushes.White, 3);
         private readonly Pen fadePen = new Pen(Brushes.White);
         private List<IDisposable> unbinds = new List<IDisposable>();
@@ -123,6 +124,7 @@ namespace OpenUtau.App.Controls {
 
         public PartControl(UPart part, PartsCanvas canvas) {
             this.part = part;
+            partsCanvas = canvas;
             bitmapData = new int[0];
             pointGeometry = new EllipseGeometry(new Rect(0, 0, 6, 6));
 
@@ -157,6 +159,10 @@ namespace OpenUtau.App.Controls {
                 change.Property == TickWidthProperty) {
                 SetPosition();
             }
+            if (change.Property == TickOffsetProperty ||
+                change.Property == ViewWidthProperty) {
+                InvalidateVisual();
+            }
             if (change.Property == SelectedProperty ||
                 change.Property == TextProperty || 
                 change.Property == FadeInProperty ||
@@ -184,27 +190,64 @@ namespace OpenUtau.App.Controls {
         }
 
         public override void Render(DrawingContext context) {
-            IBrush backgroundBrush;
+            bool isOpenInPianoRoll = partsCanvas.PianoRollOpenPart == part;
+            const byte fillAlphaFull = 200;
+            const byte fillAlphaDim = 78;
+            const byte grayAlphaFull = 0xC8;
+            const byte grayAlphaDim = 0x52;
+            const double cornerRadius = 5;
+            const double headerHeight = 18;
+
+            const byte accentAlphaFull = 255;
+            const byte accentAlphaDim = 210;
+
+            Color bodyRgb = Color.FromRgb(0x52, 0x52, 0x52);
+            byte accentAlpha = isOpenInPianoRoll ? accentAlphaFull : accentAlphaDim;
+            byte bodyAlpha = isOpenInPianoRoll ? grayAlphaFull : grayAlphaDim;
             if (Core.Util.Preferences.Default.UseTrackColor && part != null) {
                 var project = DocManager.Inst.Project;
                 if (project != null && part.trackNo >= 0 && part.trackNo < project.tracks.Count) {
                     var track = project.tracks[part.trackNo];
-                    var tcolor = ThemeManager.GetTrackColor(track.TrackColor);
-                    var c = tcolor.NoteColor.Color;
-                    backgroundBrush = new SolidColorBrush(Color.FromArgb(190, c.R, c.G, c.B));
-                } else {
-                    backgroundBrush = new SolidColorBrush(Color.FromArgb(0xBF, 0x52, 0x52, 0x52));
+                    var note = ThemeManager.GetTrackColor(track.TrackColor).NoteColor.Color;
+                    bodyRgb = Color.FromRgb(note.R, note.G, note.B);
+                    bodyAlpha = isOpenInPianoRoll ? fillAlphaFull : fillAlphaDim;
                 }
-            } else {
-                backgroundBrush = new SolidColorBrush(Color.FromArgb(0xBF, 0x52, 0x52, 0x52));
             }
-            // Background
-            context.DrawRectangle(backgroundBrush, null, new Rect(1, 0, Width - 1, Height - 1), 6, 6);
+            var bodyBrush = new SolidColorBrush(Color.FromArgb(bodyAlpha, bodyRgb.R, bodyRgb.G, bodyRgb.B));
+            var accentBrush = new SolidColorBrush(Color.FromArgb(accentAlpha, bodyRgb.R, bodyRgb.G, bodyRgb.B));
+            var borderPen = new Pen(accentBrush, 1);
 
-            // Text
+            const double inset = 1;
+            var outerRect = new Rect(inset, inset, Math.Max(0, Width - 2 * inset), Math.Max(0, Height - 2 * inset));
+            var borderRect = new Rect(inset + 0.5, inset + 0.5,
+                Math.Max(0, Width - 2 * inset - 1), Math.Max(0, Height - 2 * inset - 1));
+            context.DrawRectangle(bodyBrush, null,
+                new RoundedRect(outerRect, new CornerRadius(cornerRadius)));
+
+            double visibleLeft = 0;
+            double visibleRight = outerRect.Width;
+            if (part != null) {
+                visibleLeft = Math.Max(0, (TickOffset - part.position) * TickWidth);
+                visibleRight = Math.Min(outerRect.Width,
+                    (TickOffset + ViewWidth / TickWidth - part.position) * TickWidth);
+            }
+            var headerRect = new Rect(outerRect.X, outerRect.Y, outerRect.Width, Math.Min(headerHeight, outerRect.Height));
+            if (visibleLeft > 0 && visibleLeft < outerRect.Width) {
+                double stickyHeaderWidth = Math.Max(0, visibleRight - visibleLeft);
+                headerRect = new Rect(outerRect.X + visibleLeft, outerRect.Y, stickyHeaderWidth, headerRect.Height);
+            }
+            double headerTopLeftRadius = Math.Abs(headerRect.X - outerRect.X) < 0.01 ? cornerRadius : 0;
+            double headerTopRightRadius = Math.Abs(headerRect.Right - outerRect.Right) < 0.01 ? cornerRadius : 0;
+            context.DrawRectangle(accentBrush, null,
+                new RoundedRect(headerRect, new CornerRadius(headerTopLeftRadius, headerTopRightRadius, 0, 0)));
+            context.DrawRectangle(null, borderPen, borderRect, cornerRadius, cornerRadius);
+
             var textLayout = TextLayoutCache.Get(Text, Brushes.White, 12);
-            using (var state = context.PushTransform(Matrix.CreateTranslation(3, 2))) {
-                textLayout.Draw(context, new Point());
+            double labelX = outerRect.X + Math.Max(6, visibleLeft + 6);
+            using (var clip = context.PushClip(new Rect(visibleLeft, 0, Math.Max(0, visibleRight - visibleLeft), outerRect.Height))) {
+                using (var state = context.PushTransform(Matrix.CreateTranslation(labelX, outerRect.Y + 2))) {
+                    textLayout.Draw(context, new Point());
+                }
             }
 
             if (part == null) {
@@ -231,7 +274,7 @@ namespace OpenUtau.App.Controls {
                     DrawWaveform(wavePart, GetBitmap(ViewWidth));
                     if (bitmap != null) {
                         var srcRect = Bounds.WithY(0);
-                        var dstRect = Bounds.WithX(1).WithY(0);
+                        var dstRect = Bounds.WithX(inset).WithY(inset).WithWidth(Math.Max(0, Bounds.Width - 2 * inset)).WithHeight(Math.Max(0, Bounds.Height - 2 * inset));
                         context.DrawImage(bitmap, srcRect, dstRect);
                     }
                 } catch (Exception e) {

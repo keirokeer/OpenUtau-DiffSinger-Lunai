@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Avalonia;
 using Avalonia.Controls;
@@ -56,10 +56,44 @@ namespace OpenUtau.App.Controls {
 
         public TrackHeader() {
             InitializeComponent();
+            SingersMenu.ContainerPrepared += OnSingersMenuContainerPrepared;
+            PhonemizersMenu.ContainerPrepared += OnPhonemizersMenuContainerPrepared;
+            SyncAvatarChromeSize();
+        }
+
+        void OnSingersMenuContainerPrepared(object? sender, ContainerPreparedEventArgs e) {
+            if (e.Container is not MenuItem menuItem) {
+                return;
+            }
+            switch (menuItem.DataContext) {
+                case SingerMenuItemViewModel:
+                    menuItem.Classes.Set("singerMenuItem", true);
+                    break;
+                case MenuSeparatorViewModel:
+                    menuItem.Classes.Set("singerMenuSpacer", true);
+                    break;
+            }
+        }
+
+        void OnPhonemizersMenuContainerPrepared(object? sender, ContainerPreparedEventArgs e) {
+            if (e.Container is not MenuItem menuItem) {
+                return;
+            }
+            switch (menuItem.DataContext) {
+                case PhonemizerMenuItemViewModel phonemizer:
+                    menuItem.Header = phonemizer;
+                    break;
+                case PhonemizerMenuSeparatorViewModel:
+                    menuItem.Classes.Set("phonemizerMenuSeparator", true);
+                    break;
+            }
         }
 
         protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change) {
             base.OnPropertyChanged(change);
+            if (change.Property == TrackHeightProperty) {
+                SyncAvatarChromeSize();
+            }
             if (change.Property == OffsetProperty ||
                 change.Property == TrackNoProperty ||
                 change.Property == TrackHeightProperty) {
@@ -76,6 +110,17 @@ namespace OpenUtau.App.Controls {
             SetPosition();
         }
 
+        void SyncAvatarChromeSize() {
+            if (AvatarChrome is null) {
+                return;
+            }
+            const double cap = 101;
+            double h = TrackHeight;
+            double side = h > 0 ? Math.Min(h, cap) : cap;
+            AvatarChrome.Width = side;
+            AvatarChrome.Height = side;
+        }
+
         private void SetPosition() {
             Canvas.SetLeft(this, 0);
             Canvas.SetTop(this, Offset.Y + (track?.TrackNo ?? 0) * trackHeight);
@@ -87,6 +132,13 @@ namespace OpenUtau.App.Controls {
         }
 
         void HeaderPointerPressed(object? sender, PointerPressedEventArgs args) {
+            if (args.Handled) {
+                return;
+            }
+            SelectTrackFromPointer(args);
+        }
+
+        void SelectTrackFromPointer(PointerEventArgs args) {
             if (!args.GetCurrentPoint(this).Properties.IsLeftButtonPressed ||
                 track == null ||
                 canvas?.DataContext is not TracksViewModel tracksViewModel) {
@@ -99,6 +151,14 @@ namespace OpenUtau.App.Controls {
             } else {
                 tracksViewModel.SelectTrack(track);
             }
+        }
+
+        void TrackNoBadgePointerPressed(object? sender, PointerPressedEventArgs args) {
+            SelectTrackFromPointer(args);
+            if (track != null && canvas != null) {
+                canvas.BeginTrackReorder(track, this, args);
+            }
+            args.Handled = true;
         }
 
         void TrackNameButtonClicked(object sender, RoutedEventArgs args) {
@@ -243,6 +303,7 @@ namespace OpenUtau.App.Controls {
         }
 
         public void Dispose() {
+            SingersMenu.ContainerPrepared -= OnSingersMenuContainerPrepared;
             unbinds.ForEach(u => u.Dispose());
             unbinds.Clear();
         }

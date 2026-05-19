@@ -35,6 +35,11 @@ namespace OpenUtau.App.Controls {
                 nameof(Key),
                 o => o.Key,
                 (o, v) => o.Key = v);
+        public static readonly DirectProperty<TrackBackground, int> PianoRollHighlightTrackNoProperty =
+            AvaloniaProperty.RegisterDirect<TrackBackground, int>(
+                nameof(PianoRollHighlightTrackNo),
+                o => o.PianoRollHighlightTrackNo,
+                (o, v) => o.PianoRollHighlightTrackNo = v);
 
         public double TrackHeight {
             get => _trackHeight;
@@ -50,11 +55,15 @@ namespace OpenUtau.App.Controls {
         }
         public bool IsKeyboard {
             get => _isKeyboard;
-            set => SetAndRaise(IsPianoRollProperty, ref _isKeyboard, value);
+            set => SetAndRaise(IsKeyboardProperty, ref _isKeyboard, value);
         }
         public int Key {
             get => _key;
             set => SetAndRaise(KeyProperty, ref _key, value);
+        }
+        public int PianoRollHighlightTrackNo {
+            get => _pianoRollHighlightTrackNo;
+            set => SetAndRaise(PianoRollHighlightTrackNoProperty, ref _pianoRollHighlightTrackNo, value);
         }
 
         private double _trackHeight;
@@ -62,6 +71,7 @@ namespace OpenUtau.App.Controls {
         private bool _isPianoRoll;
         private bool _isKeyboard;
         private int _key;
+        private int _pianoRollHighlightTrackNo = -1;
 
         public TrackBackground() {
             MessageBus.Current.Listen<ThemeChangedEvent>()
@@ -74,7 +84,8 @@ namespace OpenUtau.App.Controls {
                 change.Property == TrackOffsetProperty ||
                 change.Property == ForegroundProperty ||
                 change.Property == BackgroundProperty ||
-                change.Property == KeyProperty) {
+                change.Property == KeyProperty ||
+                change.Property == PianoRollHighlightTrackNoProperty) {
                 InvalidateVisual();
             }
         }
@@ -107,10 +118,16 @@ namespace OpenUtau.App.Controls {
                 var brush = isCenterKey ? ThemeManager.CenterKeyBrush
                     : IsKeyboard ? (isAltTrack ? ThemeManager.BlackKeyBrush : ThemeManager.WhiteKeyBrush)
                     : isAltTrack ? Foreground : Background;
+                var rowRect = new Rect(0, (int)top, Bounds.Width, TrackHeight);
                 context.DrawRectangle(
                     brush,
                     null,
-                    new Rect(0, (int)top, Bounds.Width, TrackHeight));
+                    rowRect);
+                if (!IsKeyboard && !IsPianoRoll && track == PianoRollHighlightTrackNo && PianoRollHighlightTrackNo >= 0) {
+                    using (context.PushClip(rowRect)) {
+                        context.DrawRectangle(null, ThemeManager.NoteBorderPen, rowRect);
+                    }
+                }
                 if (IsKeyboard && TrackHeight >= 12) {
                     brush = isCenterKey ? ThemeManager.CenterKeyNameBrush
                         : isAltTrack ? ThemeManager.BlackKeyNameBrush
