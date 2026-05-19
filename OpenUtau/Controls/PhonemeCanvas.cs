@@ -111,8 +111,7 @@ namespace OpenUtau.App.Controls {
                 return;
             }
             bool diffSingerMode = Preferences.Default.DiffSingerPhonemePanelMode;
-            // Use same brushes as expressions panel: base = BackgroundBrush (SystemRegionBrush), alt = TrackBackgroundAltBrush
-            var bgBrush = diffSingerMode ? ThemeManager.BackgroundBrush : Background;
+            var bgBrush = Background;
             context.DrawRectangle(bgBrush, null, Bounds.WithX(0).WithY(0));
             double leftTick = TickOffset - 480;
             double rightTick = TickOffset + Bounds.Width / TickWidth + 480;
@@ -221,7 +220,7 @@ namespace OpenUtau.App.Controls {
                             var bold = phoneme.phoneme != phoneme.rawPhoneme;
                             const int fontSize = 14;
                             // Tag above bars (in tag strip)
-                            if (!string.IsNullOrEmpty(tagText)) {
+                            if (!Preferences.Default.DiffSingerLangCodeHide && !string.IsNullOrEmpty(tagText)) {
                                 var tagRect = new Rect(xLeft, 0, barWidth, tagStripHeight);
                                 using (context.PushClip(tagRect)) {
                                     var tagLayout = TextLayoutCache.Get(tagText, brush, fontSize, false);
@@ -249,7 +248,7 @@ namespace OpenUtau.App.Controls {
                                 var pen = mouseoverPhoneme == phoneme ? ThemeManager.AccentPen1Thickness2
                                     : phoneme.Error ? ErrorPen
                                     : ThemeManager.NeutralAccentPenSemi;
-                                context.DrawRectangle(ThemeManager.BackgroundBrush, pen, new Rect(new Point(-2, 1.5), size), 4, 4);
+                                context.DrawRectangle(ThemeManager.BackgroundBrush, pen, new Rect(new Point(-2, 1.5), size), 6, 6);
                                 textLayout.Draw(context, new Point());
                             }
                         }

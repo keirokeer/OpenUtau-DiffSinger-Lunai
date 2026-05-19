@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Avalonia;
@@ -217,27 +217,29 @@ namespace OpenUtau.App.Views {
 
     class NoteDrawEditState : NoteEditState {
         private UNote? note;
-        private bool playTone;
         private int activeTone;
+        private bool tonePlaying;
         protected override string? commandNameKey => "command.note.add";
 
         public NoteDrawEditState(
             Control control,
             PianoRollViewModel vm,
-            IValueTip valueTip,
-            bool playTone) : base(control, vm, valueTip) {
-            this.playTone = playTone;
+            IValueTip valueTip) : base(control, vm, valueTip) {
         }
         public override void Begin(IPointer pointer, Point point) {
             base.Begin(pointer, point);
             note = vm.NotesViewModel.MaybeAddNote(point, false);
-            if (note != null && playTone) {
-                if (PlaybackManager.Inst.PlayingMaster) {
-                    // Stop playback if playing project
-                    PlaybackManager.Inst.StopPlayback();
-                }
+            tonePlaying = false;
+            if (note != null) {
                 activeTone = note.tone;
-                PlaybackManager.Inst.PlayTone(MusicMath.ToneToFreq(note.tone));
+                if (vm.NotesViewModel.PlayTone) {
+                    if (PlaybackManager.Inst.PlayingMaster) {
+                        // Stop playback if playing project
+                        PlaybackManager.Inst.StopPlayback();
+                    }
+                    tonePlaying = true;
+                    PlaybackManager.Inst.PlayTone(MusicMath.ToneToFreq(note.tone));
+                }
             }
         }
         public override void Update(IPointer pointer, Point point) {
@@ -252,9 +254,14 @@ namespace OpenUtau.App.Views {
             }
             int tone = notesVm.PointToTone(point);
             if (activeTone != tone) {
-                // Tone has changed
-                PlaybackManager.Inst.EndTone(MusicMath.ToneToFreq(activeTone));
-                PlaybackManager.Inst.PlayTone(MusicMath.ToneToFreq(tone));
+                if (tonePlaying) {
+                    PlaybackManager.Inst.EndTone(MusicMath.ToneToFreq(activeTone));
+                    tonePlaying = false;
+                }
+                if (vm.NotesViewModel.PlayTone) {
+                    tonePlaying = true;
+                    PlaybackManager.Inst.PlayTone(MusicMath.ToneToFreq(tone));
+                }
                 activeTone = tone;
             }
             int deltaTone = tone - note.tone;
@@ -290,7 +297,10 @@ namespace OpenUtau.App.Views {
         }
         public override void End(IPointer pointer, Point point) {
             base.End(pointer, point);
-            PlaybackManager.Inst.EndTone(MusicMath.ToneToFreq(activeTone));
+            if (tonePlaying) {
+                PlaybackManager.Inst.EndTone(MusicMath.ToneToFreq(activeTone));
+                tonePlaying = false;
+            }
         }
     }
 

@@ -73,6 +73,8 @@ namespace OpenUtau.App.Controls {
         private CurveSelection curveSelection = new CurveSelection();
         private Geometry pointGeometry;
         private Geometry circleGeometry;
+        private string? cachedFillBrushKey;
+        private IBrush? cachedFillBrush;
 
         public ExpressionCanvas() {
             ClipToBounds = true;
@@ -92,10 +94,25 @@ namespace OpenUtau.App.Controls {
                     curveSelection = e.selection;
                     InvalidateVisual();
                 });
+            MessageBus.Current.Listen<ThemeChangedEvent>()
+                .Subscribe(_ => {
+                    cachedFillBrush = null;
+                    cachedFillBrushKey = null;
+                    InvalidateVisual();
+                });
+            MessageBus.Current.Listen<ExpressionCurveStyleChangedEvent>()
+                .Subscribe(_ => InvalidateVisual());
         }
 
         protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change) {
             base.OnPropertyChanged(change);
+            if (change.Property == PartProperty ||
+                change.Property == KeyProperty ||
+                change.Property == TickWidthProperty ||
+                change.Property == TickOffsetProperty) {
+                cachedFillBrush = null;
+                cachedFillBrushKey = null;
+            }
             InvalidateVisual();
         }
 
@@ -136,13 +153,21 @@ namespace OpenUtau.App.Controls {
             if (descriptor.type == UExpressionType.Curve) {
                 var curve = Part.curves.FirstOrDefault(c => c.descriptor == descriptor);
                 double defaultHeight = Math.Round(Bounds.Height - Bounds.Height * (descriptor.defaultValue - descriptor.min) / (descriptor.max - descriptor.min));
+                Color curveFillColor = useTrackColor
+                    ? tcolor.AccentColor.Color
+                    : ((SolidColorBrush)ThemeManager.AccentBrush1).Color;
                 var lPenSelected = useTrackColorForCurve ? new Pen(tcolor.AccentColorDark, 1) : ThemeManager.AccentPen2;
                 var lPen2Selected = useTrackColorForCurve ? new Pen(tcolor.AccentColorDark, 2) : ThemeManager.AccentPen2Thickness2;
-                var lPen3 = new Pen(ThemeManager.NeutralAccentBrush, 1, new DashStyle(new double[] { 4, 4 }, 0));
+                IBrush defaultLineBrush = Preferences.Default.SolidExpPanelGridLines
+                    ? HalveEffectiveOpacity(ThemeManager.NeutralAccentBrush)
+                    : ThemeManager.NeutralAccentBrush;
+                var defaultValuePen = Preferences.Default.SolidExpPanelGridLines
+                    ? new Pen(defaultLineBrush, 1)
+                    : new Pen(ThemeManager.NeutralAccentBrush, 1, new DashStyle(new double[] { 4, 4 }, 0));
                 var brush = accentBrush;
                 double x3 = Math.Round(viewModel.TickToneToPoint(leftTick, 0).X);
                 double x4 = Math.Round(viewModel.TickToneToPoint(rightTick, 0).X);
-                context.DrawLine(lPen3, new Point(x3, defaultHeight), new Point(x4, defaultHeight));
+                context.DrawLine(defaultValuePen, new Point(x3, defaultHeight), new Point(x4, defaultHeight));
 
                 curveSelection.GetWholeCurveAndSelection(descriptor.abbr, curve, out List<int> xs, out List<int> ys);
                 if (curve == null) {
@@ -172,6 +197,9 @@ namespace OpenUtau.App.Controls {
                     index = -index - 1;
                 }
                 index = Math.Max(0, index) - 1;
+                if (ShowRealCurve) {
+                    DrawCurveValueFill(context, viewModel, descriptor, xs, ys, defaultHeight, lTick, rTick, index, curveFillColor);
+                }
                 while (index < xs.Count) {
                     float tick1 = index < 0 ? lTick : xs[index];
                     float value1 = index < 0 ? descriptor.defaultValue : ys[index];
@@ -193,9 +221,6 @@ namespace OpenUtau.App.Controls {
                         pen = value1 == descriptor.defaultValue && value2 == descriptor.defaultValue ? lPen : lPen2;
                     }
                     context.DrawLine(pen, new Point(x1, y1), new Point(x2, y2));
-                    //using (var state = context.PushTransform(Matrix.CreateTranslation(x1, y1))) {
-                    //    context.DrawGeometry(brush, null, pointGeometry);
-                    //}
                     index++;
                     if (tick2 >= rTick) {
                         break;
@@ -246,7 +271,10 @@ namespace OpenUtau.App.Controls {
                             }
                         }
                         geometry.Figures!.Add(figure);
-                        context.DrawGeometry(ThemeManager.RealCurveFillBrush, ThemeManager.RealCurvePen, geometry);
+                        var realCurvePen = Preferences.Default.SolidExpPanelGridLines
+                            ? new Pen(ThemeManager.RealCurveStrokeBrush, ThemeManager.RealCurvePen.Thickness)
+                            : ThemeManager.RealCurvePen;
+                        context.DrawGeometry(ThemeManager.RealCurveFillBrush, realCurvePen, geometry);
                         offset = end;
                     }
                 }
@@ -317,6 +345,97 @@ namespace OpenUtau.App.Controls {
 
         private void DrawBackgroundForHitTest(DrawingContext context) {
             context.DrawRectangle(Brushes.Transparent, null, Bounds.WithX(0).WithY(0));
+        }
+
+        IBrush GetCurveFillBrush(double defaultHeight, Color color) {
+            double w = Bounds.Width;
+            double h = Bounds.Height;
+            string key = $"{w:R}:{h:R}:{defaultHeight:R}:{color}";
+            if (cachedFillBrush != null && cachedFillBrushKey == key) {
+                return cachedFillBrush;
+            }
+            // Absolute coordinates so each fill segment samples the same panel-wide gradient
+            // (RelativeUnit.Relative maps to each geometry's bounds and causes 100%-0%-100% bands).
+            double defaultOffset = h > 0 ? Math.Clamp(defaultHeight / h, 0, 1) : 0.5;
+            byte peakAlpha = (byte)Math.Clamp((int)Math.Round(color.A * 0.25), 0, 255);
+            var peak = Color.FromArgb(peakAlpha, color.R, color.G, color.B);
+            var transparent = Color.FromArgb(0, color.R, color.G, color.B);
+            var brush = new LinearGradientBrush {
+                StartPoint = new RelativePoint(w * 0.5, 0, RelativeUnit.Absolute),
+                EndPoint = new RelativePoint(w * 0.5, h, RelativeUnit.Absolute),
+                GradientStops = new GradientStops {
+                    new GradientStop(peak, 0),
+                    new GradientStop(transparent, defaultOffset),
+                    new GradientStop(peak, 1),
+                },
+            };
+            cachedFillBrushKey = key;
+            cachedFillBrush = brush;
+            return brush;
+        }
+
+        void DrawCurveValueFill(DrawingContext context, NotesViewModel viewModel, UExpressionDescriptor descriptor,
+            List<int> xs, List<int> ys, double defaultHeight, int lTick, int rTick, int startIndex, Color fillColor) {
+            const double eps = 0.5;
+            var figures = new PathFigures();
+            int index = startIndex;
+            while (index < xs.Count) {
+                float tick1 = index < 0 ? lTick : xs[index];
+                float value1 = index < 0 ? descriptor.defaultValue : ys[index];
+                double x1 = viewModel.TickToneToPoint(tick1, 0).X;
+                double y1 = defaultHeight - Bounds.Height * (value1 - descriptor.defaultValue) / (descriptor.max - descriptor.min);
+                float tick2 = index == xs.Count - 1 ? rTick : xs[index + 1];
+                float value2 = index == xs.Count - 1 ? descriptor.defaultValue : ys[index + 1];
+                double x2 = viewModel.TickToneToPoint(tick2, 0).X;
+                double y2 = defaultHeight - Bounds.Height * (value2 - descriptor.defaultValue) / (descriptor.max - descriptor.min);
+                var p1 = new Point(x1, y1);
+                var p2 = new Point(x2, y2);
+                if (Math.Abs(p1.Y - defaultHeight) >= eps || Math.Abs(p2.Y - defaultHeight) >= eps) {
+                    AddCurveFillSegment(figures, p1, p2, defaultHeight);
+                }
+                index++;
+                if (tick2 >= rTick) {
+                    break;
+                }
+            }
+            if (figures.Count == 0) {
+                return;
+            }
+            context.DrawGeometry(GetCurveFillBrush(defaultHeight, fillColor), null, new PathGeometry { Figures = figures });
+        }
+
+        static void AddCurveFillSegment(PathFigures figures, Point p1, Point p2, double defaultY) {
+            const double eps = 0.5;
+            if (Math.Abs(p1.Y - defaultY) < eps && Math.Abs(p2.Y - defaultY) < eps) {
+                return;
+            }
+            if ((p1.Y - defaultY) * (p2.Y - defaultY) < 0) {
+                double t = (defaultY - p1.Y) / (p2.Y - p1.Y);
+                double xc = p1.X + t * (p2.X - p1.X);
+                var cross = new Point(xc, defaultY);
+                AddCurveFillSegment(figures, p1, cross, defaultY);
+                AddCurveFillSegment(figures, cross, p2, defaultY);
+                return;
+            }
+            figures.Add(new PathFigure {
+                StartPoint = new Point(p1.X, defaultY),
+                IsClosed = true,
+                Segments = new PathSegments {
+                    new LineSegment { Point = p1 },
+                    new LineSegment { Point = p2 },
+                    new LineSegment { Point = new Point(p2.X, defaultY) },
+                },
+            });
+        }
+
+        static IBrush HalveEffectiveOpacity(IBrush brush) {
+            if (brush is not SolidColorBrush scb) {
+                return brush;
+            }
+            var c = scb.Color;
+            double effective = (c.A / 255.0) * scb.Opacity * 0.5;
+            byte newA = (byte)Math.Clamp((int)Math.Round(effective * 255.0), 0, 255);
+            return new SolidColorBrush(Color.FromArgb(newA, c.R, c.G, c.B));
         }
     }
 }

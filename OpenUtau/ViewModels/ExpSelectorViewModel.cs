@@ -1,10 +1,12 @@
-﻿using System;
+using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive.Linq;
 using Avalonia.Media;
 using OpenUtau.App.Controls;
 using OpenUtau.Core;
+using OpenUtau.Core.Render;
 using OpenUtau.Core.Ustx;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -30,6 +32,7 @@ namespace OpenUtau.App.ViewModels {
 
         ObservableCollection<UExpressionDescriptor> descriptors = new ObservableCollection<UExpressionDescriptor>();
         ObservableAsPropertyHelper<string> header;
+        int currentTrackNo = -1;
 
         public ExpSelectorViewModel() {
             DocManager.Inst.AddSubscriber(this);
@@ -84,9 +87,15 @@ namespace OpenUtau.App.ViewModels {
         }
 
         public void OnNext(UCommand cmd, bool isUndo) {
-            if (cmd is LoadProjectNotification ||
-                cmd is LoadPartNotification ||
-                cmd is ConfigureExpressionsCommand) {
+            if (cmd is LoadProjectNotification) {
+                currentTrackNo = -1;
+                OnListChange();
+            } else if (cmd is LoadPartNotification loadPart) {
+                currentTrackNo = loadPart.part.trackNo;
+                OnListChange();
+            } else if (cmd is ConfigureExpressionsCommand ||
+                cmd is ValidateProjectNotification ||
+                cmd is SingersRefreshedNotification) {
                 OnListChange();
             } else if (cmd is SelectExpressionNotification) {
                 OnSelectExp((SelectExpressionNotification)cmd);
@@ -95,12 +104,32 @@ namespace OpenUtau.App.ViewModels {
 
         private void OnListChange() {
             var selectedIndex = SelectedIndex;
+            var savedAbbr = Descriptor?.abbr ?? DocManager.Inst.Project.expSelectors[Index];
             Descriptors.Clear();
-            DocManager.Inst.Project.expressions.Values.ToList().ForEach(Descriptors.Add);
-            if (selectedIndex >= descriptors.Count) {
-                selectedIndex = Index;
+            foreach (var descriptor in GetVisibleDescriptors(currentTrackNo)) {
+                Descriptors.Add(descriptor);
             }
-            SelectedIndex = selectedIndex;
+            if (Descriptors.Count == 0) {
+                return;
+            }
+            if (!string.IsNullOrEmpty(savedAbbr) && Descriptors.Any(d => d.abbr == savedAbbr)) {
+                SelectedIndex = Descriptors.IndexOf(Descriptors.First(d => d.abbr == savedAbbr));
+            } else if (selectedIndex >= Descriptors.Count) {
+                SelectedIndex = Math.Min(Index, Descriptors.Count - 1);
+            } else {
+                SelectedIndex = selectedIndex;
+            }
+        }
+
+        static IEnumerable<UExpressionDescriptor> GetVisibleDescriptors(int trackNo) {
+            var project = DocManager.Inst.Project;
+            if (trackNo >= 0 && trackNo < project.tracks.Count) {
+                var track = project.tracks[trackNo];
+                if (track.RendererSettings.Renderer?.SingerType == USingerType.DiffSinger) {
+                    return track.GetSupportedExps(project);
+                }
+            }
+            return project.expressions.Values;
         }
 
         private void OnSelectExp(SelectExpressionNotification cmd) {
