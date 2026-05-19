@@ -21,6 +21,7 @@ namespace OpenUtau.App.Views {
             DataContext = pianoRoll.DataContext;
 
             PianoRollContainer.Content = pianoRoll;
+            Opened += (_, _) => pianoRoll.NotifyDetachedLayoutChanged();
 
             if (Preferences.Default.PianorollWindowSize.TryGetPosition(out int x, out int y)) {
                 Position = new PixelPoint(x, y);

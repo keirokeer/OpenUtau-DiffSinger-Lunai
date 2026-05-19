@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
+using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Threading;
 using DynamicData.Binding;
@@ -47,6 +49,7 @@ namespace OpenUtau.App.ViewModels {
         [Reactive] public NotesViewModel NotesViewModel { get; set; }
         [Reactive] public PlaybackViewModel? PlaybackViewModel { get; set; }
         [Reactive] public CurveViewModel CurveViewModel { get; set; }
+        [Reactive] public Dictionary<string, string> Hotkeys { get; set; } = new Dictionary<string, string>();
 
         public double Width => Preferences.Default.PianorollWindowSize.Width;
         public double Height => Preferences.Default.PianorollWindowSize.Height;
@@ -57,6 +60,7 @@ namespace OpenUtau.App.ViewModels {
         public bool ShowPortrait { get => Preferences.Default.ShowPortrait; }
         public bool ShowIcon { get => Preferences.Default.ShowIcon; }
         public bool ShowGhostNotes { get => Preferences.Default.ShowGhostNotes; }
+        public bool ShowNoteBorder { get => Preferences.Default.ShowNoteBorder; }
         public bool UseTrackColor { get => Preferences.Default.UseTrackColor; }
         public bool DegreeStyle0 { get => Preferences.Default.DegreeStyle == 0 ? true : false; }
         public bool DegreeStyle1 { get => Preferences.Default.DegreeStyle == 1 ? true : false; }
@@ -68,6 +72,21 @@ namespace OpenUtau.App.ViewModels {
         public bool PlaybackAutoScroll1 { get => Preferences.Default.PlaybackAutoScroll == 1 ? true : false; }
         public bool PlaybackAutoScroll2 { get => Preferences.Default.PlaybackAutoScroll == 2 ? true : false; }
         public bool PianoRollDetached { get => Preferences.Default.DetachPianoRoll; }
+        public bool IsSidePanelVisible => !PianoRollDetached;
+        public bool IsAppearancePanelVisible => ShowAppearancePanel && !PianoRollDetached;
+        public GridLength PianoRollSideColumnWidth => PianoRollDetached ? new GridLength(0) : new GridLength(48);
+        public GridLength PianoRollSideGapWidth => PianoRollDetached ? new GridLength(0) : new GridLength(8);
+        [Reactive] public bool ShowAppearancePanel { get; set; }
+        PreferencesViewModel? appearancePreferences;
+        public PreferencesViewModel AppearancePreferences =>
+            appearancePreferences ??= new PreferencesViewModel();
+        public GridLength AppearancePanelLeadingGapWidth =>
+            PianoRollDetached || !ShowAppearancePanel ? new GridLength(0) : new GridLength(8);
+        public GridLength AppearancePanelColumnWidth =>
+            PianoRollDetached || !ShowAppearancePanel ? new GridLength(0) : new GridLength(300);
+        public ReactiveCommand<Unit, Unit> ApplyDiffSingerQualityPresetCommand { get; }
+        public ReactiveCommand<Unit, Unit> ApplyDiffSingerMediumPresetCommand { get; }
+        public ReactiveCommand<Unit, Unit> ApplyDiffSingerLowPresetCommand { get; }
         public bool ShowPhonemizerTags {
             get => Preferences.Default.ShowPhonemizerTags;
             set {
@@ -84,6 +103,17 @@ namespace OpenUtau.App.ViewModels {
         [Reactive] public int PenToolIndex { get; set; } = Preferences.Default.EditTool.PenToolVariation;
         [Reactive] public int DrawPitchToolIndex { get; set; } = Preferences.Default.EditTool.DrawPitchToolVariation;
         [Reactive] public int DrawLinePitchToolIndex { get; set; } = Preferences.Default.EditTool.DrawLinePitchToolVariation;
+        [Reactive] public bool PitchFocusDim { get; private set; }
+
+        public bool CursorTool => ToolIndex == 0;
+        public bool PenTool => ToolIndex == 1 && PenToolIndex == 0;
+        public bool PenPlusTool => ToolIndex == 1 && PenToolIndex == 1;
+        public bool EraserTool => ToolIndex == 2;
+        public bool DrawPitchTool => ToolIndex == 3 && DrawPitchToolIndex == 0;
+        public bool OverwritePitchTool => ToolIndex == 3 && DrawPitchToolIndex == 1;
+        public bool DrawLinePitchTool => ToolIndex == 4 && DrawLinePitchToolIndex == 0;
+        public bool OverwriteLinePitchTool => ToolIndex == 4 && DrawLinePitchToolIndex == 1;
+        public bool KnifeTool => ToolIndex == 5;
 
         public ObservableCollectionExtended<MenuItemViewModel> LegacyPlugins { get; private set; }
             = new ObservableCollectionExtended<MenuItemViewModel>();
@@ -120,9 +150,42 @@ namespace OpenUtau.App.ViewModels {
 
         private ReactiveCommand<Classic.Plugin, Unit> legacyPluginCommand;
 
+        public void ReloadShortcuts() {
+            var newHotkeys = new Dictionary<string, string>();
+            
+            foreach (var sc in Preferences.Default.Shortcuts) {
+                Enum.TryParse<KeyModifiers>(sc.ModifiersName, out var parsedMods);
+                
+                string mods = KeyTranslator.GetFriendlyModifiersName(parsedMods);
+                string key = KeyTranslator.GetFriendlyName(sc.KeyName); 
+                
+                if (string.IsNullOrEmpty(mods) || sc.ModifiersName == "None") {
+                    newHotkeys[sc.ActionId] = key;
+                } else {
+                    // Mac gets no separator, Windows gets standard "+" for menus
+                    newHotkeys[sc.ActionId] = KeyTranslator.IsMac ? $"{mods}{key}" : $"{mods.Replace(" + ", "+")}+{key}";
+                }
+            }
+            
+            Hotkeys = newHotkeys;
+        }
+
         public PianoRollViewModel() {
+            ReloadShortcuts();
             NotesViewModel = new NotesViewModel();
             CurveViewModel = new CurveViewModel();
+            ShowAppearancePanel = Preferences.Default.ShowAppearancePanel;
+            ApplyDiffSingerQualityPresetCommand = ReactiveCommand.Create(() => ApplyDiffSingerRenderPreset(0));
+            ApplyDiffSingerMediumPresetCommand = ReactiveCommand.Create(() => ApplyDiffSingerRenderPreset(1));
+            ApplyDiffSingerLowPresetCommand = ReactiveCommand.Create(() => ApplyDiffSingerRenderPreset(2));
+            this.WhenAnyValue(vm => vm.ShowAppearancePanel)
+                .Subscribe(show => {
+                    Preferences.Default.ShowAppearancePanel = show;
+                    Preferences.Save();
+                    this.RaisePropertyChanged(nameof(IsAppearancePanelVisible));
+                    this.RaisePropertyChanged(nameof(AppearancePanelLeadingGapWidth));
+                    this.RaisePropertyChanged(nameof(AppearancePanelColumnWidth));
+                });
 
             this.WhenAnyValue(vm => vm.ToolIndex)
                 .Subscribe(index => EditTool.BaseTool = index);
@@ -132,6 +195,9 @@ namespace OpenUtau.App.ViewModels {
                 .Subscribe(index => EditTool.DrawPitchToolVariation = index);
             this.WhenAnyValue(vm => vm.DrawLinePitchToolIndex)
                 .Subscribe(index => EditTool.DrawLinePitchToolVariation = index);
+            this.WhenAnyValue(vm => vm.ToolIndex, vm => vm.DrawPitchToolIndex, vm => vm.DrawLinePitchToolIndex)
+                .Subscribe(_ => UpdatePitchFocusDim());
+            UpdatePitchFocusDim();
 
             NoteDeleteCommand = ReactiveCommand.Create<NoteHitInfo>(info => {
                 NotesViewModel.DeleteSelectedNotes();
@@ -218,6 +284,8 @@ namespace OpenUtau.App.ViewModels {
                 }
             });
             LoadLegacyPlugins();
+            MessageBus.Current.Listen<ShortcutsRefreshEvent>()
+                .Subscribe(_ => ReloadShortcuts());
             DocManager.Inst.AddSubscriber(this);
         }
 
@@ -238,32 +306,27 @@ namespace OpenUtau.App.ViewModels {
 
         private void LoadLegacyPlugins() {
             LegacyPlugins.Clear();
+            
             LegacyPlugins.AddRange(DocManager.Inst.Plugins.Select(plugin => new MenuItemViewModel() {
                 Header = plugin.Name,
+                InputGesture = KeyTranslator.GetGesture(plugin.Name),
                 Command = legacyPluginCommand,
                 CommandParameter = plugin,
             }));
 
             LegacyPluginShortcuts.Clear();
             foreach (MenuItemViewModel menu in LegacyPlugins) {
-                if (menu.CommandParameter is Classic.Plugin plugin) {
-                    if (Enum.TryParse(plugin.Shortcut, out Key key) && !LegacyPluginShortcuts.ContainsKey(key)) {
-                        LegacyPluginShortcuts.Add(key, menu);
-                    }
+                if (menu.InputGesture != null && !LegacyPluginShortcuts.ContainsKey(menu.InputGesture.Key)) {
+                    LegacyPluginShortcuts.Add(menu.InputGesture.Key, menu);
                 }
             }
-            LegacyPlugins.Add(new MenuItemViewModel() { // Separator
-                Header = "-",
-                Height = 1
-            });
+
+            LegacyPlugins.Add(new MenuItemViewModel() { Header = "-", Height = 1 });
             LegacyPlugins.Add(new MenuItemViewModel() {
                 Header = ThemeManager.GetString("pianoroll.menu.plugin.openfolder"),
                 Command = ReactiveCommand.Create(() => {
-                    try {
-                        OS.OpenFolder(PathManager.Inst.PluginsPath);
-                    } catch (Exception e) {
-                        DocManager.Inst.ExecuteCmd(new ErrorMessageNotification(e));
-                    }
+                    try { OS.OpenFolder(PathManager.Inst.PluginsPath); } 
+                    catch (Exception e) { DocManager.Inst.ExecuteCmd(new ErrorMessageNotification(e)); }
                 })
             });
             LegacyPlugins.Add(new MenuItemViewModel() {
@@ -307,6 +370,48 @@ namespace OpenUtau.App.ViewModels {
 
         public void MouseoverPhoneme(UPhoneme? phoneme) {
             MessageBus.Current.SendMessage(new PhonemeMouseoverEvent(phoneme));
+        }
+
+        void UpdatePitchFocusDim() {
+            bool active = EditTool.IsMatch([
+                EditTools.DrawPitchTool,
+                EditTools.OverwritePitchTool,
+                EditTools.DrawLinePitchTool,
+                EditTools.OverwriteLinePitchTool,
+            ]);
+            if (PitchFocusDim == active) {
+                return;
+            }
+            PitchFocusDim = active;
+            MessageBus.Current.SendMessage(new NotesRefreshEvent());
+        }
+
+        void ApplyDiffSingerRenderPreset(int preset) {
+            switch (preset) {
+                case 0:
+                    Preferences.Default.DiffSingerSteps = 50;
+                    Preferences.Default.DiffSingerStepsVariance = 50;
+                    Preferences.Default.DiffSingerStepsPitch = 20;
+                    break;
+                case 1:
+                    Preferences.Default.DiffSingerSteps = 20;
+                    Preferences.Default.DiffSingerStepsVariance = 20;
+                    Preferences.Default.DiffSingerStepsPitch = 10;
+                    break;
+                case 2:
+                    Preferences.Default.DiffSingerSteps = 10;
+                    Preferences.Default.DiffSingerStepsVariance = 10;
+                    Preferences.Default.DiffSingerStepsPitch = 10;
+                    break;
+                default:
+                    return;
+            }
+            Preferences.Save();
+            if (appearancePreferences != null) {
+                appearancePreferences.DiffSingerSteps = Preferences.Default.DiffSingerSteps;
+                appearancePreferences.DiffSingerStepsVariance = Preferences.Default.DiffSingerStepsVariance;
+                appearancePreferences.DiffSingerStepsPitch = Preferences.Default.DiffSingerStepsPitch;
+            }
         }
 
         #region ICmdSubscriber
