@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -19,7 +19,7 @@ using SharpCompress;
 
 namespace OpenUtau.App.Views {
     public partial class MessageBox : Window {
-        public enum MessageBoxButtons { Ok, OkCancel, YesNo, YesNoCancel, OkCopy }
+        public enum MessageBoxButtons { Ok, OkCancel, YesNo, YesNoCancel, OkCopy, DropProjectOpenImportCancel }
         public enum MessageBoxResult { Ok, Cancel, Yes, No }
 
         public MessageBox() {
@@ -153,6 +153,11 @@ namespace OpenUtau.App.Views {
             if (buttons == MessageBoxButtons.YesNo || buttons == MessageBoxButtons.YesNoCancel) {
                 AddButton(ThemeManager.GetString("dialogs.messagebox.yes"), MessageBoxResult.Yes);
                 AddButton(ThemeManager.GetString("dialogs.messagebox.no"), MessageBoxResult.No, true);
+            }
+            if (buttons == MessageBoxButtons.DropProjectOpenImportCancel) {
+                AddButton(ThemeManager.GetString("dialogs.dropproject.open"), MessageBoxResult.Yes);
+                AddButton(ThemeManager.GetString("dialogs.dropproject.import"), MessageBoxResult.No);
+                AddButton(ThemeManager.GetString("dialogs.messagebox.cancel"), MessageBoxResult.Cancel, true);
             }
 
             if (buttons == MessageBoxButtons.OkCancel || buttons == MessageBoxButtons.YesNoCancel)
