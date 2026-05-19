@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using OpenUtau.Core;
 using OpenUtau.Core.Ustx;
 using OpenUtau.Core.Util;
@@ -19,7 +19,13 @@ namespace OpenUtau.App.ViewModels {
         public TimeSpan PlayPosTime => TimeSpan.FromMilliseconds((int)Project.timeAxis.TickPosToMsPos(DocManager.Inst.playPosTick));
         [Reactive] public bool MetronomeEnabled { get; set; } = Preferences.Default.MetronomeEnabled;
 
+        bool playbackActiveLast;
+
+        public bool IsPlaybackActive =>
+            PlaybackManager.Inst.PlayingMaster || PlaybackManager.Inst.StartingToPlay;
+
         public PlaybackViewModel() {
+            playbackActiveLast = IsPlaybackActive;
             DocManager.Inst.AddSubscriber(this);
 
             this.WhenAnyValue(x => x.MetronomeEnabled)
@@ -33,20 +39,39 @@ namespace OpenUtau.App.ViewModels {
         public void SeekStart() {
             Pause();
             DocManager.Inst.ExecuteCmd(new SeekPlayPosTickNotification(0));
+            NotifyPlaybackActiveChanged();
         }
         public void SeekEnd() {
             Pause();
             DocManager.Inst.ExecuteCmd(new SeekPlayPosTickNotification(Project.EndTick));
+            NotifyPlaybackActiveChanged();
         }
         public void PlayOrPause(int tick = -1, int endTick = -1, int trackNo = -1) {
+            bool wasPlaying = PlaybackManager.Inst.PlayingMaster;
             PlaybackManager.Inst.PlayOrPause(tick: tick, endTick: endTick, trackNo: trackNo);
-            var lockStartTime = Convert.ToBoolean(Preferences.Default.LockStartTime);
-            if (!PlaybackManager.Inst.OutputActive && !PlaybackManager.Inst.StartingToPlay && lockStartTime) {
-                DocManager.Inst.ExecuteCmd(new SeekPlayPosTickNotification(PlaybackManager.Inst.StartTick, true));
+            if (wasPlaying && !PlaybackManager.Inst.PlayingMaster && !PlaybackManager.Inst.StartingToPlay
+                && Preferences.Default.LockStartTime != 0) {
+                DocManager.Inst.ExecuteCmd(new SetPlayPosTickNotification(PlaybackManager.Inst.StartTick, pause: true));
             }
+            NotifyPlaybackActiveChanged();
         }
         public void Pause() {
             PlaybackManager.Inst.PausePlayback();
+            NotifyPlaybackActiveChanged();
+        }
+
+        public void PollPlaybackActiveChanged() {
+            bool active = IsPlaybackActive;
+            if (active == playbackActiveLast) {
+                return;
+            }
+            playbackActiveLast = active;
+            this.RaisePropertyChanged(nameof(IsPlaybackActive));
+        }
+
+        void NotifyPlaybackActiveChanged() {
+            playbackActiveLast = IsPlaybackActive;
+            this.RaisePropertyChanged(nameof(IsPlaybackActive));
         }
 
         public void MovePlayPos(int tick) {
