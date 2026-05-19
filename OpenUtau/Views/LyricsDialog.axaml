@@ -24,23 +24,23 @@
     </TextBlock>
     <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="4">
       <TextBlock Text="{StaticResource lyrics.separators}" Margin="0,2"/>
-      <Border CornerRadius="5"
+      <Border CornerRadius="6"
               Background="{DynamicResource MenuFlyoutItemBackgroundPointerOver}">
         <TextBlock Text="⎵" Margin="0" Padding="4,2"/>
       </Border>
-      <Border CornerRadius="5"
+      <Border CornerRadius="6"
               Background="{DynamicResource MenuFlyoutItemBackgroundPointerOver}">
         <TextBlock Text="," Margin="0" Padding="4,2"/>
       </Border>
-      <Border CornerRadius="5"
+      <Border CornerRadius="6"
               Background="{DynamicResource MenuFlyoutItemBackgroundPointerOver}">
         <TextBlock Text="&quot;" Margin="0" Padding="4,2"/>
       </Border>
-      <Border CornerRadius="5"
+      <Border CornerRadius="6"
               Background="{DynamicResource MenuFlyoutItemBackgroundPointerOver}">
         <TextBlock Text="↵" Margin="0" Padding="4,2"/>
       </Border>
-      <Border CornerRadius="5"
+      <Border CornerRadius="6"
               Background="{DynamicResource MenuFlyoutItemBackgroundPointerOver}">
         <TextBlock Text="字" Margin="0" Padding="4,2"/>
       </Border>

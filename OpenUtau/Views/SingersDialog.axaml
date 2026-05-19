@@ -156,37 +156,37 @@
     <GridSplitter Grid.Row="3" Grid.ColumnSpan="3" Height="10"
                   Background="{DynamicResource SystemControlBackgroundAltHighBrush}"/>
     <StackPanel Grid.Row="6" Grid.ColumnSpan="3" Margin="10,0" Orientation="Horizontal" Spacing="3">
-      <Border Margin="0" BorderThickness="1" CornerRadius="4"
+      <Border Margin="0" BorderThickness="1" CornerRadius="6"
               BorderBrush="{DynamicResource SystemControlForegroundBaseMediumBrush}">
         <TextBlock Margin="2,0">Q</TextBlock>
       </Border>
       <TextBlock Margin="0,1,6,1" Text="{DynamicResource singers.otoview.selectprev}"/>
-      <Border Margin="0" BorderThickness="1" CornerRadius="4"
+      <Border Margin="0" BorderThickness="1" CornerRadius="6"
               BorderBrush="{DynamicResource SystemControlForegroundBaseMediumBrush}">
         <TextBlock Margin="2,0">E</TextBlock>
       </Border>
       <TextBlock Margin="0,1,6,1" Text="{DynamicResource singers.otoview.selectnext}"/>
-      <Border Margin="0" BorderThickness="1" CornerRadius="4"
+      <Border Margin="0" BorderThickness="1" CornerRadius="6"
               BorderBrush="{DynamicResource SystemControlForegroundBaseMediumBrush}">
         <TextBlock Margin="2,0">F</TextBlock>
       </Border>
       <TextBlock Margin="0,1,6,1" Text="{DynamicResource singers.otoview.showall}"/>
-      <Border Margin="0" BorderThickness="1" CornerRadius="4"
+      <Border Margin="0" BorderThickness="1" CornerRadius="6"
               BorderBrush="{DynamicResource SystemControlForegroundBaseMediumBrush}">
         <TextBlock Margin="2,0">W</TextBlock>
       </Border>
       <TextBlock Margin="0,1,6,1" Text="{DynamicResource singers.otoview.zoomin}"/>
-      <Border Margin="0" BorderThickness="1" CornerRadius="4"
+      <Border Margin="0" BorderThickness="1" CornerRadius="6"
               BorderBrush="{DynamicResource SystemControlForegroundBaseMediumBrush}">
         <TextBlock Margin="2,0">S</TextBlock>
       </Border>
       <TextBlock Margin="0,1,6,1" Text="{DynamicResource singers.otoview.zoomout}"/>
-      <Border Margin="0" BorderThickness="1" CornerRadius="4"
+      <Border Margin="0" BorderThickness="1" CornerRadius="6"
               BorderBrush="{DynamicResource SystemControlForegroundBaseMediumBrush}">
         <TextBlock Margin="2,0">A</TextBlock>
       </Border>
       <TextBlock Margin="0,1,6,1" Text="{DynamicResource singers.otoview.moveleft}"/>
-      <Border Margin="0" BorderThickness="1" CornerRadius="4"
+      <Border Margin="0" BorderThickness="1" CornerRadius="6"
               BorderBrush="{DynamicResource SystemControlForegroundBaseMediumBrush}">
         <TextBlock Margin="2,0">D</TextBlock>
       </Border>
@@ -194,7 +194,7 @@
     </StackPanel>
     <StackPanel Grid.Row="6" Grid.ColumnSpan="3" Margin="10,0" Orientation="Horizontal" Spacing="3"
                 HorizontalAlignment="Right">
-        <Border BorderThickness="1" CornerRadius="4" ClipToBounds="True"
+        <Border BorderThickness="1" CornerRadius="6" ClipToBounds="True"
                 BorderBrush="{DynamicResource SystemControlForegroundBaseMediumBrush}">
             <Button Margin="0" Padding="8,0,8,0" Classes="normal" Background="Transparent" Click="OnPlaySelectedFile">
                 <Button.Content>
@@ -211,7 +211,7 @@
                 </Button.Content>
             </Button>
         </Border>
-        <Border BorderThickness="1" CornerRadius="4" ClipToBounds="True"
+        <Border BorderThickness="1" CornerRadius="6" ClipToBounds="True"
                 BorderBrush="{DynamicResource SystemControlForegroundBaseMediumBrush}">
             <ToggleButton Classes="normal" Background="Transparent" IsChecked="{Binding ZoomInMel}">
                 <Path Fill="{DynamicResource SystemControlForegroundBaseHighBrush}"
@@ -227,27 +227,27 @@
         </Border>
     </StackPanel>
     <StackPanel Grid.Row="8" Grid.ColumnSpan="3" Margin="10,0" Orientation="Horizontal" Spacing="3">
-      <Border Margin="0" BorderThickness="1" CornerRadius="4"
+      <Border Margin="0" BorderThickness="1" CornerRadius="6"
               BorderBrush="{DynamicResource SystemControlForegroundBaseMediumBrush}">
         <TextBlock Margin="2,0">1</TextBlock>
       </Border>
       <TextBlock Margin="0,1,6,1" Text="{DynamicResource oto.edit.offset}"/>
-      <Border Margin="0" BorderThickness="1" CornerRadius="4"
+      <Border Margin="0" BorderThickness="1" CornerRadius="6"
               BorderBrush="{DynamicResource SystemControlForegroundBaseMediumBrush}">
         <TextBlock Margin="2,0">2</TextBlock>
       </Border>
       <TextBlock Margin="0,1,6,1" Text="{DynamicResource oto.edit.overlap}"/>
-      <Border Margin="0" BorderThickness="1" CornerRadius="4"
+      <Border Margin="0" BorderThickness="1" CornerRadius="6"
               BorderBrush="{DynamicResource SystemControlForegroundBaseMediumBrush}">
         <TextBlock Margin="2,0">3</TextBlock>
       </Border>
       <TextBlock Margin="0,1,6,1" Text="{DynamicResource oto.edit.preutter}"/>
-      <Border Margin="0" BorderThickness="1" CornerRadius="4"
+      <Border Margin="0" BorderThickness="1" CornerRadius="6"
               BorderBrush="{DynamicResource SystemControlForegroundBaseMediumBrush}">
         <TextBlock Margin="2,0">4</TextBlock>
       </Border>
       <TextBlock Margin="0,1,6,1" Text="{DynamicResource oto.edit.consonant}"/>
-      <Border Margin="0" BorderThickness="1" CornerRadius="4"
+      <Border Margin="0" BorderThickness="1" CornerRadius="6"
               BorderBrush="{DynamicResource SystemControlForegroundBaseMediumBrush}">
         <TextBlock Margin="2,0">5</TextBlock>
       </Border>

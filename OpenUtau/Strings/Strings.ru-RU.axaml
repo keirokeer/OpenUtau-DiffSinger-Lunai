@@ -92,6 +92,33 @@ OpenUtau стремится стать средой редактирования
   <system:String x:Key="dialogs.export.savefirst">Сначала нужно сохранить проект</system:String>
   <system:String x:Key="dialogs.importtracks.caption">Импортировать треки</system:String>
   <system:String x:Key="dialogs.importtracks.importtempo">Импортированный проект содержит следующие маркеры темпа. Использовать их?</system:String>
+  <system:String x:Key="dialogs.importproject.caption">Параметры импорта</system:String>
+  <system:String x:Key="dialogs.importproject.message">Выберите, что импортировать из файла:</system:String>
+  <system:String x:Key="dialogs.importproject.notes">Ноты и лирика</system:String>
+  <system:String x:Key="dialogs.importproject.pitch">Кривая pitch (PITD)</system:String>
+  <system:String x:Key="dialogs.importproject.tempo">Маркеры темпа</system:String>
+  <system:String x:Key="dialogs.importproject.timesig">Размеры такта</system:String>
+  <system:String x:Key="dialogs.importproject.defaultlyric">Лирика по умолчанию</system:String>
+  <system:String x:Key="dialogs.importproject.fillgaps">Заполнить короткие промежутки</system:String>
+  <system:String x:Key="dialogs.importproject.fillgaps.threshold">Максимальная длина, подлежащая обработке (исключительная)</system:String>
+  <system:String x:Key="dialogs.importproject.fillgaps.thresholditem">1/{0} ноты</system:String>
+  <system:String x:Key="dialogs.importproject.leadingpadding">Отступ перед первой нотой</system:String>
+  <system:String x:Key="dialogs.importproject.leadingpadding.size">Размер отступа, если нота в начале клипа</system:String>
+  <system:String x:Key="dialogs.importproject.resolveoverlaps">Исправить наслоение нот</system:String>
+  <system:String x:Key="dialogs.importproject.lyricssection">Обработка лирики</system:String>
+  <system:String x:Key="dialogs.importproject.japanese">Японская лирика</system:String>
+  <system:String x:Key="dialogs.importproject.japanese.none">Без преобразования</system:String>
+  <system:String x:Key="dialogs.importproject.japanese.hiragana">Ромадзи → хирагана</system:String>
+  <system:String x:Key="dialogs.importproject.japanese.romaji">Хирагана → ромадзи</system:String>
+  <system:String x:Key="dialogs.importproject.chinesepinyin">Китайские иероглифы → пиньинь</system:String>
+  <system:String x:Key="dialogs.importproject.lyricsmapping">Сопоставление лирики (точное)</system:String>
+  <system:String x:Key="dialogs.importproject.lyricsmapping.hint">По строке: откуда=куда</system:String>
+  <system:String x:Key="dialogs.importproject.lyricsreplace">Замена лирики</system:String>
+  <system:String x:Key="dialogs.importproject.lyricsreplace.hint">откуда=&gt;куда или /шаблон/замена/</system:String>
+  <system:String x:Key="dialogs.dropproject.caption">Открыть или импортировать проект</system:String>
+  <system:String x:Key="dialogs.dropproject.message">Открыть перетащенный файл как новый проект или импортировать его треки в текущий проект?</system:String>
+  <system:String x:Key="dialogs.dropproject.open">Открыть проект</system:String>
+  <system:String x:Key="dialogs.dropproject.import">Импортировать треки</system:String>
   <system:String x:Key="dialogs.installdependency.caption">Установка зависимостей</system:String>
   <system:String x:Key="dialogs.installdependency.message">Установка </system:String>
   <system:String x:Key="dialogs.installdll.caption">Установка фонемайзера</system:String>
@@ -364,6 +391,8 @@ OpenUtau стремится стать средой редактирования
   <system:String x:Key="notedefaults.vibrato.shift">Сдвиг</system:String>
   <system:String x:Key="notedefaults.vibrato.vollink">Динамика</system:String>
 
+  <system:String x:Key="workspace.tracks">Треки</system:String>
+
   <system:String x:Key="noteproperty">Свойства ноты</system:String>
   <system:String x:Key="noteproperty.apply">Применить</system:String>
   <system:String x:Key="noteproperty.basic">Базовый</system:String>
@@ -373,6 +402,8 @@ OpenUtau стремится стать средой редактирования
   <system:String x:Key="noteproperty.tone">Тон</system:String>
   <system:String x:Key="noteproperty.tuning">Тюнинг</system:String>
   <system:String x:Key="noteproperty.vibratoenable">Включить</system:String>
+  <system:String x:Key="noteproperty.phonemizer">Фонемайзер</system:String>
+  <system:String x:Key="noteproperty.parent.phonemizer">Как у родительской ноты</system:String>
 
   <system:String x:Key="oto.alias">Алиас</system:String>
   <system:String x:Key="oto.color">Цвет</system:String>
@@ -542,15 +573,22 @@ OpenUtau стремится стать средой редактирования
   <system:String x:Key="pianoroll.toggle.finalpitch">Показать отрендеренный питч (R)</system:String>
   <system:String x:Key="pianoroll.toggle.noteparams">Показать параметры ноты (\)</system:String>
   <system:String x:Key="pianoroll.toggle.phoneme">Показать фонемы (O)</system:String>
+  <system:String x:Key="pianoroll.toggle.phonemizer">Показать теги фонемайзера</system:String>
   <system:String x:Key="pianoroll.toggle.pitch">Показать кривую питча (I)</system:String>
   <system:String x:Key="pianoroll.toggle.snap">Привязка (P)</system:String>
   <system:String x:Key="pianoroll.toggle.snap.auto">Авто</system:String>
   <system:String x:Key="pianoroll.toggle.snap.autotriplet">Авто (триплет)</system:String>
   <system:String x:Key="pianoroll.toggle.tips">Показать подсказки (T)</system:String>
   <system:String x:Key="pianoroll.toggle.tone">Переключить тон ноты (Y)</system:String>
+  <system:String x:Key="pianoroll.toggle.livepitch">Live-питч (DiffSinger)</system:String>
+  <system:String x:Key="pianoroll.toggle.livepitch.fast">Live-питч Turbo (DiffSinger)</system:String>
   <system:String x:Key="pianoroll.toggle.vibrato">Отображать вибрато (U)</system:String>
   <system:String x:Key="pianoroll.toggle.waveform">Отображать форму волны (W)</system:String>
   <system:String x:Key="pianoroll.toggle.expressions">Показать выражения (L)</system:String>
+  <system:String x:Key="pianoroll.toggle.appearance">Настройки оформления</system:String>
+  <system:String x:Key="pianoroll.toggle.diffsinger.quality">DiffSinger: качество (акустика 50, вэриэнс 50, питч 20)</system:String>
+  <system:String x:Key="pianoroll.toggle.diffsinger.medium">DiffSinger: баланс (акустика 20, вэриэнс 20, питч 10)</system:String>
+  <system:String x:Key="pianoroll.toggle.diffsinger.fast">DiffSinger: низкое качество (акустика 10, вэриэнс 10, питч 10)</system:String>
   <system:String x:Key="pianoroll.tool.drawlinepitch">Инструмент для рисования питча линией (Shift + 4)
     ЛКМ, чтобы рисовать (прямая линия)
     ПКМ, чтобы сбросить
@@ -606,6 +644,15 @@ OpenUtau стремится стать средой редактирования
   <system:String x:Key="prefs.appearance.diffsingerlangcodehide">Скрыть языковой префикс в фонемах</system:String>
   <system:String x:Key="prefs.appearance.lang">Язык</system:String>
   <system:String x:Key="prefs.appearance.showghostnotes">Отображать ноты других треков на пианоролле</system:String>
+  <system:String x:Key="prefs.appearance.shownoteborder">Обводка нот на пианоролле</system:String>
+  <system:String x:Key="prefs.appearance.section.theme">Тема</system:String>
+  <system:String x:Key="prefs.appearance.section.pianoroll">Пианоролл</system:String>
+  <system:String x:Key="prefs.appearance.section.grid">Сетка и прокрутка</system:String>
+  <system:String x:Key="prefs.appearance.section.expressions">Параметры и фонемы</system:String>
+  <system:String x:Key="prefs.appearance.solidtickgridlines">Сплошные линии сетки такта (пианоролл, треки и панель параметров)</system:String>
+  <system:String x:Key="prefs.appearance.solidexppanelgridlines">Сплошные линии стандартного значения в панели параметров</system:String>
+  <system:String x:Key="prefs.appearance.classicscrollbars">Классические ползунки прокрутки (отдельная полоса)</system:String>
+  <system:String x:Key="prefs.appearance.notecornerradius">Скругление углов нот</system:String>
   <system:String x:Key="prefs.appearance.showicon">Отображать иконку на пианоролле</system:String>
   <system:String x:Key="prefs.appearance.showportrait">Отображать портрет на пианоролле</system:String>
   <system:String x:Key="prefs.appearance.sortorder">Язык отображения имени вокалиста</system:String>
@@ -619,6 +666,7 @@ OpenUtau стремится стать средой редактирования
   <system:String x:Key="prefs.appearance.customtheme.create.prompt">Введите Название Темы</system:String>
   <system:String x:Key="prefs.appearance.customtheme.create.empty">Название темы не может быть пустым.</system:String>
   <system:String x:Key="prefs.appearance.trackcolor">Использовать цвет трека в интерфейсе</system:String>
+  <system:String x:Key="prefs.appearance.defaulttrackcolor">Цвет трека по умолчанию для новых треков</system:String>
   <system:String x:Key="prefs.cache">Кэш</system:String>
   <system:String x:Key="prefs.cache.clearonquit">Очищать кэш при выходе</system:String>
   <system:String x:Key="prefs.cache.diffsingertensorcache">Тензорный кэш DiffSinger</system:String>
@@ -820,7 +868,11 @@ OpenUtau стремится стать средой редактирования
 
   <system:String x:Key="tracks.duplicate">Дублировать трек</system:String>
   <system:String x:Key="tracks.duplicatesettings">Дублировать только параметры трека</system:String>
+  <system:String x:Key="tracks.standardizesettings">Унифицировать настройки трека</system:String>
+  <system:String x:Key="tracks.rotateselectedtracksingers">Ротация вокалистов на выбранных треках</system:String>
   <system:String x:Key="tracks.favorite">Избранные</system:String>
+  <system:String x:Key="tracks.singer.favorite.tooltip">Добавить вокалиста в избранное</system:String>
+  <system:String x:Key="tracks.singer.applytoalltracks.tooltip">Применить ко всем выбранным трекам</system:String>
   <system:String x:Key="tracks.installsinger">Установить вокалиста</system:String>
   <system:String x:Key="tracks.more">Больше</system:String>
   <system:String x:Key="tracks.movedown">Переместить вниз</system:String>

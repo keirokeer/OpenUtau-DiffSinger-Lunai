@@ -12,7 +12,7 @@
              Grid.Row="0" VerticalAlignment="Center" Background="Transparent" Height="50" Margin="20,0">
       <ListBox.ItemTemplate>
         <DataTemplate>
-          <Border Background="{Binding AccentColor}" CornerRadius="2" Width="25"/>
+          <Border Background="{Binding AccentColor}" CornerRadius="6" Width="25"/>
         </DataTemplate>
       </ListBox.ItemTemplate>
       <ListBox.ItemsPanel>

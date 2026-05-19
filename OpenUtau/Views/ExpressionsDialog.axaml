@@ -19,8 +19,8 @@
 
   <Grid Margin="{Binding $parent.WindowDecorationMargin}" RowDefinitions="Auto,*,Auto">
     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="10" IsVisible="{Binding IsSwitchVisible}">
-      <ToggleButton Content="{DynamicResource exps.project}" IsChecked="{Binding !IsTrackOverride}" CornerRadius="5,0,0,5" Classes="switch" Command="{Binding OnClickProject}"/>
-      <ToggleButton Content="{DynamicResource exps.track}" IsChecked="{Binding IsTrackOverride}" CornerRadius="0,5,5,0" Classes="switch" Command="{Binding OnClickTrack}"/>
+      <ToggleButton Content="{DynamicResource exps.project}" IsChecked="{Binding !IsTrackOverride}" CornerRadius="6,0,0,6" Classes="switch" Command="{Binding OnClickProject}"/>
+      <ToggleButton Content="{DynamicResource exps.track}" IsChecked="{Binding IsTrackOverride}" CornerRadius="0,6,6,0" Classes="switch" Command="{Binding OnClickTrack}"/>
     </StackPanel>
 
     <Border Grid.Row="1" Margin="10" Width="150" HorizontalAlignment="Left">

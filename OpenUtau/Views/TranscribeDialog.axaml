@@ -1,4 +1,4 @@
-﻿<Window xmlns="https://github.com/avaloniaui"
+<Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -74,7 +74,7 @@
       <!-- GAME options panel, shown when GAME is selected and available -->
       <Border IsVisible="{Binding GameOptionsVisible}"
               BorderThickness="1" BorderBrush="{DynamicResource SystemControlForegroundBaseHighBrush}"
-              CornerRadius="4" Padding="8">
+              CornerRadius="6" Padding="8">
         <StackPanel Spacing="6">
           <TextBlock Text="{DynamicResource dialogs.transcribe.game.options}"
                      FontWeight="SemiBold"/>
