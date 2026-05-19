@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
@@ -13,6 +13,7 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
+using OpenUtau.App;
 using OpenUtau.App.Controls;
 using OpenUtau.App.ViewModels;
 using OpenUtau.Classic;
@@ -81,6 +82,7 @@ namespace OpenUtau.App.Views {
                 DispatcherPriority.Normal,
                 (sender, args) => {
                     PlaybackManager.Inst.UpdatePlayPos();
+                    viewModel.PlaybackViewModel.PollPlaybackActiveChanged();
                     pianoRoll?.ViewModel?.NotesViewModel?.SmoothScrollStep();
                 });
             timer.Start();
@@ -107,6 +109,10 @@ namespace OpenUtau.App.Views {
 
             DocManager.Inst.AddSubscriber(this);
 
+            ApplyTracksScrollStyle();
+            MessageBus.Current.Listen<ScrollbarsStyleChangedEvent>()
+                .Subscribe(_ => Dispatcher.UIThread.Post(ApplyTracksScrollStyle));
+
             Log.Information("Main window checking Update.");
             UpdaterDialog.CheckForUpdate(
                 dialog => dialog.Show(this),
@@ -118,6 +124,34 @@ namespace OpenUtau.App.Views {
 
         public void InitProject() {
             viewModel.InitProject(this);
+        }
+
+        void ApplyTracksScrollStyle() {
+            if (!IsLoaded) {
+                return;
+            }
+            bool classic = Preferences.Default.UseClassicScrollbars;
+            viewModel.RefreshScrollbarStylePreference();
+            if (TracksHScrollBar.Parent is Grid tracksGrid) {
+                if (tracksGrid.RowDefinitions.Count > 2) {
+                    tracksGrid.RowDefinitions[2].Height = classic ? new GridLength(24) : new GridLength(0);
+                }
+                if (tracksGrid.ColumnDefinitions.Count > 2) {
+                    tracksGrid.ColumnDefinitions[2].Width = classic ? new GridLength(16) : new GridLength(0);
+                }
+            }
+            Grid.SetRow(TracksHScrollBar, classic ? 2 : 1);
+            TracksHScrollBar.ZIndex = classic ? 0 : 400;
+            TracksHScrollBar.VerticalAlignment = classic
+                ? Avalonia.Layout.VerticalAlignment.Stretch
+                : Avalonia.Layout.VerticalAlignment.Bottom;
+            TracksHScrollBar.Height = classic ? double.NaN : 10;
+            TracksHScrollBar.Margin = classic ? new Thickness(0, 4, 0, 4) : new Thickness(0, 0, 0, 3);
+            TracksHScrollBar.Classes.Set("overlay", !classic);
+            TracksHScrollBar.Classes.Set("music", classic);
+
+            Grid.SetColumn(VScrollBar, classic ? 2 : 1);
+            WorkspaceScrollbarHelper.ApplyVerticalScrollBar(VScrollBar, classic);
         }
 
         void OnEditTimeSignature(object sender, PointerPressedEventArgs args) {
@@ -243,12 +277,17 @@ namespace OpenUtau.App.Views {
                 FilePicker.UST,
                 FilePicker.MIDI,
                 FilePicker.UFDATA,
-                FilePicker.MUSICXML);
+                FilePicker.MUSICXML,
+                FilePicker.SVP);
             if (files == null || files.Length == 0) {
                 return;
             }
             try {
-                viewModel.OpenProject(files);
+                var importOptions = await PromptSvpImportOptionsAsync(files);
+                if (ContainsSvpFile(files) && importOptions == null) {
+                    return;
+                }
+                viewModel.OpenProject(files, importOptions);
                 viewModel.Page = 1;
             } catch (Exception e) {
                 Log.Error(e, $"Failed to open files {string.Join("\n", files)}");
@@ -339,36 +378,17 @@ namespace OpenUtau.App.Views {
                 FilePicker.UST,
                 FilePicker.MIDI,
                 FilePicker.UFDATA,
-                FilePicker.MUSICXML);
+                FilePicker.MUSICXML,
+                FilePicker.SVP);
             if (files == null || files.Length == 0) {
                 return;
             }
             try {
-                var loadedProjects = Formats.ReadProjects(files);
-                if (loadedProjects == null || loadedProjects.Length == 0) {
-                    return;
-                }
-                // Imports tempo for new projects, otherwise asks the user.
-                bool importTempo = DocManager.Inst.Project.parts.Count == 0;
-                if (!importTempo && loadedProjects[0].tempos.Count > 0) {
-                    var tempoString = string.Join("\n",
-                        loadedProjects[0].tempos
-                            .Select(tempo => $"position: {tempo.position}, tempo: {tempo.bpm}")
-                        );
-                    // Ask the user
-                    var result = await MessageBox.Show(
-                        this,
-                        ThemeManager.GetString("dialogs.importtracks.importtempo") + "\n" + tempoString,
-                        ThemeManager.GetString("dialogs.importtracks.caption"),
-                        MessageBox.MessageBoxButtons.YesNo);
-                    importTempo = result == MessageBox.MessageBoxResult.Yes;
-                }
-                viewModel.ImportTracks(loadedProjects, importTempo);
+                await ImportProjectFilesAsync(files);
             } catch (Exception e) {
                 Log.Error(e, $"Failed to import files");
                 _ = await MessageBox.ShowError(this, new MessageCustomizableException("Failed to import files", "<translate:errors.failed.importfiles>", e));
             }
-            ValidateTracksVoiceColor();
         }
 
         async void OnMenuImportAudio(object sender, RoutedEventArgs args) {
@@ -891,7 +911,7 @@ namespace OpenUtau.App.Views {
         }
 
         async void OnDrop(object? sender, DragEventArgs args) {
-            string[] ProjectExts = { ".ustx", ".ust", ".vsqx", ".ufdata", ".musicxml", ".mid", ".midi" };
+            string[] ProjectExts = { ".ustx", ".ust", ".vsqx", ".ufdata", ".musicxml", ".mid", ".midi", ".svp" };
             string[] ArchiveExts = { ".zip", ".rar", ".uar" };
             string[] AudioExts = { ".mp3", ".wav", ".ogg", ".flac" };
             string[] SupportedExts = ProjectExts
@@ -921,28 +941,7 @@ namespace OpenUtau.App.Views {
                 var projectFiles = supportedFiles.Where(file => ProjectExts.Contains(Path.GetExtension(file).ToLower())).ToArray();
                 viewModel.Page = 1;
                 if (projectFiles.Length > 0) {
-                    try {
-                        var loadedProjects = Formats.ReadProjects(files);
-                        // Imports tempo for new projects, otherwise asks the user.
-                        bool importTempo = DocManager.Inst.Project.parts.Count == 0;
-                        if (!importTempo && loadedProjects[0].tempos.Count > 0) {
-                            var tempoString = string.Join("\n",
-                                loadedProjects[0].tempos
-                                    .Select(tempo => $"position: {tempo.position}, tempo: {tempo.bpm}")
-                                );
-                            // Ask the user
-                            var result = await MessageBox.Show(
-                                this,
-                                ThemeManager.GetString("dialogs.importtracks.importtempo") + "\n" + tempoString,
-                                ThemeManager.GetString("dialogs.importtracks.caption"),
-                                MessageBox.MessageBoxButtons.YesNo);
-                            importTempo = result == MessageBox.MessageBoxResult.Yes;
-                        }
-                        viewModel.ImportTracks(loadedProjects, importTempo);
-                    } catch (Exception e) {
-                        Log.Error(e, "Failed to import project");
-                        _ = await MessageBox.ShowError(this, new MessageCustomizableException("Failed to import files", "<translate:errors.failed.importfiles>", e));
-                    }
+                    await HandleDroppedProjectFilesAsync(projectFiles);
                 }
                 var audioFiles = supportedFiles.Where(file => AudioExts.Contains(Path.GetExtension(file).ToLower())).ToArray();
                 foreach (var audioFile in audioFiles) {
@@ -1262,6 +1261,7 @@ namespace OpenUtau.App.Views {
                 Preferences.Default.DetachPianoRoll = true;
             }
             Preferences.Save();
+            pianoRoll?.NotifyDetachedLayoutChanged();
         }
 
         public void EnterTikTokMode() {
@@ -1329,8 +1329,9 @@ namespace OpenUtau.App.Views {
                     delta = new Vector(delta.Y, delta.X);
                 }
                 if (delta.X != 0) {
-                    HScrollBar.Value = Math.Max(HScrollBar.Minimum,
-                        Math.Min(HScrollBar.Maximum, HScrollBar.Value - HScrollBar.SmallChange * delta.X));
+                    var hScroll = TracksHScrollBar;
+                    hScroll.Value = Math.Max(hScroll.Minimum,
+                        Math.Min(hScroll.Maximum, hScroll.Value - hScroll.SmallChange * delta.X));
                 }
                 if (delta.Y != 0) {
                     VScrollBar.Value = Math.Max(VScrollBar.Minimum,
@@ -1888,6 +1889,99 @@ namespace OpenUtau.App.Views {
                 forceClose = true;
                 Close();
             }, TaskScheduler.FromCurrentSynchronizationContext());
+        }
+
+        async Task<bool?> AskOpenOrImportDroppedProjectAsync() {
+            if (DocManager.Inst.Project.parts.Count == 0) {
+                return true;
+            }
+            var result = await MessageBox.Show(
+                this,
+                ThemeManager.GetString("dialogs.dropproject.message"),
+                ThemeManager.GetString("dialogs.dropproject.caption"),
+                MessageBox.MessageBoxButtons.DropProjectOpenImportCancel);
+            return result switch {
+                MessageBox.MessageBoxResult.Yes => true,
+                MessageBox.MessageBoxResult.No => false,
+                _ => null,
+            };
+        }
+
+        static bool ContainsSvpFile(string[] files) =>
+            files.Any(f => Path.GetExtension(f).Equals(".svp", StringComparison.OrdinalIgnoreCase));
+
+        async Task<ProjectImportOptions?> PromptSvpImportOptionsAsync(string[] files) {
+            if (!ContainsSvpFile(files)) {
+                return null;
+            }
+            return await ImportProjectDialog.ShowAsync(this, Path.GetFileName(files.First(f =>
+                Path.GetExtension(f).Equals(".svp", StringComparison.OrdinalIgnoreCase))));
+        }
+
+        async Task ImportProjectFilesAsync(string[] files) {
+            ProjectImportOptions? svpOptions = null;
+            if (ContainsSvpFile(files)) {
+                svpOptions = await PromptSvpImportOptionsAsync(files);
+                if (svpOptions == null) {
+                    return;
+                }
+            }
+            var loaded = Formats.ReadProjects(files, svpOptions);
+            if (loaded.Length == 0) {
+                return;
+            }
+            bool? importTempoOverride = svpOptions != null ? svpOptions.ImportTempo : null;
+            await ImportProjectsAsync(loaded, importTempoOverride);
+        }
+
+        async Task ImportProjectsAsync(UProject[] loadedProjects, bool? importTempoOverride = null) {
+            if (loadedProjects == null || loadedProjects.Length == 0) {
+                return;
+            }
+            bool importTempo = importTempoOverride ?? DocManager.Inst.Project.parts.Count == 0;
+            if (importTempoOverride == null && !importTempo && loadedProjects[0].tempos.Count > 0) {
+                var tempoString = string.Join("\n",
+                    loadedProjects[0].tempos
+                        .Select(tempo => $"position: {tempo.position}, tempo: {tempo.bpm}")
+                    );
+                var result = await MessageBox.Show(
+                    this,
+                    ThemeManager.GetString("dialogs.importtracks.importtempo") + "\n" + tempoString,
+                    ThemeManager.GetString("dialogs.importtracks.caption"),
+                    MessageBox.MessageBoxButtons.YesNo);
+                importTempo = result == MessageBox.MessageBoxResult.Yes;
+            }
+            viewModel.ImportTracks(loadedProjects, importTempo);
+            ValidateTracksVoiceColor();
+        }
+
+        async Task HandleDroppedProjectFilesAsync(string[] projectFiles) {
+            bool? openProject = await AskOpenOrImportDroppedProjectAsync();
+            if (openProject == null) {
+                return;
+            }
+            if (openProject.Value) {
+                if (!DocManager.Inst.ChangesSaved && !await AskIfSaveAndContinue()) {
+                    return;
+                }
+                try {
+                    var importOptions = await PromptSvpImportOptionsAsync(projectFiles);
+                    if (ContainsSvpFile(projectFiles) && importOptions == null) {
+                        return;
+                    }
+                    viewModel.OpenProject(projectFiles, importOptions);
+                } catch (Exception e) {
+                    Log.Error(e, "Failed to open dropped project");
+                    _ = await MessageBox.ShowError(this, new MessageCustomizableException("Failed to open file", "<translate:errors.failed.openfile>", e));
+                }
+                return;
+            }
+            try {
+                await ImportProjectFilesAsync(projectFiles);
+            } catch (Exception e) {
+                Log.Error(e, "Failed to import project");
+                _ = await MessageBox.ShowError(this, new MessageCustomizableException("Failed to import files", "<translate:errors.failed.importfiles>", e));
+            }
         }
 
         private async Task<bool> AskIfSaveAndContinue() {

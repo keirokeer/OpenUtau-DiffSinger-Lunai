@@ -3,8 +3,9 @@
         xmlns:vm="using:OpenUtau.App.ViewModels">
   <Style Selector="Control">
     <Style.Resources>
-      <CornerRadius x:Key="ControlCornerRadius">5</CornerRadius>
-      <CornerRadius x:Key="OverlayCornerRadius">5</CornerRadius>
+      <CornerRadius x:Key="ControlCornerRadius">6</CornerRadius>
+      <!-- Square corners for menus, flyouts, combo dropdowns (avoids hover rects vs rounded chrome). -->
+      <CornerRadius x:Key="OverlayCornerRadius">0</CornerRadius>
       <x:Double x:Key="MenuFlyoutThemeMinHeight">20</x:Double>
       <Thickness x:Key="MenuFlyoutScrollerMargin">0</Thickness>
       <Thickness x:Key="ComboBoxDropdownContentMargin">0</Thickness>
@@ -13,6 +14,16 @@
   <Style Selector="Window">
     <Setter Property="FontFamily" Value="{DynamicResource ui.fontfamily}"/>
     <Setter Property="Icon" Value="/Assets/open-utau.ico"/>
+  </Style>
+  <!-- String ToolTip.Tip can inherit placement-target foreground; force white on root and text content. -->
+  <Style Selector="ToolTip">
+    <Setter Property="Foreground" Value="{StaticResource ToolTipForegroundBrush}"/>
+  </Style>
+  <Style Selector="ToolTip TextBlock">
+    <Setter Property="Foreground" Value="{StaticResource ToolTipForegroundBrush}"/>
+  </Style>
+  <Style Selector="ToolTip AccessText">
+    <Setter Property="Foreground" Value="{StaticResource ToolTipForegroundBrush}"/>
   </Style>
   <Style Selector="Menu">
     <Setter Property="Height" Value="24"/>
@@ -83,6 +94,7 @@
     <Setter Property="FontSize" Value="12"/>
   </Style>
   <Style Selector="TextBox">
+    <Setter Property="CornerRadius" Value="6"/>
     <Setter Property="MinHeight" Value="20"/>
     <Setter Property="Height" Value="20"/>
     <Setter Property="Padding" Value="4,1"/>
@@ -97,6 +109,7 @@
   </Style>
 
   <Style Selector="Button">
+    <Setter Property="CornerRadius" Value="6"/>
     <Setter Property="BorderThickness" Value="0"/>
     <Setter Property="FontSize" Value="12"/>
     <Setter Property="Height" Value="20"/>
@@ -124,6 +137,7 @@
     <Setter Property="RenderTransform" Value="scale(1)"/>
   </Style>
   <Style Selector="Button.clear">
+    <Setter Property="CornerRadius" Value="6"/>
     <Setter Property="BorderThickness" Value="0"/>
     <Setter Property="FontSize" Value="12"/>
     <Setter Property="Height" Value="20"/>
@@ -134,10 +148,34 @@
     <Setter Property="VerticalContentAlignment" Value="Center"/>
   </Style>
   <Style Selector="Button.clear:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-    <Setter Property="Background" Value="{DynamicResource BackgroundColorPointerOver}"/>
+    <Setter Property="Background" Value="{DynamicResource TransportToolbarOffHoverBrush}"/>
+  </Style>
+  <Style Selector="Button.clear.trackHeaderTextButton">
+    <Setter Property="CornerRadius" Value="4" />
+  </Style>
+  <Style Selector="Button.clear.trackHeaderTextButton.muted">
+    <Setter Property="Foreground" Value="{DynamicResource MutedIconBrush}"/>
+  </Style>
+  <Style Selector="Button.clear.trackHeaderTextButton:pointerover /template/ ContentPresenter#PART_ContentPresenter,
+          Button.clear.trackHeaderTextButton:pressed /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource AppTopBarTransportStripBrush}" />
+    <Setter Property="CornerRadius" Value="4" />
+  </Style>
+
+  <Style Selector="Button.transportChrome">
+    <Setter Property="CornerRadius" Value="6"/>
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="BorderThickness" Value="0"/>
+  </Style>
+  <Style Selector="Button.transportChrome:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource TransportToolbarOffHoverBrush}"/>
+  </Style>
+  <Style Selector="Button.transportChrome:pressed /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource TransportToolbarOffPressedBrush}"/>
   </Style>
 
   <Style Selector="ToggleButton.normal">
+    <Setter Property="CornerRadius" Value="6"/>
     <Setter Property="BorderThickness" Value="0"/>
     <Setter Property="FontSize" Value="12"/>
     <Setter Property="Height" Value="20"/>
@@ -165,7 +203,8 @@
   </Style>
 
   <Style Selector="ToggleButton.toolbar">
-    <Setter Property="CornerRadius" Value="4"/>
+    <Setter Property="Foreground" Value="{DynamicResource ToolTipForegroundBrush}"/>
+    <Setter Property="CornerRadius" Value="6"/>
     <Setter Property="BorderThickness" Value="0"/>
     <Setter Property="FontSize" Value="12"/>
     <Setter Property="Height" Value="20"/>
@@ -176,19 +215,19 @@
     <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundAltHighBrush}" />
 
     <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-      <Setter Property="Background" Value="{DynamicResource NeutralAccentBrush}" />
+      <Setter Property="Background" Value="{DynamicResource TransportToolbarOffHoverBrush}" />
     </Style>
     <Style Selector="^:pressed /template/ ContentPresenter#PART_ContentPresenter">
-      <Setter Property="Background" Value="{DynamicResource NeutralAccentBrushPointerOver}" />
+      <Setter Property="Background" Value="{DynamicResource TransportToolbarOffPressedBrush}" />
     </Style>
     <Style Selector="^:checked /template/ ContentPresenter#PART_ContentPresenter">
-      <Setter Property="Background" Value="{DynamicResource NeutralAccentBrushSemi}" />
+      <Setter Property="Background" Value="{DynamicResource SystemControlForegroundBaseHighBrush}" />
     </Style>
     <Style Selector="^:checked:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-      <Setter Property="Background" Value="{DynamicResource NeutralAccentBrush}" />
+      <Setter Property="Background" Value="{DynamicResource TransportToolbarOnHoverBrush}" />
     </Style>
     <Style Selector="^:checked:pressed /template/ ContentPresenter#PART_ContentPresenter">
-      <Setter Property="Background" Value="{DynamicResource NeutralAccentBrushPointerOver}" />
+      <Setter Property="Background" Value="{DynamicResource TransportToolbarOnHoverBrush}" />
     </Style>
 
     <Style Selector="^ Path.filled">
@@ -202,9 +241,30 @@
       <Setter Property="StrokeThickness" Value="1"/>
       <Setter Property="Stroke" Value="{DynamicResource SystemControlForegroundBaseHighBrush}" />
     </Style>
+    <!-- Checked fill = ForegroundBaseHigh: ink must be panel background for contrast. -->
+    <Style Selector="^:checked Path.filled">
+      <Setter Property="Fill" Value="{DynamicResource SystemControlBackgroundAltHighBrush}" />
+    </Style>
+    <Style Selector="^:checked Path.stroked">
+      <Setter Property="Stroke" Value="{DynamicResource SystemControlBackgroundAltHighBrush}" />
+    </Style>
+    <Style Selector="^:checked Ellipse.stroked">
+      <Setter Property="Stroke" Value="{DynamicResource SystemControlBackgroundAltHighBrush}" />
+    </Style>
+  </Style>
+  <Style Selector="ToggleButton.toolbar TextBlock.toolbarGlyphText">
+    <Setter Property="Foreground" Value="{DynamicResource SystemControlForegroundBaseHighBrush}" />
+    <Setter Property="FontSize" Value="15" />
+  </Style>
+  <Style Selector="ToggleButton.toolbar:checked TextBlock.toolbarGlyphText">
+    <Setter Property="Foreground" Value="{DynamicResource SystemControlBackgroundAltHighBrush}" />
+  </Style>
+  <Style Selector="ToggleButton.toolbar:pointerover, ToggleButton.toolbar:pressed, ToggleButton.toolbar:checked, ToggleButton.toolbar:checked:pointerover, ToggleButton.toolbar:checked:pressed">
+    <Setter Property="Foreground" Value="{DynamicResource ToolTipForegroundBrush}"/>
   </Style>
 
   <Style Selector="ToggleButton.switch">
+    <Setter Property="CornerRadius" Value="6"/>
     <Setter Property="FontSize" Value="13"/>
     <Setter Property="Padding" Value="6,2"/>
     <Setter Property="BorderThickness" Value="0"/>
@@ -288,31 +348,491 @@
     <Setter Property="Foreground" Value="{DynamicResource AccentBrush1}"/>
   </Style>
 
-  <Style Selector="Border.playback">
-    <Setter Property="CornerRadius" Value="4"/>
-    <Setter Property="BorderThickness" Value="1"/>
-    <Setter Property="BorderBrush" Value="{DynamicResource NeutralAccentBrushSemi}"/>
-    <Setter Property="Height" Value="20"/>
+  <Style Selector="Grid.workspaceLayout">
+    <Setter Property="Background" Value="{DynamicResource WorkspaceCanvasBrush}" />
   </Style>
-  <Style Selector="Border.playback TextBlock">
+  <Style Selector="Border.workspaceCard">
+    <Setter Property="Background" Value="{DynamicResource WorkspaceCardBrush}" />
+    <Setter Property="CornerRadius" Value="8" />
+    <Setter Property="ClipToBounds" Value="True" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Padding" Value="4" />
+  </Style>
+  <!-- Docked workspace tiles: flush to screen on outer edges; 8px gap only between blocks. -->
+  <Style Selector="Border.workspaceDockTop">
+    <Setter Property="CornerRadius" Value="0" />
+    <Setter Property="Margin" Value="0,0,0,8" />
+  </Style>
+  <Style Selector="Border.workspaceDockTracks">
+    <Setter Property="CornerRadius" Value="0" />
+    <Setter Property="Margin" Value="0,0,0,0" />
+    <Setter Property="Padding" Value="0" />
+  </Style>
+  <Style Selector="Border.workspaceDockPianoHost">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Margin" Value="0" />
+  </Style>
+  <Style Selector="Border.workspaceDockPianoRollSide">
+    <Setter Property="CornerRadius" Value="0,8,8,0" />
+    <Setter Property="Margin" Value="0" />
+    <Setter Property="Padding" Value="8" />
+  </Style>
+  <Style Selector="Border.workspaceDockAppearance">
+    <Setter Property="CornerRadius" Value="8" />
+    <Setter Property="Margin" Value="0" />
+    <Setter Property="Padding" Value="0" />
+  </Style>
+  <Style Selector="Border.workspaceDockPianoRoll,
+                 Border.workspaceDockPianoRollMain,
+                 Border.workspaceDockPianoRollExp">
+    <Setter Property="CornerRadius" Value="8" />
+    <Setter Property="Margin" Value="0" />
+    <Setter Property="Padding" Value="0" />
+  </Style>
+  <Style Selector="Border.workspaceDockPianoRoll.FlushRight,
+                 Border.workspaceDockPianoRollMain.FlushRight,
+                 Border.workspaceDockPianoRollExp.FlushRight">
+    <Setter Property="CornerRadius" Value="8,0,0,8" />
+    <Setter Property="Padding" Value="0" />
+  </Style>
+  <Style Selector="Border.workspaceDockPianoRoll.FlushLeft,
+                 Border.workspaceDockPianoRollMain.FlushLeft,
+                 Border.workspaceDockPianoRollExp.FlushLeft">
+    <Setter Property="CornerRadius" Value="0,8,8,0" />
+    <Setter Property="Padding" Value="0" />
+  </Style>
+  <Style Selector="Border.workspaceDockPianoRoll.FlushLeft.FlushRight,
+                 Border.workspaceDockPianoRollMain.FlushLeft.FlushRight,
+                 Border.workspaceDockPianoRollExp.FlushLeft.FlushRight">
+    <Setter Property="CornerRadius" Value="0,0,0,0" />
+  </Style>
+  <Style Selector="Border.workspaceDockPianoRollMain.FlushRight > Grid > Border.pianoRollTopBar,
+                 Border.workspaceDockPianoRoll.FlushRight > Grid > Border.pianoRollTopBar">
+    <Setter Property="Padding" Value="8,8,8,8" />
+  </Style>
+  <Style Selector="Border.workspaceDockNoteProps">
+    <Setter Property="CornerRadius" Value="8,0,0,8" />
+    <Setter Property="Margin" Value="0" />
+    <!-- Match piano-roll dock: no top card inset so header aligns with Edit/View row. -->
+    <Setter Property="Padding" Value="0" />
+  </Style>
+  <Style Selector="TextBlock.workspacePanelTitle">
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="Opacity" Value="0.55" />
+    <Setter Property="Foreground" Value="{DynamicResource SystemControlForegroundBaseHighBrush}" />
+  </Style>
+  <Style Selector="TextBlock.notePropsPanelTitle">
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="Foreground" Value="{DynamicResource SystemControlForegroundBaseHighBrush}" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
+
+  <!-- Welcome (home) screen -->
+  <Style Selector="Border.welcomeCard">
+    <Setter Property="Background" Value="{DynamicResource WorkspaceCardBrush}" />
+    <Setter Property="CornerRadius" Value="8" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Padding" Value="12" />
+    <Setter Property="ClipToBounds" Value="True" />
+  </Style>
+  <Style Selector="Border.welcomeHubShell">
+    <Setter Property="Background" Value="{DynamicResource WorkspaceCardBrush}" />
+    <Setter Property="CornerRadius" Value="8" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Padding" Value="12,12,12,8" />
+    <Setter Property="ClipToBounds" Value="False" />
+  </Style>
+  <Style Selector="Button.welcomeRecoveryButton">
+    <Setter Property="CornerRadius" Value="8" />
+    <Setter Property="HorizontalAlignment" Value="Stretch" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="Padding" Value="12,10" />
+    <Setter Property="MinHeight" Value="40" />
+    <Setter Property="FontSize" Value="12" />
+  </Style>
+  <Style Selector="Button.welcomeActionButton">
+    <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundBaseLowBrush}" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="CornerRadius" Value="4" />
+    <Setter Property="Padding" Value="8" />
+    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="MinHeight" Value="56" />
+  </Style>
+  <Style Selector="Button.welcomeActionButton:pointerover">
+    <Setter Property="Background" Value="{DynamicResource PianoRollSideHoverBackgroundBrush}" />
+  </Style>
+  <Style Selector="Button.welcomeActionButton:pressed">
+    <Setter Property="Background" Value="{DynamicResource PianoRollSideHoverBackgroundBrush}" />
+  </Style>
+  <Style Selector="Button.singerHubInstallButton">
+    <Setter Property="Margin" Value="0" />
+    <Setter Property="Padding" Value="8,5,8,3" />
+    <Setter Property="Height" Value="24" />
+    <Setter Property="MinHeight" Value="24" />
+    <Setter Property="FontSize" Value="11" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+  </Style>
+  <Style Selector="TextBlock.welcomeActionTitle">
+    <Setter Property="FontSize" Value="13" />
+    <Setter Property="Foreground" Value="{DynamicResource SystemControlForegroundBaseHighBrush}" />
+  </Style>
+  <Style Selector="TextBlock.welcomeActionDescription">
+    <Setter Property="FontSize" Value="11" />
+    <Setter Property="Opacity" Value="0.55" />
+    <Setter Property="TextWrapping" Value="Wrap" />
+  </Style>
+  <Style Selector="ListBox.welcomeFileList">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+  </Style>
+  <Style Selector="ListBox.welcomeFileList ListBoxItem">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Padding" Value="8,6" />
+    <Setter Property="Margin" Value="0,1" />
+    <Setter Property="CornerRadius" Value="4" />
+    <Setter Property="MinHeight" Value="44" />
+    <Setter Property="Height" Value="NaN" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+  </Style>
+  <Style Selector="ListBox.welcomeFileList ListBoxItem:pointerover">
+    <Setter Property="Background" Value="{DynamicResource PianoRollSideHoverBackgroundBrush}" />
+  </Style>
+  <Style Selector="ListBox.welcomeFileList ListBoxItem:selected">
+    <Setter Property="Background" Value="{DynamicResource PianoRollSideHoverBackgroundBrush}" />
+  </Style>
+  <Style Selector="TextBlock.welcomeFileName">
+    <Setter Property="FontSize" Value="13" />
+    <Setter Property="Foreground" Value="{DynamicResource SystemControlForegroundBaseHighBrush}" />
+  </Style>
+  <Style Selector="TextBlock.welcomeFilePath">
+    <Setter Property="FontSize" Value="11" />
+    <Setter Property="Opacity" Value="0.55" />
+    <Setter Property="TextWrapping" Value="Wrap" />
+  </Style>
+
+  <!-- Main window top bar: 32px chrome, 8px padding top and bottom (48px total). -->
+  <Style Selector="Border.appTopBar">
+    <Setter Property="Padding" Value="8,8,8,8" />
+  </Style>
+  <Style Selector="Border.appTopBar > Grid">
+    <Setter Property="MinHeight" Value="32" />
+    <Setter Property="Height" Value="32" />
+    <Setter Property="VerticalAlignment" Value="Stretch" />
+  </Style>
+  <Style Selector="Border.appTopBar Menu">
+    <Setter Property="Height" Value="32" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="HorizontalAlignment" Value="Left" />
+    <Setter Property="Background" Value="Transparent" />
+  </Style>
+  <Style Selector="Border.appTopBar Menu > MenuItem">
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="Height" Value="32" />
+    <Setter Property="MinHeight" Value="32" />
+    <Setter Property="Padding" Value="8,0,8,0" />
+    <Setter Property="CornerRadius" Value="4" />
+    <Setter Property="Background" Value="Transparent" />
+  </Style>
+  <Style Selector="Border.appTopBar Menu > MenuItem:selected /template/ Border#PART_LayoutRoot">
+    <Setter Property="Background" Value="{DynamicResource PianoRollSideHoverBackgroundBrush}" />
+    <Setter Property="CornerRadius" Value="4" />
+  </Style>
+  <Style Selector="Border.appTopBar Menu > MenuItem:pressed /template/ Border#PART_LayoutRoot:pointerover">
+    <Setter Property="Background" Value="{DynamicResource PianoRollSideHoverBackgroundBrush}" />
+    <Setter Property="CornerRadius" Value="4" />
+  </Style>
+  <Style Selector="Border.appTopBar Menu > MenuItem:disabled">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Opacity" Value="0.45" />
+  </Style>
+  <Style Selector="Border.appTopBar Menu > MenuItem:disabled /template/ Border#PART_LayoutRoot">
+    <Setter Property="Background" Value="Transparent" />
+  </Style>
+  <Style Selector="Border.appTopBar Menu > MenuItem:disabled:pointerover /template/ Border#PART_LayoutRoot,
+                 Border.appTopBar Menu > MenuItem:disabled:selected /template/ Border#PART_LayoutRoot,
+                 Border.appTopBar Menu > MenuItem:disabled:pressed /template/ Border#PART_LayoutRoot">
+    <Setter Property="Background" Value="Transparent" />
+  </Style>
+  <Style Selector="TextBlock.appTopBarLabel">
+    <Setter Property="FontSize" Value="15" />
+    <Setter Property="FontFamily" Value="{DynamicResource ui.fontfamily}" />
+    <Setter Property="Foreground" Value="{DynamicResource SystemControlForegroundBaseHighBrush}" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="HorizontalAlignment" Value="Center" />
+  </Style>
+  <Style Selector="Border.appTopBarChrome">
+    <Setter Property="MinHeight" Value="32" />
+    <Setter Property="Height" Value="32" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
+  <Style Selector="StackPanel.appTopBarTransportStrip">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
+  <Style Selector="Border.appTopBarValueStrip">
+    <Setter Property="Background" Value="{DynamicResource AppTopBarValueStripBrush}" />
+    <Setter Property="MinHeight" Value="32" />
+    <Setter Property="Height" Value="32" />
+    <Setter Property="CornerRadius" Value="4" />
+    <Setter Property="ClipToBounds" Value="True" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
+  <Style Selector="Border.appTopBarValueStrip > Grid">
+    <Setter Property="VerticalAlignment" Value="Stretch" />
+  </Style>
+  <Style Selector="Border.appTopBarValueStrip Border.transportStripCell">
+    <Setter Property="MinHeight" Value="32" />
+    <Setter Property="VerticalAlignment" Value="Stretch" />
+    <Setter Property="Padding" Value="12,0" />
+    <Setter Property="Background" Value="Transparent" />
+  </Style>
+  <Style Selector="Border.appTopBarValueStrip:not(.appTopBarTimerStrip) Border.transportStripCell:pointerover">
+    <Setter Property="Background" Value="{DynamicResource PianoRollToolbarButtonHoverBrush}" />
+  </Style>
+  <Style Selector="Border.appTopBarTimerStrip">
+    <Setter Property="Cursor" Value="Arrow" />
+  </Style>
+  <Style Selector="Border.appTopBarValueStrip > Border.transportStripCell:pointerover">
+    <Setter Property="CornerRadius" Value="4" />
+  </Style>
+  <!-- BPM (left): rounded outer left; sharp at divider (top-right, bottom-right). -->
+  <Style Selector="Border.appTopBarValueStrip > Border.appTopBarBpmCell:pointerover">
+    <Setter Property="CornerRadius" Value="4,0,0,4" />
+  </Style>
+  <!-- Time signature (right): sharp at divider (top-left, bottom-left); rounded outer right. -->
+  <Style Selector="Border.appTopBarValueStrip > Border.appTopBarTimeSigCell:pointerover">
+    <Setter Property="CornerRadius" Value="0,4,4,0" />
+  </Style>
+  <Style Selector="Border.appTopBarValueStrip Border.transportValueDivider">
+    <Setter Property="Width" Value="1" />
+    <Setter Property="Margin" Value="0,8" />
+    <Setter Property="Background" Value="{DynamicResource AppTopBarValueDividerBrush}" />
+    <Setter Property="Opacity" Value="0.55" />
+  </Style>
+  <!-- Main window transport: separate 32×32 chips (like piano-roll side toggles). -->
+  <Style Selector="Button.transportChip, ToggleButton.transportChip">
+    <Setter Property="Width" Value="32" />
+    <Setter Property="MinWidth" Value="32" />
+    <Setter Property="Height" Value="32" />
+    <Setter Property="MinHeight" Value="32" />
+    <Setter Property="Margin" Value="0" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="FocusAdorner" Value="{x:Null}" />
+    <Setter Property="CornerRadius" Value="4" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+  </Style>
+  <Style Selector="Button.transportChip /template/ ContentPresenter#PART_ContentPresenter,
+          ToggleButton.transportChip /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="CornerRadius" Value="4" />
+    <Setter Property="Margin" Value="0" />
+    <Setter Property="MinHeight" Value="32" />
+  </Style>
+  <Style Selector="Button.transportChip /template/ Border#PART_BorderElement,
+          ToggleButton.transportChip /template/ Border#PART_BorderElement">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="BoxShadow" Value="0 0 0 0 Transparent" />
+  </Style>
+  <Style Selector="ToggleButton.transportChip:checked /template/ Border#PART_BorderElement,
+          ToggleButton.transportChip:checked:pointerover /template/ Border#PART_BorderElement,
+          ToggleButton.transportChip:checked:pressed /template/ Border#PART_BorderElement">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="BoxShadow" Value="0 0 0 0 Transparent" />
+  </Style>
+  <Style Selector="StackPanel.appTopBarTransportStrip Viewbox">
+    <Setter Property="Width" Value="18" />
+    <Setter Property="Height" Value="20" />
+    <Setter Property="MaxWidth" Value="18" />
+    <Setter Property="MaxHeight" Value="20" />
+    <Setter Property="Stretch" Value="Uniform" />
+    <Setter Property="HorizontalAlignment" Value="Center" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
+  <Style Selector="Button.transportChip Path.filled,
+          ToggleButton.transportChip Path.filled">
+    <Setter Property="Fill" Value="{DynamicResource TransportChipIconOffBrush}" />
+    <Setter Property="Transitions">
+      <Transitions>
+        <BrushTransition Property="Fill" Duration="0:0:0.15" />
+      </Transitions>
+    </Setter>
+  </Style>
+  <Style Selector="Button.transportChip:pointerover:not(.playing) Path.filled,
+          ToggleButton.transportChip:not(:checked):pointerover Path.filled">
+    <Setter Property="Fill" Value="{DynamicResource ToolbarToolIconOnAccentBrush}" />
+  </Style>
+  <Style Selector="Button.transportChip:pointerover /template/ ContentPresenter#PART_ContentPresenter,
+          Button.transportChip:pressed /template/ ContentPresenter#PART_ContentPresenter,
+          ToggleButton.transportChip:pointerover /template/ ContentPresenter#PART_ContentPresenter,
+          ToggleButton.transportChip:pressed /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource AppTopBarTransportStripBrush}" />
+    <Setter Property="CornerRadius" Value="4" />
+  </Style>
+  <Style Selector="ToggleButton.transportChip:checked /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="CornerRadius" Value="4" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="BoxShadow" Value="0 0 0 0 Transparent" />
+  </Style>
+  <Style Selector="Button.playPauseChip.playing Path.pauseIcon.filled,
+          Button.playPauseChip.playing:pointerover Path.pauseIcon.filled">
+    <Setter Property="Fill" Value="{DynamicResource TransportAccentPlayPauseBrush}" />
+  </Style>
+  <Style Selector="ToggleButton.metronomeChip:checked Path.filled,
+          ToggleButton.metronomeChip:checked:pointerover Path.filled">
+    <Setter Property="Fill" Value="{DynamicResource TransportAccentMetronomeBrush}" />
+  </Style>
+  <Style Selector="Button.playPauseChip Path.pauseIcon">
+    <Setter Property="IsVisible" Value="False" />
+  </Style>
+  <Style Selector="Button.playPauseChip.playing Path.playIcon">
+    <Setter Property="IsVisible" Value="False" />
+  </Style>
+  <Style Selector="Button.playPauseChip.playing Path.pauseIcon">
+    <Setter Property="IsVisible" Value="True" />
+  </Style>
+
+  <!-- Track header: mute / solo / settings chips (24×24). -->
+  <Style Selector="Button.trackChip, ToggleButton.trackChip">
+    <Setter Property="Width" Value="24" />
+    <Setter Property="MinWidth" Value="24" />
+    <Setter Property="Height" Value="24" />
+    <Setter Property="MinHeight" Value="24" />
+    <Setter Property="Margin" Value="0" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="FocusAdorner" Value="{x:Null}" />
+    <Setter Property="CornerRadius" Value="4" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+  </Style>
+  <Style Selector="Button.trackChip /template/ ContentPresenter#PART_ContentPresenter,
+          ToggleButton.trackChip /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="CornerRadius" Value="4" />
+    <Setter Property="Margin" Value="0" />
+  </Style>
+  <Style Selector="ToggleButton.trackChip /template/ Border#PART_BorderElement,
+          Button.trackChip /template/ Border#PART_BorderElement">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="BoxShadow" Value="0 0 0 0 Transparent" />
+  </Style>
+  <Style Selector="Button.trackChip Path.filled,
+          ToggleButton.trackChip Path.filled">
+    <Setter Property="Fill" Value="{DynamicResource TransportChipIconOffBrush}" />
+    <Setter Property="Transitions">
+      <Transitions>
+        <BrushTransition Property="Fill" Duration="0:0:0.15" />
+      </Transitions>
+    </Setter>
+  </Style>
+  <Style Selector="Button.trackChip:pointerover /template/ ContentPresenter#PART_ContentPresenter,
+          Button.trackChip:pressed /template/ ContentPresenter#PART_ContentPresenter,
+          ToggleButton.trackChip:not(:checked):pointerover /template/ ContentPresenter#PART_ContentPresenter,
+          ToggleButton.trackChip:not(:checked):pressed /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource AppTopBarTransportStripBrush}" />
+    <Setter Property="CornerRadius" Value="4" />
+  </Style>
+  <Style Selector="ToggleButton.trackMuteChip:checked Path.filled,
+          ToggleButton.trackMuteChip:checked:pointerover Path.filled">
+    <Setter Property="Fill" Value="{DynamicResource TrackAccentMuteBrush}" />
+  </Style>
+  <Style Selector="ToggleButton.trackSoloChip:checked Path.filled,
+          ToggleButton.trackSoloChip:checked:pointerover Path.filled">
+    <Setter Property="Fill" Value="{DynamicResource TrackAccentSoloBrush}" />
+  </Style>
+  <Style Selector="ToggleButton.trackMuteChip:checked /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Margin" Value="2" />
+    <Setter Property="CornerRadius" Value="2" />
+    <Setter Property="Background" Value="{DynamicResource TrackAccentMuteCheckedBrush}" />
+    <Setter Property="ClipToBounds" Value="True" />
+  </Style>
+  <Style Selector="ToggleButton.trackSoloChip:checked /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Margin" Value="2" />
+    <Setter Property="CornerRadius" Value="2" />
+    <Setter Property="Background" Value="{DynamicResource TrackAccentSoloCheckedBrush}" />
+    <Setter Property="ClipToBounds" Value="True" />
+  </Style>
+  <Style Selector="ToggleButton.trackMuteChip:checked:pointerover /template/ ContentPresenter#PART_ContentPresenter,
+          ToggleButton.trackMuteChip:checked:pressed /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Margin" Value="0" />
+    <Setter Property="CornerRadius" Value="4" />
+    <Setter Property="BorderThickness" Value="2" />
+    <Setter Property="BorderBrush" Value="{DynamicResource AppTopBarTransportStripBrush}" />
+    <Setter Property="Background" Value="{DynamicResource TrackAccentMuteCheckedBrush}" />
+  </Style>
+  <Style Selector="ToggleButton.trackSoloChip:checked:pointerover /template/ ContentPresenter#PART_ContentPresenter,
+          ToggleButton.trackSoloChip:checked:pressed /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Margin" Value="0" />
+    <Setter Property="CornerRadius" Value="4" />
+    <Setter Property="BorderThickness" Value="2" />
+    <Setter Property="BorderBrush" Value="{DynamicResource AppTopBarTransportStripBrush}" />
+    <Setter Property="Background" Value="{DynamicResource TrackAccentSoloCheckedBrush}" />
+  </Style>
+  <Style Selector="Button.trackSettingsChip:pressed Path.filled">
+    <Setter Property="Fill" Value="{DynamicResource ToolbarToolIconOnAccentBrush}" />
+  </Style>
+
+  <Style Selector="Border.pianoRollToolbarStrip, Border.transportToolbarStrip">
+    <Setter Property="Background" Value="{DynamicResource PianoRollToolbarStripBackgroundBrush}" />
+    <Setter Property="CornerRadius" Value="6" />
+    <Setter Property="ClipToBounds" Value="True" />
+    <Setter Property="Padding" Value="0" />
+  </Style>
+  <Style Selector="Border.transportToolbarStrip">
+    <Setter Property="Height" Value="20" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
+  <Style Selector="Border.transportToolbarStrip TextBlock">
     <Setter Property="Padding" Value="6,0,0,1"/>
     <Setter Property="FontSize" Value="11"/>
     <Setter Property="FontFamily" Value="Monospace"/>
     <Setter Property="VerticalAlignment" Value="Center"/>
     <Setter Property="HorizontalAlignment" Value="Center"/>
+    <Setter Property="Foreground" Value="{DynamicResource SystemControlForegroundBaseHighBrush}"/>
   </Style>
-  <Style Selector="Border.playback StackPanel">
+  <Style Selector="Border.transportToolbarStrip StackPanel">
     <Setter Property="VerticalAlignment" Value="Center"/>
     <Setter Property="HorizontalAlignment" Value="Center"/>
   </Style>
-  <Style Selector="Border.playback Button">
+  <Style Selector="Border.transportToolbarStrip Border.transportStripCell">
+    <Setter Property="Background" Value="Transparent" />
+  </Style>
+  <Style Selector="Border.transportToolbarStrip Border.transportStripCell:pointerover">
+    <Setter Property="Background" Value="{DynamicResource PianoRollToolbarButtonHoverBrush}" />
+  </Style>
+  <Style Selector="Border.transportToolbarStrip Button Path">
+    <Setter Property="Fill" Value="{DynamicResource SystemControlForegroundBaseHighBrush}" />
+  </Style>
+  <Style Selector="Border.transportToolbarStrip ToggleButton:not(:checked) Path">
+    <Setter Property="Fill" Value="{DynamicResource SystemControlForegroundBaseHighBrush}" />
+  </Style>
+  <Style Selector="Border.transportToolbarStrip Button">
     <Setter Property="Margin" Value="0"/>
     <Setter Property="Padding" Value="0"/>
     <Setter Property="Width" Value="21"/>
     <Setter Property="Height" Value="19"/>
     <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="Foreground" Value="{DynamicResource SystemControlForegroundBaseHighBrush}"/>
+    <Setter Property="CornerRadius" Value="0"/>
   </Style>
-  <Style Selector="Border.playback ToggleButton">
+  <Style Selector="Border.transportToolbarStrip ToggleButton">
     <Setter Property="Margin" Value="0"/>
     <Setter Property="Padding" Value="0"/>
     <Setter Property="Width" Value="21"/>
@@ -321,10 +841,168 @@
     <Setter Property="Background" Value="Transparent"/>
     <Setter Property="HorizontalContentAlignment" Value="Center"/>
     <Setter Property="VerticalContentAlignment" Value="Center"/>
+    <Setter Property="Foreground" Value="{DynamicResource SystemControlForegroundBaseHighBrush}"/>
+    <Setter Property="CornerRadius" Value="0"/>
+  </Style>
+  <!-- Segmented strip: square hovers inside; only end caps rounded (matches piano-roll toolbarStrip). -->
+  <Style Selector="Border.transportToolbarStrip > Grid > Button:first-child">
+    <Setter Property="CornerRadius" Value="6,0,0,6"/>
+  </Style>
+  <Style Selector="Border.transportToolbarStrip > Grid > ToggleButton:last-child">
+    <Setter Property="CornerRadius" Value="0,6,6,0"/>
+  </Style>
+  <Style Selector="Border.transportToolbarStrip Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource PianoRollToolbarButtonHoverBrush}"/>
+  </Style>
+  <Style Selector="Border.transportToolbarStrip Button:pressed /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource TransportToolbarOffPressedBrush}"/>
+  </Style>
+  <Style Selector="Border.transportToolbarStrip ToggleButton:not(:checked):pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource PianoRollToolbarButtonHoverBrush}"/>
+  </Style>
+  <Style Selector="Border.transportToolbarStrip ToggleButton:not(:checked):pressed /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource TransportToolbarOffPressedBrush}"/>
+  </Style>
+  <Style Selector="Border.transportToolbarStrip ToggleButton:checked /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource SystemControlForegroundBaseHighBrush}"/>
+  </Style>
+  <Style Selector="Border.transportToolbarStrip ToggleButton:checked:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource TransportToolbarOnHoverBrush}"/>
+  </Style>
+  <Style Selector="Border.transportToolbarStrip ToggleButton:checked:pressed /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource TransportToolbarOnHoverBrush}"/>
+  </Style>
+  <Style Selector="Border.transportToolbarStrip ToggleButton:checked Path">
+    <Setter Property="Fill" Value="{DynamicResource SystemControlBackgroundAltHighBrush}"/>
+  </Style>
+
+  <Style Selector="Border.pianoRollToolbarStrip ToggleButton.toolbar">
+    <Setter Property="CornerRadius" Value="0" />
+    <Setter Property="Background" Value="Transparent" />
+  </Style>
+  <Style Selector="Border.pianoRollToolbarStrip ToggleButton.toolbar:pointerover:not(:checked) /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource PianoRollToolbarButtonHoverBrush}" />
+  </Style>
+
+  <Style Selector="Border.pianoRollTopBar">
+    <Setter Property="Padding" Value="8,8,8,8" />
+    <Setter Property="MinHeight" Value="48" />
+    <Setter Property="VerticalAlignment" Value="Stretch" />
+  </Style>
+  <Style Selector="Border.expPanelTopBar">
+    <Setter Property="Background" Value="{DynamicResource WorkspaceCardBrush}" />
+    <Setter Property="MinHeight" Value="24" />
+    <Setter Property="MaxHeight" Value="24" />
+    <Setter Property="VerticalAlignment" Value="Stretch" />
+  </Style>
+  <Style Selector="Border.pianoRollTopBar > Grid">
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="HorizontalAlignment" Value="Stretch" />
+  </Style>
+  <Style Selector="Border.pianoRollTopBar Menu">
+    <Setter Property="Height" Value="32" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="Background" Value="Transparent" />
+  </Style>
+  <Style Selector="Border.pianoRollTopBar Menu > MenuItem">
+    <Setter Property="Height" Value="32" />
+    <Setter Property="MinHeight" Value="32" />
+    <Setter Property="Padding" Value="8,0,8,0" />
+    <Setter Property="CornerRadius" Value="4" />
+    <Setter Property="Background" Value="Transparent" />
+  </Style>
+  <Style Selector="Border.pianoRollTopBar Menu > MenuItem:selected /template/ Border#PART_LayoutRoot">
+    <Setter Property="Background" Value="{DynamicResource PianoRollSideHoverBackgroundBrush}" />
+    <Setter Property="CornerRadius" Value="4" />
+  </Style>
+  <Style Selector="Border.pianoRollTopBar Menu > MenuItem:pressed /template/ Border#PART_LayoutRoot:pointerover">
+    <Setter Property="Background" Value="{DynamicResource PianoRollSideHoverBackgroundBrush}" />
+    <Setter Property="CornerRadius" Value="4" />
+  </Style>
+  <Style Selector="Border.pianoRollTopBar ToggleButton.topBarToggleChip">
+    <Setter Property="Width" Value="32" />
+    <Setter Property="Height" Value="32" />
+    <Setter Property="MinWidth" Value="32" />
+    <Setter Property="MinHeight" Value="32" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="Margin" Value="0" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="CornerRadius" Value="4" />
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+  </Style>
+  <Style Selector="Border.pianoRollTopBar ToggleButton.topBarToggleChip /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="CornerRadius" Value="4" />
+  </Style>
+  <Style Selector="Border.pianoRollTopBar ToggleButton.topBarToggleChip:pointerover:not(:checked) /template/ ContentPresenter#PART_ContentPresenter,
+          Border.pianoRollTopBar ToggleButton.topBarToggleChip:pressed:not(:checked) /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource PianoRollSideHoverBackgroundBrush}" />
+  </Style>
+  <Style Selector="Border.pianoRollTopBar ToggleButton.topBarToggleChip:checked /template/ ContentPresenter#PART_ContentPresenter,
+          Border.pianoRollTopBar ToggleButton.topBarToggleChip:checked:pointerover /template/ ContentPresenter#PART_ContentPresenter,
+          Border.pianoRollTopBar ToggleButton.topBarToggleChip:checked:pressed /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource SelectedTrackAccentBrush}" />
+  </Style>
+  <Style Selector="Border.pianoRollTopBar ToggleButton.topBarToggleChip:not(:checked):not(:pointerover) Path.filled">
+    <Setter Property="Fill" Value="{DynamicResource PianoRollSideIconOffBrush}" />
+  </Style>
+  <Style Selector="Border.pianoRollTopBar ToggleButton.topBarToggleChip:checked Path.filled,
+          Border.pianoRollTopBar ToggleButton.topBarToggleChip:pointerover Path.filled">
+    <Setter Property="Fill" Value="{DynamicResource ToolbarToolIconOnAccentBrush}" />
+  </Style>
+  <!-- View note parameters: top-bar chip (not left-sidebar checked tint). -->
+  <Style Selector="Border.pianoRollTopBar ToggleButton.sideToolbarToggle.noteParamsToggle /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="CornerRadius" Value="4" />
+    <Setter Property="Margin" Value="0" />
+    <Setter Property="BorderThickness" Value="0" />
+  </Style>
+  <Style Selector="Border.pianoRollTopBar ToggleButton.sideToolbarToggle.noteParamsToggle:checked /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Margin" Value="0" />
+    <Setter Property="CornerRadius" Value="4" />
+    <Setter Property="BorderThickness" Value="0" />
+  </Style>
+  <Style Selector="Border.pianoRollTopBar ToggleButton.sideToolbarToggle.noteParamsToggle:pointerover /template/ ContentPresenter#PART_ContentPresenter,
+          Border.pianoRollTopBar ToggleButton.sideToolbarToggle.noteParamsToggle:pressed /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource PianoRollSideHoverBackgroundBrush}" />
+  </Style>
+  <Style Selector="Border.pianoRollTopBar ToggleButton.topBarToggleChip Grid.toolbarIconHost">
+    <Setter Property="Width" Value="24" />
+    <Setter Property="Height" Value="24" />
+  </Style>
+  <!-- Snap division / key: same chrome as Edit, View, Batch Edits menu items. -->
+  <Style Selector="Border.pianoRollTopBar Button.topBarTextChip">
+    <Setter Property="MinWidth" Value="32" />
+    <Setter Property="MinHeight" Value="32" />
+    <Setter Property="Height" Value="32" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="Padding" Value="8,0,8,0" />
+    <Setter Property="Margin" Value="0" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="CornerRadius" Value="4" />
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Foreground" Value="{DynamicResource SystemControlForegroundBaseHighBrush}" />
+  </Style>
+  <Style Selector="Border.pianoRollTopBar Button.topBarTextChip:pointerover /template/ ContentPresenter#PART_ContentPresenter,
+          Border.pianoRollTopBar Button.topBarTextChip:pressed /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource PianoRollSideHoverBackgroundBrush}" />
+    <Setter Property="CornerRadius" Value="4" />
+  </Style>
+  <Style Selector="Border.pianoRollTopBar Button.topBarTextChip TextBlock">
+    <Setter Property="Foreground" Value="{DynamicResource SystemControlForegroundBaseHighBrush}" />
+    <Setter Property="FontSize" Value="10" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
+
+  <Style Selector="Border.workspaceDockPianoRollSide > StackPanel">
+    <Setter Property="Spacing" Value="0" />
   </Style>
 
   <Style Selector="Border.tips">
-    <Setter Property="CornerRadius" Value="4"/>
+    <Setter Property="CornerRadius" Value="6"/>
     <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundAltHighBrush}"/>
     <Setter Property="BorderBrush" Value="{DynamicResource NeutralAccentBrushSemi}"/>
     <Setter Property="BorderThickness" Value="1"/>
@@ -335,54 +1013,216 @@
     <Setter Property="LineHeight" Value="18"/>
   </Style>
 
-  <Style Selector="ScrollBar.music[IsExpanded=True] /template/ Rectangle#TrackRect">
+  <!-- Thin overlay scrollbars: pill thumb on content, no arrow buttons or track fill. -->
+  <Style Selector="ScrollBar.overlay">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="ClipToBounds" Value="True" />
+    <Setter Property="AllowAutoHide" Value="False" />
+  </Style>
+  <Style Selector="ScrollBar.overlay:horizontal">
+    <Setter Property="MinHeight" Value="10" />
+    <Setter Property="MaxHeight" Value="10" />
+  </Style>
+  <Style Selector="ScrollBar.overlay:vertical">
+    <Setter Property="MinHeight" Value="0" />
+    <Setter Property="MaxHeight" Value="Infinity" />
+    <Setter Property="MinWidth" Value="10" />
+    <Setter Property="MaxWidth" Value="10" />
+  </Style>
+  <Style Selector="ScrollBar.overlay /template/ Rectangle#TrackRect">
     <Setter Property="Fill" Value="Transparent" />
+    <Setter Property="Stroke" Value="Transparent" />
+    <Setter Property="Opacity" Value="0" />
   </Style>
-  <Style Selector="ScrollBar.music[IsExpanded=true] /template/ Thumb.thumb">
-    <Setter Property="Background" Value="{DynamicResource NeutralAccentBrushSemi}" />
+  <Style Selector="ScrollBar.overlay:horizontal /template/ Thumb">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="Margin" Value="0" />
+    <Setter Property="MinHeight" Value="0" />
+    <Setter Property="Template">
+      <ControlTemplate TargetType="Thumb">
+        <Border x:Name="PART_Border"
+                Height="8"
+                MinHeight="8"
+                MaxHeight="8"
+                VerticalAlignment="Center"
+                HorizontalAlignment="Stretch"
+                Background="{DynamicResource ScrollBarThumbBrush}"
+                Opacity="0.85"
+                CornerRadius="4"
+                BorderThickness="0"
+                ClipToBounds="True"/>
+      </ControlTemplate>
+    </Setter>
   </Style>
-  <Style Selector="ScrollBar.music[IsExpanded=true] /template/ Thumb.thumb:pointerover">
+  <Style Selector="ScrollBar.overlay:vertical /template/ Thumb">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="Margin" Value="0" />
+    <Setter Property="MinWidth" Value="0" />
+    <Setter Property="Template">
+      <ControlTemplate TargetType="Thumb">
+        <Border x:Name="PART_Border"
+                Width="8"
+                MinWidth="8"
+                MaxWidth="8"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Stretch"
+                Background="{DynamicResource ScrollBarThumbBrush}"
+                Opacity="0.85"
+                CornerRadius="4"
+                BorderThickness="0"
+                ClipToBounds="True"/>
+      </ControlTemplate>
+    </Setter>
+  </Style>
+  <Style Selector="ScrollBar.overlay /template/ Thumb:pointerover /template/ Border#PART_Border">
+    <Setter Property="Opacity" Value="1" />
+    <Setter Property="Background" Value="#C4C4C4" />
+  </Style>
+  <Style Selector="ScrollBar.overlay /template/ Thumb:pressed /template/ Border#PART_Border">
+    <Setter Property="Opacity" Value="1" />
+    <Setter Property="Background" Value="#D9D9D9" />
+  </Style>
+  <Style Selector="ScrollBar.overlay /template/ RepeatButton#PART_LineUpButton,
+                 ScrollBar.overlay /template/ RepeatButton#PART_LineDownButton">
+    <Setter Property="IsVisible" Value="False" />
+    <Setter Property="IsHitTestVisible" Value="False" />
+    <Setter Property="Opacity" Value="0" />
+    <Setter Property="Width" Value="0" />
+    <Setter Property="Height" Value="0" />
+    <Setter Property="MinWidth" Value="0" />
+    <Setter Property="MinHeight" Value="0" />
+    <Setter Property="MaxWidth" Value="0" />
+    <Setter Property="MaxHeight" Value="0" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Background" Value="Transparent" />
+  </Style>
+  <Style Selector="ScrollBar.overlay /template/ RepeatButton#PART_LineUpButton PathIcon,
+                 ScrollBar.overlay /template/ RepeatButton#PART_LineDownButton PathIcon,
+                 ScrollBar.overlay /template/ RepeatButton#PART_LineUpButton /template/ Border,
+                 ScrollBar.overlay /template/ RepeatButton#PART_LineDownButton /template/ Border,
+                 ScrollBar.overlay /template/ RepeatButton#PART_LineUpButton /template/ ContentPresenter,
+                 ScrollBar.overlay /template/ RepeatButton#PART_LineDownButton /template/ ContentPresenter">
+    <Setter Property="IsVisible" Value="False" />
+    <Setter Property="Opacity" Value="0" />
+  </Style>
+  <Style Selector="ScrollBar.overlay /template/ RepeatButton#PART_PageUpButton,
+                 ScrollBar.overlay /template/ RepeatButton#PART_PageDownButton">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Opacity" Value="0" />
+    <Setter Property="BorderThickness" Value="0" />
+  </Style>
+  <Style Selector="ScrollViewer.workspaceScroll.overlay /template/ ScrollBar:vertical /template/ Thumb">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="Margin" Value="0" />
+    <Setter Property="Template">
+      <ControlTemplate TargetType="Thumb">
+        <Border x:Name="PART_Border"
+                Width="8"
+                MinWidth="8"
+                MaxWidth="8"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Stretch"
+                Background="{DynamicResource ScrollBarThumbBrush}"
+                Opacity="0.85"
+                CornerRadius="4"
+                BorderThickness="0"
+                ClipToBounds="True"/>
+      </ControlTemplate>
+    </Setter>
+  </Style>
+  <Style Selector="ScrollViewer.workspaceScroll.overlay /template/ ScrollBar:vertical /template/ Thumb:pointerover /template/ Border#PART_Border">
+    <Setter Property="Opacity" Value="1" />
+    <Setter Property="Background" Value="#C4C4C4" />
+  </Style>
+  <Style Selector="ScrollViewer.workspaceScroll.overlay /template/ ScrollBar:vertical /template/ Thumb:pressed /template/ Border#PART_Border">
+    <Setter Property="Opacity" Value="1" />
+    <Setter Property="Background" Value="#D9D9D9" />
+  </Style>
+
+  <!-- Avalonia 11 Fluent ScrollBar.music: style colors/corners only; never set Thumb size or alignment (breaks drag and viewport ratio). -->
+  <Style Selector="ScrollBar.music[IsExpanded=True] /template/ Rectangle#TrackRect,
+                 ScrollViewer.workspaceScroll /template/ ScrollBar[IsExpanded=True] /template/ Rectangle#TrackRect">
+    <Setter Property="Fill" Value="Transparent" />
+    <Setter Property="Stroke" Value="Transparent" />
+  </Style>
+  <Style Selector="ScrollBar.music[IsExpanded=true] /template/ Thumb,
+                 ScrollViewer.workspaceScroll /template/ ScrollBar[IsExpanded=true] /template/ Thumb">
+    <Setter Property="Opacity" Value="1" />
+    <Setter Property="Background" Value="{DynamicResource ScrollBarThumbBrush}" />
+  </Style>
+  <Style Selector="ScrollBar.music[IsExpanded=true] /template/ Thumb /template/ Border,
+                 ScrollViewer.workspaceScroll /template/ ScrollBar[IsExpanded=true] /template/ Thumb /template/ Border">
+    <Setter Property="CornerRadius" Value="4" />
+    <Setter Property="Opacity" Value="1" />
+    <Setter Property="Background" Value="{DynamicResource ScrollBarThumbBrush}" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+  </Style>
+  <Style Selector="ScrollBar.music[IsExpanded=true] /template/ Thumb:pointerover,
+                 ScrollViewer.workspaceScroll /template/ ScrollBar[IsExpanded=true] /template/ Thumb:pointerover">
+    <Setter Property="Opacity" Value="1" />
     <Setter Property="Background" Value="{DynamicResource NeutralAccentBrush}" />
   </Style>
-  <Style Selector="ScrollBar.music /template/ RepeatButton.line /template/ Border#Root" >
+  <Style Selector="ScrollBar.music[IsExpanded=true] /template/ Thumb:pointerover /template/ Border,
+                 ScrollViewer.workspaceScroll /template/ ScrollBar[IsExpanded=true] /template/ Thumb:pointerover /template/ Border">
+    <Setter Property="CornerRadius" Value="4" />
+    <Setter Property="Opacity" Value="1" />
+    <Setter Property="Background" Value="{DynamicResource NeutralAccentBrush}" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+  </Style>
+  <!-- Line buttons: icon tint on hover only (no fill), like ViewScaler. -->
+  <Style Selector="ScrollBar.music[IsExpanded=true] /template/ RepeatButton#PART_LineUpButton /template/ ContentPresenter#PART_ContentPresenter,
+                 ScrollBar.music[IsExpanded=true] /template/ RepeatButton#PART_LineDownButton /template/ ContentPresenter#PART_ContentPresenter,
+                 ScrollBar.music[IsExpanded=true] /template/ RepeatButton#PART_LineUpButton:pointerover /template/ ContentPresenter#PART_ContentPresenter,
+                 ScrollBar.music[IsExpanded=true] /template/ RepeatButton#PART_LineDownButton:pointerover /template/ ContentPresenter#PART_ContentPresenter,
+                 ScrollBar.music[IsExpanded=true] /template/ RepeatButton#PART_LineUpButton:pressed /template/ ContentPresenter#PART_ContentPresenter,
+                 ScrollBar.music[IsExpanded=true] /template/ RepeatButton#PART_LineDownButton:pressed /template/ ContentPresenter#PART_ContentPresenter,
+                 ScrollViewer.workspaceScroll /template/ ScrollBar[IsExpanded=true] /template/ RepeatButton#PART_LineUpButton /template/ ContentPresenter#PART_ContentPresenter,
+                 ScrollViewer.workspaceScroll /template/ ScrollBar[IsExpanded=true] /template/ RepeatButton#PART_LineDownButton /template/ ContentPresenter#PART_ContentPresenter,
+                 ScrollViewer.workspaceScroll /template/ ScrollBar[IsExpanded=true] /template/ RepeatButton#PART_LineUpButton:pointerover /template/ ContentPresenter#PART_ContentPresenter,
+                 ScrollViewer.workspaceScroll /template/ ScrollBar[IsExpanded=true] /template/ RepeatButton#PART_LineDownButton:pointerover /template/ ContentPresenter#PART_ContentPresenter,
+                 ScrollViewer.workspaceScroll /template/ ScrollBar[IsExpanded=true] /template/ RepeatButton#PART_LineUpButton:pressed /template/ ContentPresenter#PART_ContentPresenter,
+                 ScrollViewer.workspaceScroll /template/ ScrollBar[IsExpanded=true] /template/ RepeatButton#PART_LineDownButton:pressed /template/ ContentPresenter#PART_ContentPresenter">
     <Setter Property="Background" Value="Transparent" />
   </Style>
-  <Style Selector="ScrollBar.music /template/ RepeatButton.line:pointerover /template/ Border#Root" >
+  <Style Selector="ScrollBar.music[IsExpanded=true] /template/ RepeatButton#PART_LineUpButton /template/ Border#PART_BorderElement,
+                 ScrollBar.music[IsExpanded=true] /template/ RepeatButton#PART_LineDownButton /template/ Border#PART_BorderElement,
+                 ScrollBar.music[IsExpanded=true] /template/ RepeatButton#PART_LineUpButton:pointerover /template/ Border#PART_BorderElement,
+                 ScrollBar.music[IsExpanded=true] /template/ RepeatButton#PART_LineDownButton:pointerover /template/ Border#PART_BorderElement,
+                 ScrollBar.music[IsExpanded=true] /template/ RepeatButton#PART_LineUpButton:pressed /template/ Border#PART_BorderElement,
+                 ScrollBar.music[IsExpanded=true] /template/ RepeatButton#PART_LineDownButton:pressed /template/ Border#PART_BorderElement,
+                 ScrollViewer.workspaceScroll /template/ ScrollBar[IsExpanded=true] /template/ RepeatButton#PART_LineUpButton /template/ Border#PART_BorderElement,
+                 ScrollViewer.workspaceScroll /template/ ScrollBar[IsExpanded=true] /template/ RepeatButton#PART_LineDownButton /template/ Border#PART_BorderElement,
+                 ScrollViewer.workspaceScroll /template/ ScrollBar[IsExpanded=true] /template/ RepeatButton#PART_LineUpButton:pointerover /template/ Border#PART_BorderElement,
+                 ScrollViewer.workspaceScroll /template/ ScrollBar[IsExpanded=true] /template/ RepeatButton#PART_LineDownButton:pointerover /template/ Border#PART_BorderElement,
+                 ScrollViewer.workspaceScroll /template/ ScrollBar[IsExpanded=true] /template/ RepeatButton#PART_LineUpButton:pressed /template/ Border#PART_BorderElement,
+                 ScrollViewer.workspaceScroll /template/ ScrollBar[IsExpanded=true] /template/ RepeatButton#PART_LineDownButton:pressed /template/ Border#PART_BorderElement">
     <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
   </Style>
-  <Style Selector="ScrollBar.music /template/ RepeatButton.line:pressed /template/ Border#Root" >
-    <Setter Property="Background" Value="Transparent" />
+  <Style Selector="ScrollBar.music[IsExpanded=true] /template/ RepeatButton#PART_LineUpButton PathIcon,
+                 ScrollBar.music[IsExpanded=true] /template/ RepeatButton#PART_LineDownButton PathIcon,
+                 ScrollViewer.workspaceScroll /template/ ScrollBar[IsExpanded=true] /template/ RepeatButton#PART_LineUpButton PathIcon,
+                 ScrollViewer.workspaceScroll /template/ ScrollBar[IsExpanded=true] /template/ RepeatButton#PART_LineDownButton PathIcon">
+    <Setter Property="Foreground" Value="{DynamicResource NeutralAccentBrushSemi}" />
   </Style>
-  <Style Selector="ScrollBar.music:vertical /template/ RepeatButton.line.up /template/ Path">
-    <Setter Property="Data" Value="M 0 20 L 20 20 L 10 0 Z" />
-  </Style>
-  <Style Selector="ScrollBar.music:vertical /template/ RepeatButton.line.down /template/ Path">
-    <Setter Property="Data" Value="M 0 0 L 20 0 L 10 20 Z" />
-  </Style>
-  <Style Selector="ScrollBar.music:horizontal /template/ RepeatButton.line.up /template/ Path">
-    <Setter Property="Data" Value="M 0 10 L 20 0 L 20 20 Z" />
-  </Style>
-  <Style Selector="ScrollBar.music:horizontal /template/ RepeatButton.line.down /template/ Path">
-    <Setter Property="Data" Value="M 20 10 L 0 0 L 0 20 Z" />
-  </Style>
-  <Style Selector="ScrollBar.music /template/ RepeatButton.line /template/ Viewbox" >
-    <Setter Property="Width" Value="24" />
-    <Setter Property="Height" Value="24" />
-  </Style>
-  <Style Selector="ScrollBar.music /template/ RepeatButton.line /template/ Path#Arrow" >
-    <Setter Property="Width" Value="24" />
-    <Setter Property="Height" Value="24" />
-    <Setter Property="Fill" Value="{DynamicResource NeutralAccentBrushSemi}" />
-  </Style>
-  <Style Selector="ScrollBar.music /template/ RepeatButton.line:pointerover /template/ Path#Arrow" >
-    <Setter Property="Width" Value="24" />
-    <Setter Property="Height" Value="24" />
-    <Setter Property="Fill" Value="{DynamicResource NeutralAccentBrush}" />
-  </Style>
-  <Style Selector="ScrollBar.music /template/ RepeatButton.line:pressed /template/ Path#Arrow" >
-    <Setter Property="Width" Value="24" />
-    <Setter Property="Height" Value="24" />
-    <Setter Property="Fill" Value="{DynamicResource NeutralAccentBrush}" />
+  <Style Selector="ScrollBar.music[IsExpanded=true] /template/ RepeatButton#PART_LineUpButton:pointerover PathIcon,
+                 ScrollBar.music[IsExpanded=true] /template/ RepeatButton#PART_LineDownButton:pointerover PathIcon,
+                 ScrollBar.music[IsExpanded=true] /template/ RepeatButton#PART_LineUpButton:pressed PathIcon,
+                 ScrollBar.music[IsExpanded=true] /template/ RepeatButton#PART_LineDownButton:pressed PathIcon,
+                 ScrollViewer.workspaceScroll /template/ ScrollBar[IsExpanded=true] /template/ RepeatButton#PART_LineUpButton:pointerover PathIcon,
+                 ScrollViewer.workspaceScroll /template/ ScrollBar[IsExpanded=true] /template/ RepeatButton#PART_LineDownButton:pointerover PathIcon,
+                 ScrollViewer.workspaceScroll /template/ ScrollBar[IsExpanded=true] /template/ RepeatButton#PART_LineUpButton:pressed PathIcon,
+                 ScrollViewer.workspaceScroll /template/ ScrollBar[IsExpanded=true] /template/ RepeatButton#PART_LineDownButton:pressed PathIcon">
+    <Setter Property="Foreground" Value="{DynamicResource NeutralAccentBrush}" />
   </Style>
 
   <Style Selector="HeaderedContentControl.groupbox">
@@ -406,7 +1246,7 @@
             </Border>
             <Border Grid.RowSpan="2" Grid.ColumnSpan="2" Margin="0,8,0,0" Padding="12,12,12,8"
                 BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1"
-                    CornerRadius="3">
+                    CornerRadius="6">
               <ContentPresenter Content="{TemplateBinding Content}" />
             </Border>
           </Grid>
@@ -468,7 +1308,7 @@
     <Setter Property="Template">
       <Setter.Value>
         <ControlTemplate>
-          <Border Background="{TemplateBinding Background}" Height="6" Width="16" CornerRadius="2"/>
+          <Border Background="{TemplateBinding Background}" Height="6" Width="16" CornerRadius="6"/>
         </ControlTemplate>
       </Setter.Value>
     </Setter>
@@ -496,7 +1336,7 @@
 
   <Style Selector="ColorPicker TextBox">
     <Setter Property="VerticalContentAlignment" Value="Center"/>
-    <Setter Property="CornerRadius" Value="0,4,4,0"/>
+    <Setter Property="CornerRadius" Value="0,6,6,0"/>
     <Setter Property="Height" Value="32"/>
     <Setter Property="Padding" Value="5"/>
     <Setter Property="Margin" Value="0"/>
