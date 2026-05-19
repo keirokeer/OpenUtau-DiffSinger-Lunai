@@ -6,7 +6,7 @@
              x:Class="OpenUtau.App.Controls.TrackAdder" Width="300" Height="104">
   <Border>
     <Button Classes="clear" VerticalAlignment="Center" HorizontalAlignment="Center"
-            Width="60" Height="30" CornerRadius="4" Click="ButtonClicked">
+            Width="60" Height="30" CornerRadius="6" Click="ButtonClicked">
       <Path Classes="filled" Width="24" Height="24" Data="M10.61,13.43H2.28V10.57H10.61V2H13.39V10.57H21.72V13.43H13.39V22H10.61Z" 
             Fill="{DynamicResource NeutralAccentBrushSemi}"/>
     </Button>

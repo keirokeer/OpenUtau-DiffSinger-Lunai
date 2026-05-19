@@ -11,7 +11,7 @@ using OpenUtau.Core.Ustx;
 using ReactiveUI;
 
 namespace OpenUtau.App.Controls {
-    class TrackHeaderCanvas : Canvas {
+    partial class TrackHeaderCanvas : Canvas {
         public static readonly DirectProperty<TrackHeaderCanvas, double> TrackHeightProperty =
             AvaloniaProperty.RegisterDirect<TrackHeaderCanvas, double>(
                 nameof(TrackHeight),

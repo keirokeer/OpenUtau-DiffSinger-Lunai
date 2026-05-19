@@ -1,15 +1,22 @@
 ﻿using System.Collections.Generic;
 using System.Windows.Input;
+using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Controls.Shapes;
 using Avalonia.Data;
 using Avalonia.Input;
+using Avalonia.Layout;
+using Avalonia.Media;
 using Avalonia.Threading;
+using OpenUtau.Api;
+using OpenUtau.App.Controls;
 using OpenUtau.Core.Ustx;
 
 namespace OpenUtau.App.ViewModels {
     public class MenuItemViewModel {
-        public string? Header { get; set; }
+        public object? Header { get; set; }
         public ICommand? Command { get; set; }
+        public ICommand? SecondaryCommand { get; set; }
         public object? CommandParameter { get; set; }
         public IList<MenuItemViewModel>? Items { get; set; }
         public double Height { get; set; } = 24;
@@ -17,6 +24,7 @@ namespace OpenUtau.App.ViewModels {
         public KeyGesture? InputGesture { get; set; }
         public bool IsEnabled { get; set; } = true;
         public object? Icon { get; set; }
+        public virtual object HeaderViewModel => Header!;
 
         public MenuItemViewModel() { }
         public MenuItemViewModel(bool isChecked) {
@@ -30,7 +38,82 @@ namespace OpenUtau.App.ViewModels {
         }
     }
 
+    public sealed class MenuSeparatorViewModel : MenuItemViewModel {
+        public MenuSeparatorViewModel() {
+            Header = new Panel {
+                Height = 8,
+                Background = Brushes.Transparent,
+                IsHitTestVisible = false,
+            };
+            Height = 8;
+            IsEnabled = false;
+        }
+
+        public override object HeaderViewModel => Header!;
+    }
+
+    public sealed class PhonemizerMenuSeparatorViewModel : MenuItemViewModel {
+        public PhonemizerMenuSeparatorViewModel() {
+            Header = new Border {
+                Height = 1,
+                Margin = new Thickness(4, 0),
+                Background = Brushes.White,
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+                VerticalAlignment = VerticalAlignment.Center,
+                IsHitTestVisible = false,
+            };
+            Height = 9;
+            IsEnabled = false;
+        }
+
+        public override object HeaderViewModel => Header!;
+    }
+
+    public class PhonemizerMenuItemViewModel : MenuItemViewModel {
+        public override object HeaderViewModel => this;
+
+        public PhonemizerMenuItemViewModel(
+            PhonemizerFactory factory,
+            ICommand command,
+            string? prefix = null,
+            ICommand? secondaryCommand = null) {
+            Command = command;
+            SecondaryCommand = secondaryCommand;
+            CommandParameter = factory;
+            Header = BuildHeader(factory, prefix);
+        }
+
+        static Control BuildHeader(PhonemizerFactory factory, string? prefix) {
+            var panel = new StackPanel {
+                Orientation = Orientation.Horizontal,
+                Spacing = 6,
+            };
+            var tagBlock = new TextBlock {
+                Text = prefix ?? factory.tag,
+                VerticalAlignment = VerticalAlignment.Center,
+            };
+            tagBlock.Foreground = ThemeManager.ForegroundBrush;
+            var detail = factory.name;
+            if (!string.IsNullOrEmpty(factory.author)) {
+                detail += $" (Contributed by {factory.author})";
+            }
+            var detailBlock = new TextBlock {
+                Text = detail,
+                Opacity = 0.4,
+                VerticalAlignment = VerticalAlignment.Center,
+            };
+            detailBlock.Foreground = ThemeManager.ForegroundBrush;
+            panel.Children.Add(tagBlock);
+            panel.Children.Add(detailBlock);
+            return panel;
+        }
+    }
+
     public class SingerMenuItemViewModel : MenuItemViewModel {
+        Grid? singerMenuRow;
+        public override object HeaderViewModel => singerMenuRow ??= SingerMenuRow.Create(this);
+        public new object? Icon => null;
+
         public bool IsFavourite {
             get {
                 if(CommandParameter is USinger singer) {
@@ -42,19 +125,6 @@ namespace OpenUtau.App.ViewModels {
                 if (CommandParameter is USinger singer) {
                     singer.IsFavourite = value;
                 }
-            }
-        }
-        private object? _icon;
-        public new object? Icon {
-            get {
-                if(_icon == null) {
-                    if (CommandParameter is USinger) {
-                        _icon = new FavouriteToggleButton() {
-                            [!FavouriteToggleButton.IsCheckedProperty] = new Binding("IsFavourite")
-                        };
-                    }
-                }
-                return _icon;
             }
         }
         public string? Location {

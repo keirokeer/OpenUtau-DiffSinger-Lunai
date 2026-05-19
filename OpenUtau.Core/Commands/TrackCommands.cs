@@ -78,12 +78,77 @@ namespace OpenUtau.Core {
         }
         public override string ToString() => "Move track";
         public override void Execute() {
+            if (index < 0 || index + 1 >= project.tracks.Count) {
+                return;
+            }
             project.tracks.Reverse(index, 2);
             UpdateTrackNo();
         }
         public override void Unexecute() {
+            if (index < 0 || index + 1 >= project.tracks.Count) {
+                return;
+            }
             project.tracks.Reverse(index, 2);
             UpdateTrackNo();
+        }
+    }
+
+    public class ReorderTrackCommand : TrackCommand {
+        readonly int oldIndex;
+        readonly int newIndex;
+
+        public ReorderTrackCommand(UProject project, UTrack track, int newIndex) {
+            this.project = project;
+            this.track = track;
+            oldIndex = track.TrackNo;
+            this.newIndex = newIndex;
+        }
+
+        public override string ToString() => "Reorder track";
+        public override void Execute() => MoveTo(newIndex);
+        public override void Unexecute() => MoveTo(oldIndex);
+
+        void MoveTo(int targetIndex) {
+            if (targetIndex < 0 || targetIndex >= project.tracks.Count) {
+                return;
+            }
+            int currentIndex = track.TrackNo;
+            if (currentIndex == targetIndex) {
+                return;
+            }
+            project.tracks.RemoveAt(currentIndex);
+            project.tracks.Insert(targetIndex, track);
+            UpdateTrackNo();
+        }
+    }
+
+    public class TrackChangeSettingsCommand : TrackCommand {
+        readonly bool newMute;
+        readonly bool oldMute;
+        readonly double newVolume;
+        readonly double oldVolume;
+        readonly double newPan;
+        readonly double oldPan;
+        public TrackChangeSettingsCommand(UProject project, UTrack track, bool mute, double volume, double pan) {
+            this.project = project;
+            this.track = track;
+            newMute = mute;
+            newVolume = volume;
+            newPan = pan;
+            oldMute = track.Mute;
+            oldVolume = track.Volume;
+            oldPan = track.Pan;
+        }
+        public override string ToString() => "Change track settings";
+        public override void Execute() {
+            track.Mute = newMute;
+            track.Volume = newVolume;
+            track.Pan = newPan;
+        }
+        public override void Unexecute() {
+            track.Mute = oldMute;
+            track.Volume = oldVolume;
+            track.Pan = oldPan;
         }
     }
 

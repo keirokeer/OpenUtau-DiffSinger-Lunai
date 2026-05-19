@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
@@ -37,6 +37,11 @@ namespace OpenUtau.App.Controls {
                 nameof(Items),
                 o => o.Items,
                 (o, v) => o.Items = v);
+        public static readonly DirectProperty<PartsCanvas, UPart?> PianoRollOpenPartProperty =
+            AvaloniaProperty.RegisterDirect<PartsCanvas, UPart?>(
+                nameof(PianoRollOpenPart),
+                o => o.PianoRollOpenPart,
+                (o, v) => o.PianoRollOpenPart = v);
 
         public double TickWidth {
             get => tickWidth;
@@ -58,12 +63,23 @@ namespace OpenUtau.App.Controls {
             get => _items;
             set => SetAndRaise(ItemsProperty, ref _items, value);
         }
+        public UPart? PianoRollOpenPart {
+            get => _pianoRollOpenPart;
+            set {
+                if (SetAndRaise(PianoRollOpenPartProperty, ref _pianoRollOpenPart, value)) {
+                    foreach (var control in partControls.Values) {
+                        control.InvalidateVisual();
+                    }
+                }
+            }
+        }
 
         private double tickWidth;
         private double trackHeight;
         private double tickOffset;
         private double trackOffset;
         private ObservableCollection<UPart>? _items;
+        private UPart? _pianoRollOpenPart;
 
         Dictionary<UPart, PartControl> partControls = new Dictionary<UPart, PartControl>();
 
