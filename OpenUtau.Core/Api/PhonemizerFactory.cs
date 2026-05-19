@@ -1,10 +1,12 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using OpenUtau.Core.Ustx;
 
 namespace OpenUtau.Api {
     public class PhonemizerFactory {
+        public const string DiffSingerLanguage = "DiffSinger";
         public Type type;
         public string name;
         public string tag;
@@ -57,5 +59,17 @@ namespace OpenUtau.Api {
         }
 
         public static PhonemizerFactory[] GetAll() => orderedFactories;
+
+        public static bool IsDiffSingerPhonemizer(PhonemizerFactory factory) {
+            return string.Equals(factory.language, DiffSingerLanguage, StringComparison.OrdinalIgnoreCase);
+        }
+
+        public static IEnumerable<PhonemizerFactory> EnumerateForSinger(USinger? singer) {
+            var all = GetAll();
+            if (singer != null && singer.Found && singer.SingerType == USingerType.DiffSinger) {
+                return all.Where(IsDiffSingerPhonemizer);
+            }
+            return all.Where(factory => !IsDiffSingerPhonemizer(factory));
+        }
     }
 }

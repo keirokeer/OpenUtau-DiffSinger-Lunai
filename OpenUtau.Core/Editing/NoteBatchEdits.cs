@@ -1,7 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using OpenUtau.Core.Render;
 using OpenUtau.Core.Ustx;
 using OpenUtau.Core.Format;
 
@@ -466,13 +467,38 @@ namespace OpenUtau.Core.Editing {
         public void RunAsync(
             UProject project, UVoicePart part, List<UNote> selectedNotes, DocManager docManager,
             Action<int, int> setProgressCallback, CancellationToken cancellationToken) {
+            RunInternal(
+                project, part, selectedNotes, docManager,
+                setProgressCallback, cancellationToken);
+        }
+
+        /// <summary>Live pitch only; must not replace <see cref="RunAsync"/> (BatchEdit interface).</summary>
+        internal void RunLive(
+            UProject project, UVoicePart part, List<UNote> selectedNotes, DocManager docManager,
+            CancellationToken cancellationToken, double pitchSteps, bool fastRealtime) {
+            RunInternal(
+                project, part, selectedNotes, docManager,
+                (_, _) => { }, cancellationToken,
+                recordUndo: false,
+                showUnsupportedError: false,
+                pitchSteps: pitchSteps,
+                fastRealtime: fastRealtime);
+        }
+
+        void RunInternal(
+            UProject project, UVoicePart part, List<UNote> selectedNotes, DocManager docManager,
+            Action<int, int> setProgressCallback, CancellationToken cancellationToken,
+            bool recordUndo = true, bool showUnsupportedError = true, double? pitchSteps = null,
+            bool fastRealtime = false) {
             var renderer = project.tracks[part.trackNo].RendererSettings.Renderer;
             if (renderer == null || !renderer.SupportsRenderPitch) {
-                var e = new MessageCustomizableException(
-                    "Current renderer doesn't support generating pitch curve", 
-                    $"<translate:errors.editing.autopitch.unsupported>",
-                    new Exception());
-                DocManager.Inst.ExecuteCmd(new ErrorMessageNotification(e));
+                if (showUnsupportedError) {
+                    var e = new MessageCustomizableException(
+                        "Current renderer doesn't support generating pitch curve",
+                        $"<translate:errors.editing.autopitch.unsupported>",
+                        new Exception());
+                    DocManager.Inst.ExecuteCmd(new ErrorMessageNotification(e));
+                }
                 return;
             }
             var notes = selectedNotes.Count > 0 ? selectedNotes : part.notes.ToList();
@@ -488,7 +514,12 @@ namespace OpenUtau.Core.Editing {
             var commands = new List<SetCurveCommand>();
             for (int ph_i = phrases.Count() - 1; ph_i >= 0; ph_i--) {
                 var phrase = phrases[ph_i];
-                var result = renderer.LoadRenderedPitch(phrase);
+                RenderPitchResult result;
+                if (pitchSteps.HasValue && renderer is DiffSinger.DiffSingerRenderer diffSingerRenderer) {
+                    result = diffSingerRenderer.LoadRenderedPitch(phrase, pitchSteps.Value, fastRealtime);
+                } else {
+                    result = renderer.LoadRenderedPitch(phrase);
+                }
                 if (result == null) {
                     continue;
                 }
@@ -526,10 +557,23 @@ namespace OpenUtau.Core.Editing {
                 setProgressCallback(finished, phrases.Length);
             }
 
+            if (commands.Count == 0) {
+                return;
+            }
+            var validateOptions = new ValidateOptions {
+                SkipTiming = true,
+                Part = part,
+                SkipPhonemizer = true,
+                SkipPhoneme = true,
+            };
             DocManager.Inst.PostOnUIThread(() => {
-                docManager.StartUndoGroup("command.batch.note", true);
-                commands.ForEach(docManager.ExecuteCmd);
-                docManager.EndUndoGroup();
+                if (recordUndo) {
+                    docManager.StartUndoGroup("command.batch.note", true);
+                    commands.ForEach(docManager.ExecuteCmd);
+                    docManager.EndUndoGroup();
+                } else {
+                    docManager.ApplyTransient(commands, validateOptions, preRender: !fastRealtime);
+                }
             });
         }
     }

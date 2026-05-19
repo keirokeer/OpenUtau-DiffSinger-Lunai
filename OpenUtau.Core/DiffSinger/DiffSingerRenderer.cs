@@ -30,6 +30,7 @@ namespace OpenUtau.Core.DiffSinger {
             Format.Ustx.BREC,
             Format.Ustx.VOIC,
             Format.Ustx.TENC,
+            Format.Ustx.OPEC,
             VELC,
             ENE,
             PEXP,
@@ -487,13 +488,17 @@ namespace OpenUtau.Core.DiffSinger {
         }
 
         public RenderPitchResult LoadRenderedPitch(RenderPhrase phrase) {
+            return LoadRenderedPitch(phrase, null);
+        }
+
+        public RenderPitchResult LoadRenderedPitch(RenderPhrase phrase, double? pitchSteps, bool fastRealtime = false) {
             DiffSingerSinger singer = (DiffSingerSinger) phrase.singer;
             if (!singer.HasPitchPredictor) {
                 throw new Exception("This singer has no pitch predictor.");
             }
             var pitchPredictor = singer.getPitchPredictor()!;
             lock (pitchPredictor) {
-                return pitchPredictor.Process(phrase);
+                return pitchPredictor.Process(phrase, pitchSteps, fastRealtime);
             }
         }
 

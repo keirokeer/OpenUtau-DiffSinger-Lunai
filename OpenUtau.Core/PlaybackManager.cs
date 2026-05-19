@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -222,8 +222,8 @@ namespace OpenUtau.Core {
 
         public int Mix(int position, float[] buffer, int offset, int count) {
             int masterPos = masterSource.Mix(position, buffer, offset, count);
-            int overlayPos = overlaySource.Mix(position, buffer, offset, count);
-            return Math.Max(masterPos, overlayPos);
+            overlaySource.Mix(position, buffer, offset, count);
+            return masterPos;
         }
     }
 
@@ -251,6 +251,8 @@ namespace OpenUtau.Core {
         double startMs;
         public int StartTick => DocManager.Inst.Project.timeAxis.MsPosToTickPos(startMs);
         CancellationTokenSource renderCancellation;
+        CancellationTokenSource preRenderCancellation;
+        bool pausedWithMix;
 
         public Audio.IAudioOutput AudioOutput { get; set; } = new Audio.DummyAudioOutput();
         public bool OutputActive => AudioOutput.PlaybackState == PlaybackState.Playing;
@@ -342,6 +344,19 @@ namespace OpenUtau.Core {
         }
 
         public void Play(UProject project, int tick, int endTick = -1, int trackNo = -1) {
+            if (pausedWithMix && masterMix != null) {
+                var timeAxis = project.timeAxis;
+                startMs = timeAxis.TickPosToMsPos(tick);
+                masterMix.SetPosition((int)(startMs * 44100 / 1000) * 2);
+                pausedWithMix = false;
+                PlayingMaster = true;
+                StartingToPlay = false;
+                metronomeEngine.StartPlayback(timeAxis, tick);
+                AudioOutput.Stop();
+                AudioOutput.Init(masterMix);
+                AudioOutput.Play();
+                return;
+            }
             if (AudioOutput.PlaybackState == PlaybackState.Paused) {
                 PlayingMaster = true;
                 metronomeEngine.StartPlayback(project.timeAxis, DocManager.Inst.playPosTick);
@@ -355,6 +370,7 @@ namespace OpenUtau.Core {
         }
 
         public void StopPlayback() {
+            pausedWithMix = false;
             AudioOutput.Stop();
             masterMix = null;
             PlayingMaster = false;
@@ -362,7 +378,16 @@ namespace OpenUtau.Core {
         }
 
         public void PausePlayback() {
-            AudioOutput.Pause();
+            if (Preferences.Default.UseSystemDefaultAudioDevice && masterMix != null) {
+                var timeAxis = DocManager.Inst.Project.timeAxis;
+                int tick = DocManager.Inst.playPosTick;
+                startMs = timeAxis.TickPosToMsPos(tick);
+                masterMix.SetPosition((int)(startMs * 44100 / 1000) * 2);
+                AudioOutput.Stop();
+                pausedWithMix = true;
+            } else {
+                AudioOutput.Pause();
+            }
             PlayingMaster = false;
             metronomeEngine.Stop();
         }
@@ -492,7 +517,7 @@ namespace OpenUtau.Core {
         void SchedulePreRender() {
             Log.Information("SchedulePreRender");
             var engine = new RenderEngine(DocManager.Inst.Project);
-            engine.PreRenderProject(ref renderCancellation);
+            engine.PreRenderProject(ref preRenderCancellation);
         }
 
         #region ICmdSubscriber

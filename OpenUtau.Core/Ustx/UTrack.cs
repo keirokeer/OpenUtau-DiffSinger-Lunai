@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using OpenUtau.Api;
@@ -89,6 +89,7 @@ namespace OpenUtau.Core.Ustx {
         [YamlIgnore] public int TrackNo { set; get; }
         public string TrackName { get; set; } = "New Track";
         public string TrackColor { get; set; } = "Blue";
+        static string NewTrackColor() => Util.Preferences.ResolveDefaultTrackColor();
         [YamlIgnore] public bool Muted { set; get; }
         public bool Mute { get; set; }
         public bool Solo { get; set; }
@@ -100,8 +101,10 @@ namespace OpenUtau.Core.Ustx {
         public string[] VoiceColorNames { get; set; } = new string[] { "" };
 
         public UTrack() {
+            TrackColor = NewTrackColor();
         }
         public UTrack(UProject project) {
+            TrackColor = NewTrackColor();
             int trackCount = 0;
             if (project.tracks != null && project.tracks.Count > 0) {
                 trackCount = project.tracks.Max(t => int.TryParse(t.TrackName.Replace("Track", ""), out int result) ? result : 0);
@@ -113,6 +116,7 @@ namespace OpenUtau.Core.Ustx {
         }
         public UTrack(string trackName) {
             TrackName = trackName;
+            TrackColor = NewTrackColor();
         }
 
         public bool TryGetExpDescriptor(UProject project, string abbr, out UExpressionDescriptor descriptor) {
@@ -132,13 +136,18 @@ namespace OpenUtau.Core.Ustx {
 
         public List<UExpressionDescriptor> GetSupportedExps(UProject project) {
             var list = new List<UExpressionDescriptor>();
-            if (RendererSettings.Renderer == null) {
+            var renderer = RendererSettings.Renderer;
+            if (renderer == null) {
                 return list;
             }
-            var exps = project.expressions.Keys.ToList();
-            exps.Union(TrackExpressions.Select(exp => exp.abbr));
-            foreach (var abbr in exps) {
-                if (TryGetExpDescriptor(project, abbr, out var descriptor) && RendererSettings.Renderer.SupportsExpression(descriptor)) {
+            foreach (var descriptor in project.expressions.Values) {
+                if (renderer.SupportsExpression(descriptor)) {
+                    list.Add(descriptor);
+                }
+            }
+            foreach (var descriptor in TrackExpressions) {
+                if (renderer.SupportsExpression(descriptor)
+                    && !list.Exists(d => d.abbr == descriptor.abbr)) {
                     list.Add(descriptor);
                 }
             }
