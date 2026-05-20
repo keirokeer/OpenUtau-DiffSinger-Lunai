@@ -270,15 +270,16 @@
         <Grid Classes="workspaceLayout" ColumnDefinitions="300,*,16"
               VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
           <Grid.RowDefinitions>
-            <RowDefinition Height="*" MinHeight="48"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="3*"
+            <RowDefinition Height="{Binding TracksRowHeight}" MinHeight="0"/>
+            <RowDefinition Height="{Binding PianoRollSplitterRowHeight}" MinHeight="0"/>
+            <RowDefinition Height="{Binding PianoRollRowHeight}"
                            MinHeight="{Binding PianoRollMinHeight}"
                            MaxHeight="{Binding PianoRollMaxHeight}"/>
             <RowDefinition Height="20"/>
             <RowDefinition Height="4"/>
           </Grid.RowDefinitions>
-          <Border Grid.Row="0" Grid.ColumnSpan="3" Classes="workspaceCard workspaceDockTracks">
+          <Border Grid.Row="0" Grid.ColumnSpan="3" Classes="workspaceCard workspaceDockTracks"
+                  IsVisible="{Binding ShowTracksArea}">
             <Grid ColumnDefinitions="300,*,16">
               <Grid.RowDefinitions>
                 <RowDefinition Height="24"/>
@@ -506,10 +507,10 @@
           </Border>
           <GridSplitter Grid.Row="1" Grid.ColumnSpan="3"
                         ResizeDirection="Rows"
-                        Height="8" MinHeight="8"
+                        Height="8" MinHeight="8" MaxHeight="8"
                         HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                         Background="Transparent" Focusable="False" Cursor="SizeNorthSouth"
-                        IsVisible="{Binding ShowPianoRoll}"/>
+                        IsVisible="{Binding ShowPianoRollSplitter}"/>
           <Border Grid.Row="2" Grid.ColumnSpan="3" Classes="workspaceDockPianoHost"
                   ClipToBounds="True" IsVisible="{Binding ShowPianoRoll}">
             <ContentControl Name="PianoRollContainer"

@@ -120,6 +120,9 @@ namespace OpenUtau.App.Views {
                 TaskScheduler.FromCurrentSynchronizationContext());
             Log.Information("Created main window.");
             this.Cursor = null;
+            Opened += (_, _) => Dispatcher.UIThread.Post(
+                PianoRollViewModel.WarmUpAppearancePreferences,
+                DispatcherPriority.Background);
         }
 
         public void InitProject() {
@@ -130,7 +133,7 @@ namespace OpenUtau.App.Views {
             if (!IsLoaded) {
                 return;
             }
-            bool classic = Preferences.Default.UseClassicScrollbars;
+            bool classic = !Preferences.Default.UseOverlayScrollbars;
             viewModel.RefreshScrollbarStylePreference();
             if (TracksHScrollBar.Parent is Grid tracksGrid) {
                 if (tracksGrid.RowDefinitions.Count > 2) {
@@ -1227,6 +1230,7 @@ namespace OpenUtau.App.Views {
                     LoadingWindow.EndLoading();
 
                     pianoRoll.ViewModel.PlaybackViewModel = viewModel.PlaybackViewModel;
+                    pianoRoll.ViewModel.PianoRollFullscreen = viewModel.PianoRollFullscreen;
                 }
                 if (pianoRollWindow != null) {
                     pianoRollWindow.Show();
@@ -1241,9 +1245,34 @@ namespace OpenUtau.App.Views {
             }
         }
 
+        public void TogglePianoRollFullscreen() {
+            SetPianoRollFullscreen(!viewModel.PianoRollFullscreen);
+        }
+
+        public void SetPianoRollFullscreen(bool fullscreen) {
+            if (Preferences.Default.DetachPianoRoll) {
+                return;
+            }
+            if (fullscreen && pianoRoll == null) {
+                return;
+            }
+            viewModel.PianoRollFullscreen = fullscreen;
+            if (fullscreen) {
+                viewModel.ShowPianoRoll = true;
+            }
+            if (pianoRoll != null) {
+                pianoRoll.ViewModel.PianoRollFullscreen = fullscreen;
+                pianoRoll.PianoRollFullscreenToggle.IsChecked = fullscreen;
+                pianoRoll.NotifyDetachedLayoutChanged();
+            }
+        }
+
         public void SetPianoRollAttachment() {
             if (pianoRoll == null) {
                 return;
+            }
+            if (viewModel.PianoRollFullscreen) {
+                SetPianoRollFullscreen(false);
             }
             if (Preferences.Default.DetachPianoRoll) {
                 pianoRollWindow?.ForceClose();

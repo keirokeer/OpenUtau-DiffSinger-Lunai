@@ -132,10 +132,13 @@ namespace OpenUtau.Core {
     public class ProgressBarNotification : UNotification {
         public double Progress;
         public string Info;
+        /// <summary>When &gt; 0, status text is cleared after this many seconds.</summary>
+        public double AutoClearSeconds;
         public override bool Silent => true;
-        public ProgressBarNotification(double progress, string info) {
+        public ProgressBarNotification(double progress, string info, double autoClearSeconds = 0) {
             Progress = progress;
             Info = info;
+            AutoClearSeconds = autoClearSeconds;
         }
         public override string ToString() => $"Set progress {Progress} {Info}";
     }

@@ -4,6 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Reactive;
 using System.Threading.Tasks;
+using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Threading;
 using DynamicData.Binding;
 using OpenUtau.App;
@@ -46,6 +48,8 @@ namespace OpenUtau.App.ViewModels {
     }
 
     public class MainWindowViewModel : ViewModelBase, ICmdSubscriber {
+        DispatcherTimer? progressTextClearTimer;
+
         public string Title => !ProjectSaved
             ? $"{AppVersion}"
             : $"{(DocManager.Inst.ChangesSaved ? "" : "*")}{AppVersion} [{DocManager.Inst.Project.FilePath}]";
@@ -77,9 +81,20 @@ namespace OpenUtau.App.ViewModels {
         [Reactive] public double Progress { get; set; }
         [Reactive] public string ProgressText { get; set; }
         [Reactive] public bool ShowPianoRoll { get; set; }
+        [Reactive] public bool PianoRollFullscreen { get; set; }
         [Reactive] public double PianoRollMaxHeight { get; set; }
         [Reactive] public double PianoRollMinHeight { get; set; }
-        [Reactive] public bool UseClassicScrollbars { get; private set; }
+        public bool ShowTracksArea => !PianoRollFullscreen;
+        public bool ShowPianoRollSplitter => ShowPianoRoll && !PianoRollFullscreen;
+        public GridLength TracksRowHeight => PianoRollFullscreen
+            ? new GridLength(0)
+            : new GridLength(1, GridUnitType.Star);
+        public GridLength PianoRollRowHeight => PianoRollFullscreen
+            ? new GridLength(1, GridUnitType.Star)
+            : new GridLength(3, GridUnitType.Star);
+        public GridLength PianoRollSplitterRowHeight =>
+            ShowPianoRoll && !PianoRollFullscreen ? new GridLength(8) : new GridLength(0);
+        [Reactive] public bool UseOverlayScrollbars { get; private set; }
         public ReactiveCommand<UPart, Unit> PartDeleteCommand { get; set; }
         public ReactiveCommand<int, Unit>? AddTempoChangeCmd { get; set; }
         public ReactiveCommand<int, Unit>? DelTempoChangeCmd { get; set; }
@@ -137,6 +152,19 @@ namespace OpenUtau.App.ViewModels {
                 .Subscribe(x => {
                     PianoRollMaxHeight = x ? double.PositiveInfinity : 0;
                     PianoRollMinHeight = x ? ViewConstants.PianoRollMinHeight : 0;
+                    if (!x && PianoRollFullscreen) {
+                        PianoRollFullscreen = false;
+                    }
+                    this.RaisePropertyChanged(nameof(ShowPianoRollSplitter));
+                    this.RaisePropertyChanged(nameof(PianoRollSplitterRowHeight));
+                });
+            this.WhenAnyValue(vm => vm.PianoRollFullscreen)
+                .Subscribe(_ => {
+                    this.RaisePropertyChanged(nameof(ShowTracksArea));
+                    this.RaisePropertyChanged(nameof(ShowPianoRollSplitter));
+                    this.RaisePropertyChanged(nameof(PianoRollSplitterRowHeight));
+                    this.RaisePropertyChanged(nameof(TracksRowHeight));
+                    this.RaisePropertyChanged(nameof(PianoRollRowHeight));
                 });
             RefreshScrollbarStylePreference();
             MessageBus.Current.Listen<ScrollbarsStyleChangedEvent>()
@@ -144,7 +172,7 @@ namespace OpenUtau.App.ViewModels {
         }
 
         public void RefreshScrollbarStylePreference() {
-            UseClassicScrollbars = Preferences.Default.UseClassicScrollbars;
+            UseOverlayScrollbars = Preferences.Default.UseOverlayScrollbars;
         }
 
         public void Undo() {
@@ -466,6 +494,19 @@ namespace OpenUtau.App.ViewModels {
                 Dispatcher.UIThread.InvokeAsync(() => {
                     Progress = progressBarNotification.Progress;
                     ProgressText = progressBarNotification.Info;
+                    progressTextClearTimer?.Stop();
+                    progressTextClearTimer = null;
+                    if (progressBarNotification.AutoClearSeconds > 0) {
+                        progressTextClearTimer = new DispatcherTimer {
+                            Interval = TimeSpan.FromSeconds(progressBarNotification.AutoClearSeconds),
+                        };
+                        progressTextClearTimer.Tick += (_, _) => {
+                            ProgressText = string.Empty;
+                            progressTextClearTimer?.Stop();
+                            progressTextClearTimer = null;
+                        };
+                        progressTextClearTimer.Start();
+                    }
                 }, DispatcherPriority.Background);
             } else if (cmd is LoadProjectNotification loadProject) {
                 Preferences.AddRecentFileIfEnabled(loadProject.project.FilePath);
