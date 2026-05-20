@@ -1159,7 +1159,7 @@ namespace OpenUtau.App.ViewModels {
                     PrimaryKeyNotSupported = !IsExpSupported(PrimaryKey);
                 } else if (cmd is SetPlayPosTickNotification setPlayPosTick) {
                     SetPlayPos(setPlayPosTick.playPosTick, setPlayPosTick.waitingRendering);
-                    if (!setPlayPosTick.pause) {
+                    if (!setPlayPosTick.pause || Preferences.Default.LockStartTime == 1) {
                         MaybeAutoScroll(PlayPosX);
                     }
                 } else if (cmd is FocusNoteNotification focusNote) {

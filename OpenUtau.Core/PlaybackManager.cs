@@ -249,7 +249,10 @@ namespace OpenUtau.Core {
         MasterAdapter editingMix;
         
         double startMs;
+        int playbackStartTick;
         public int StartTick => DocManager.Inst.Project.timeAxis.MsPosToTickPos(startMs);
+        /// <summary>Tick where the current playback session started (for lock start time on pause).</summary>
+        public int PlaybackStartTick => playbackStartTick;
         CancellationTokenSource renderCancellation;
         CancellationTokenSource preRenderCancellation;
         bool pausedWithMix;
@@ -347,6 +350,7 @@ namespace OpenUtau.Core {
             if (pausedWithMix && masterMix != null) {
                 var timeAxis = project.timeAxis;
                 startMs = timeAxis.TickPosToMsPos(tick);
+                // playbackStartTick unchanged — resume from pause, not a new session
                 masterMix.SetPosition((int)(startMs * 44100 / 1000) * 2);
                 pausedWithMix = false;
                 PlayingMaster = true;
@@ -403,7 +407,8 @@ namespace OpenUtau.Core {
         private void StartPlayback(double startMs, MasterAdapter masterAdapter) {
             toneGenerator.EndAllTones();
             this.startMs = startMs;
-            metronomeEngine.StartPlayback(DocManager.Inst.Project.timeAxis, StartTick);
+            playbackStartTick = StartTick;
+            metronomeEngine.StartPlayback(DocManager.Inst.Project.timeAxis, playbackStartTick);
             var start = TimeSpan.FromMilliseconds(startMs);
             Log.Information($"StartPlayback at {start}");
             masterMix = masterAdapter;
