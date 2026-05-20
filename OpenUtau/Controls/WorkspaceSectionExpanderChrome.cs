@@ -32,6 +32,24 @@ namespace OpenUtau.App.Controls {
             Apply(root);
         }
 
+        public bool HasAppliedNotePropsExpanders(Control root) {
+            if (!root.IsLoaded) {
+                return false;
+            }
+            foreach (var expander in root.GetVisualDescendants().OfType<Expander>()) {
+                if (!expander.Classes.Contains("notePropsExpander")) {
+                    continue;
+                }
+                expander.ApplyTemplate();
+                if (expander.GetVisualDescendants().OfType<ToggleButton>().FirstOrDefault(b => b.Name == "ExpanderHeader") is ToggleButton header
+                    && header.GetVisualDescendants().OfType<Border>().FirstOrDefault(b => b.Name == "ToggleButtonBackground") is Border headerBg
+                    && headerBg.Tag is HeaderBrushState) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         public void Apply(Control root) {
             if (!root.IsLoaded) {
                 return;

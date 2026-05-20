@@ -19,23 +19,60 @@ namespace OpenUtau.App.Views {
         PreferencesViewModel ViewModel => EnsureViewModel();
         readonly WorkspaceSectionExpanderChrome sectionChrome = new();
         int scrollStyleApplyGeneration;
+        int sectionBrushApplyGeneration;
 
         public AppearancePreferencesPane() {
             InitializeComponent();
             AttachedToVisualTree += (_, _) => {
                 ScheduleApplyScrollStyle();
-                UpdateSectionBrushes();
+                ScheduleUpdateSectionBrushes(retryIfNeeded: true);
             };
-            DetachedFromVisualTree += (_, _) => scrollStyleApplyGeneration++;
+            Loaded += (_, _) => ScheduleUpdateSectionBrushes(retryIfNeeded: true);
+            DetachedFromVisualTree += (_, _) => {
+                scrollStyleApplyGeneration++;
+                sectionBrushApplyGeneration++;
+            };
+            this.GetObservable(IsVisibleProperty).Subscribe(visible => {
+                if (visible) {
+                    ScheduleUpdateSectionBrushes(retryIfNeeded: true);
+                }
+            });
             MessageBus.Current.Listen<ScrollbarsStyleChangedEvent>()
                 .Subscribe(_ => ScheduleApplyScrollStyle());
             MessageBus.Current.Listen<PianorollRefreshEvent>()
-                .Subscribe(_ => Dispatcher.UIThread.Post(UpdateSectionBrushes, DispatcherPriority.Background));
+                .Subscribe(e => {
+                    if (e.refreshItem is "TrackColor" or "Part") {
+                        ScheduleUpdateSectionBrushes(retryIfNeeded: true);
+                    }
+                });
             MessageBus.Current.Listen<ThemeChangedEvent>()
-                .Subscribe(_ => Dispatcher.UIThread.Post(UpdateSectionBrushes, DispatcherPriority.Background));
+                .Subscribe(_ => ScheduleUpdateSectionBrushes(retryIfNeeded: true));
         }
 
-        void UpdateSectionBrushes() {
+        public void ScheduleUpdateSectionBrushes(bool retryIfNeeded = false) {
+            if (!WorkspaceScrollbarHelper.IsInVisualTree(this)) {
+                return;
+            }
+            int generation = ++sectionBrushApplyGeneration;
+            Dispatcher.UIThread.Post(() => {
+                if (generation != sectionBrushApplyGeneration
+                    || !WorkspaceScrollbarHelper.IsInVisualTree(this)) {
+                    return;
+                }
+                ApplySectionBrushes();
+                if (retryIfNeeded
+                    && generation == sectionBrushApplyGeneration
+                    && !sectionChrome.HasAppliedNotePropsExpanders(this)) {
+                    Dispatcher.UIThread.Post(() => {
+                        if (generation == sectionBrushApplyGeneration) {
+                            ApplySectionBrushes();
+                        }
+                    }, DispatcherPriority.Render);
+                }
+            }, DispatcherPriority.Loaded);
+        }
+
+        void ApplySectionBrushes() {
             if (!IsLoaded) {
                 return;
             }
@@ -74,7 +111,7 @@ namespace OpenUtau.App.Views {
             if (!WorkspaceScrollbarHelper.IsInVisualTree(this)) {
                 return;
             }
-            WorkspaceScrollbarHelper.ApplyScrollViewer(ContentScroll, Preferences.Default.UseClassicScrollbars);
+            WorkspaceScrollbarHelper.ApplyScrollViewer(ContentScroll, !Preferences.Default.UseOverlayScrollbars);
         }
 
         PreferencesViewModel EnsureViewModel() {
@@ -154,3 +191,4 @@ namespace OpenUtau.App.Views {
         }
     }
 }
+

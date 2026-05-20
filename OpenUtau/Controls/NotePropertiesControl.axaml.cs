@@ -25,6 +25,7 @@ namespace OpenUtau.App.Controls {
         private readonly NotePropertiesViewModel ViewModel;
         private readonly WorkspaceSectionExpanderChrome sectionChrome = new();
         private int scrollStyleApplyGeneration;
+        private int sectionBrushApplyGeneration;
 
         public NotePropertiesControl() {
             InitializeComponent();
@@ -51,9 +52,12 @@ namespace OpenUtau.App.Controls {
 
             AttachedToVisualTree += (_, _) => {
                 ScheduleApplyNotePropsScrollStyle();
-                ApplySectionBrushes();
+                ScheduleApplySectionBrushes(retryIfNeeded: true);
             };
-            DetachedFromVisualTree += (_, _) => scrollStyleApplyGeneration++;
+            DetachedFromVisualTree += (_, _) => {
+                scrollStyleApplyGeneration++;
+                sectionBrushApplyGeneration++;
+            };
             MessageBus.Current.Listen<ScrollbarsStyleChangedEvent>()
                 .Subscribe(_ => ScheduleApplyNotePropsScrollStyle());
             ViewModel.PropertyChanged += OnViewModelPropertyChanged;
@@ -66,6 +70,29 @@ namespace OpenUtau.App.Controls {
                 or nameof(NotePropertiesViewModel.SectionContentBackground)) {
                 ApplySectionBrushes();
             }
+        }
+
+        void ScheduleApplySectionBrushes(bool retryIfNeeded = false) {
+            if (!WorkspaceScrollbarHelper.IsInVisualTree(this)) {
+                return;
+            }
+            int generation = ++sectionBrushApplyGeneration;
+            Dispatcher.UIThread.Post(() => {
+                if (generation != sectionBrushApplyGeneration
+                    || !WorkspaceScrollbarHelper.IsInVisualTree(this)) {
+                    return;
+                }
+                ApplySectionBrushes();
+                if (retryIfNeeded
+                    && generation == sectionBrushApplyGeneration
+                    && !sectionChrome.HasAppliedNotePropsExpanders(this)) {
+                    Dispatcher.UIThread.Post(() => {
+                        if (generation == sectionBrushApplyGeneration) {
+                            ApplySectionBrushes();
+                        }
+                    }, DispatcherPriority.Render);
+                }
+            }, DispatcherPriority.Loaded);
         }
 
         void ApplySectionBrushes() {
@@ -97,7 +124,7 @@ namespace OpenUtau.App.Controls {
             if (!WorkspaceScrollbarHelper.IsInVisualTree(this)) {
                 return;
             }
-            WorkspaceScrollbarHelper.ApplyScrollViewer(ContentScroll, Preferences.Default.UseClassicScrollbars);
+            WorkspaceScrollbarHelper.ApplyScrollViewer(ContentScroll, !Preferences.Default.UseOverlayScrollbars);
         }
 
         private void LoadPart(UPart? part) {
@@ -115,7 +142,7 @@ namespace OpenUtau.App.Controls {
             }
 
             NotePropertiesViewModel.NoteLoading = false;
-            Dispatcher.UIThread.Post(ApplySectionBrushes, DispatcherPriority.Loaded);
+            ScheduleApplySectionBrushes(retryIfNeeded: true);
         }
 
         private string textBoxValue = string.Empty;
