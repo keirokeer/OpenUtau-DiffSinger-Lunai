@@ -529,7 +529,7 @@
     <Setter Property="Background" Value="{DynamicResource PianoRollSideHoverBackgroundBrush}" />
   </Style>
   <!-- Checked: 5% accent fill inset 2px (card shows in the margin ring). -->
-  <Style Selector="ToggleButton.sideToolbarToggle:checked:not(.noteParamsToggle) /template/ ContentPresenter#PART_ContentPresenter">
+  <Style Selector="ToggleButton.sideToolbarToggle:checked:not(.noteParamsToggle):not(.pianoRollFullscreenToggle) /template/ ContentPresenter#PART_ContentPresenter">
     <Setter Property="Margin" Value="2" />
     <Setter Property="CornerRadius" Value="2" />
     <Setter Property="BorderThickness" Value="0" />
@@ -627,6 +627,13 @@
     <Setter Property="HorizontalAlignment" Value="Center" />
     <Setter Property="VerticalAlignment" Value="Center" />
   </Style>
+  <Style Selector="Button.sideToolbarAction TextBlock.sideToolbarGlyphCompact">
+    <Setter Property="Foreground" Value="{DynamicResource PianoRollSideIconOffBrush}" />
+    <Setter Property="FontSize" Value="10" />
+    <Setter Property="FontWeight" Value="Bold" />
+    <Setter Property="HorizontalAlignment" Value="Center" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
   <Style Selector="Button.sideToolbarAction:pointerover TextBlock.sideToolbarGlyph">
     <Setter Property="Foreground" Value="{DynamicResource PianoRollSideIconOffBrush}" />
   </Style>
@@ -634,8 +641,8 @@
     <Setter Property="Foreground" Value="{DynamicResource ToolTipForegroundBrush}" />
   </Style>
   <!-- Checked + hover: outer 2px ring on full chip (no inset). -->
-  <Style Selector="ToggleButton.sideToolbarToggle:checked:pointerover:not(.noteParamsToggle) /template/ ContentPresenter#PART_ContentPresenter,
-          ToggleButton.sideToolbarToggle:checked:pressed:not(.noteParamsToggle) /template/ ContentPresenter#PART_ContentPresenter">
+  <Style Selector="ToggleButton.sideToolbarToggle:checked:pointerover:not(.noteParamsToggle):not(.pianoRollFullscreenToggle) /template/ ContentPresenter#PART_ContentPresenter,
+          ToggleButton.sideToolbarToggle:checked:pressed:not(.noteParamsToggle):not(.pianoRollFullscreenToggle) /template/ ContentPresenter#PART_ContentPresenter">
     <Setter Property="Margin" Value="0" />
     <Setter Property="CornerRadius" Value="4" />
     <Setter Property="BorderThickness" Value="2" />
@@ -692,6 +699,10 @@
   <Style Selector="ToggleButton.sideToolbarToggle.tipsToggle TextBlock.sideToolbarGlyph">
     <Setter Property="Margin" Value="0,-4,0,0" />
   </Style>
+  <Style Selector="ToggleButton.sideToolbarToggle.livePitchToggle TextBlock.sideToolbarGlyph,
+          ToggleButton.sideToolbarToggle.livePitchFastToggle TextBlock.sideToolbarGlyph">
+    <Setter Property="Margin" Value="0,-2,0,0" />
+  </Style>
   <Style Selector="ToggleButton.sideToolbarToggle:checked.tipsToggle TextBlock.sideToolbarGlyph">
     <Setter Property="Foreground" Value="{DynamicResource PianoRollSideAccentTipsBrush}" />
   </Style>
@@ -703,6 +714,10 @@
   </Style>
   <Style Selector="ToggleButton.sideToolbarToggle:checked.livePitchFastToggle TextBlock.sideToolbarGlyph">
     <Setter Property="Foreground" Value="{DynamicResource PianoRollSideAccentLivePitchFastBrush}" />
+  </Style>
+  <Style Selector="ToggleButton.sideToolbarToggle.pianoRollFullscreenToggle:checked Path.filled,
+          ToggleButton.sideToolbarToggle.pianoRollFullscreenToggle:checked:pointerover Path.filled">
+    <Setter Property="Fill" Value="{DynamicResource ToolbarToolIconOnAccentBrush}" />
   </Style>
   <Style Selector="ToggleButton.sideToolbarToggle:checked.vibratoToggle Path.stroked">
     <Setter Property="Stroke" Value="{DynamicResource PianoRollSideAccentVibratoBrush}" />
@@ -737,15 +752,18 @@
           ToggleButton.sideToolbarToggle.noteParamsToggle:checked:pointerover Path.filled">
     <Setter Property="Fill" Value="{DynamicResource ToolbarToolIconOnAccentBrush}" />
   </Style>
-  <!-- noteParams: local styles override Fluent :checked (PianoRoll StyleInclude > App). -->
-  <Style Selector="ToggleButton.noteParamsToggle:checked /template/ ContentPresenter#PART_ContentPresenter">
+  <!-- noteParams / fullscreen (top bar): local styles override Fluent :checked (PianoRoll StyleInclude > App). -->
+  <Style Selector="ToggleButton.noteParamsToggle:checked /template/ ContentPresenter#PART_ContentPresenter,
+          ToggleButton.pianoRollFullscreenToggle:checked /template/ ContentPresenter#PART_ContentPresenter">
     <Setter Property="Background" Value="Transparent" />
     <Setter Property="Margin" Value="0" />
     <Setter Property="CornerRadius" Value="4" />
     <Setter Property="BorderThickness" Value="0" />
   </Style>
   <Style Selector="ToggleButton.noteParamsToggle:pointerover /template/ ContentPresenter#PART_ContentPresenter,
-          ToggleButton.noteParamsToggle:pressed /template/ ContentPresenter#PART_ContentPresenter">
+          ToggleButton.noteParamsToggle:pressed /template/ ContentPresenter#PART_ContentPresenter,
+          ToggleButton.pianoRollFullscreenToggle:pointerover /template/ ContentPresenter#PART_ContentPresenter,
+          ToggleButton.pianoRollFullscreenToggle:pressed /template/ ContentPresenter#PART_ContentPresenter">
     <Setter Property="Background" Value="{DynamicResource PianoRollSideHoverBackgroundBrush}" />
     <Setter Property="Margin" Value="0" />
     <Setter Property="CornerRadius" Value="4" />

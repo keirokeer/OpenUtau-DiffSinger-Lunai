@@ -249,13 +249,17 @@
                    IsHitTestVisible="False" IsVisible="False"/>
       </Canvas>
       <Border Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Classes="pianoRollTopBar"
-            HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+            HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ClipToBounds="True">
       <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*" MinWidth="0"/>
+          <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        <Grid Grid.Column="0" MinWidth="0">
         <Grid.ColumnDefinitions>
           <ColumnDefinition Width="Auto"/>
           <ColumnDefinition Width="12"/>
-          <ColumnDefinition Width="Auto"/>
-          <ColumnDefinition Width="*"/>
+          <ColumnDefinition Width="*" MinWidth="0"/>
         </Grid.ColumnDefinitions>
         <Border Grid.Column="0">
           <Menu Background="Transparent"
@@ -390,6 +394,11 @@
                 </MenuItem>
               </MenuItem>
               <MenuItem Header="{DynamicResource pianoroll.menu.view.pianoroll}">
+                <MenuItem Header="{DynamicResource pianoroll.menu.view.pianoroll.fullscreen}" Click="OnMenuPianoRollFullscreen">
+                  <MenuItem.Icon>
+                    <CheckBox IsChecked="{Binding PianoRollFullscreen}" IsHitTestVisible="False"/>
+                  </MenuItem.Icon>
+                </MenuItem>
                 <MenuItem Header="{DynamicResource pianoroll.menu.view.pianoroll.detach}" Click="OnMenuDetachPianoRoll">
                   <MenuItem.Icon>
                     <CheckBox IsChecked="{Binding PianoRollDetached}" />
@@ -416,7 +425,7 @@
           </Menu>
         </Border>
 
-        <Border Grid.Column="2">
+        <Border Grid.Column="2" ClipToBounds="True">
           <StackPanel Orientation="Horizontal" Spacing="0">
             <ListBox Classes="toolbar topBarToolStrip" SelectedIndex="{Binding ToolIndex}" VerticalAlignment="Center">
                 <ListBox.ItemsPanel>
@@ -535,14 +544,46 @@
                              ItemsSource="{Binding NotesViewModel.Keys}" KeyDown="OnKeyKeyDown"/>
               </Button.ContextMenu>
             </Button>
-            <Border Width="12" IsVisible="{Binding PianoRollDetached}"/>
-            <c:PianoRollTopBarViewToggles IsVisible="{Binding PianoRollDetached}"
+            <Border Width="12" IsVisible="{Binding UsesExpandedPianoRollLayout}"/>
+            <c:PianoRollTopBarViewToggles IsVisible="{Binding UsesExpandedPianoRollLayout}"
                                           VerticalAlignment="Center"/>
           </StackPanel>
         </Border>
-        <Border Grid.Column="3" HorizontalAlignment="Stretch" VerticalAlignment="Center">
+        </Grid>
+        <Border Grid.Column="1" VerticalAlignment="Center" Classes="pianoRollTopBarPriorityOverlay">
+          <StackPanel Orientation="Horizontal" Spacing="0" VerticalAlignment="Center">
+          <ToggleButton Name="PianoRollFullscreenToggle" Classes="sideToolbarToggle pianoRollFullscreenToggle" Margin="0" Padding="0"
+                        IsVisible="{Binding !PianoRollDetached}"
+                        IsChecked="{Binding PianoRollFullscreen, Mode=OneWay}"
+                        Click="OnPianoRollFullscreenToggle">
+            <ToolTip.Tip>
+              <TextBlock Text="{DynamicResource pianoroll.toggle.fullscreen}" Foreground="{DynamicResource ToolTipForegroundBrush}"/>
+            </ToolTip.Tip>
+            <Grid Classes="toolbarIconHostSide">
+              <Grid Classes="toolbarIconHostSideLayout">
+                <Path Classes="filled" RenderTransformOrigin="0.5,0.5" IsVisible="{Binding !PianoRollFullscreen}"
+                      Data="M5,5 H11 V8 H8 V11 H5 Z M19,5 H13 V8 H16 V11 H19 Z M5,19 H11 V16 H8 V13 H5 Z M19,19 H13 V16 H16 V13 H19 Z">
+                  <Path.RenderTransform>
+                    <TransformGroup>
+                      <ScaleTransform ScaleX="0.72" ScaleY="0.72"/>
+                      <TranslateTransform X="0" Y="0"/>
+                    </TransformGroup>
+                  </Path.RenderTransform>
+                </Path>
+                <Path Classes="filled" RenderTransformOrigin="0.5,0.5" IsVisible="{Binding PianoRollFullscreen}"
+                      Data="M5,10 V5 H10 V8 H8 V10 H5 Z M19,10 V5 H14 V8 H16 V10 H19 Z M5,14 V19 H10 V16 H8 V14 H5 Z M19,14 V19 H14 V16 H16 V14 H19 Z">
+                  <Path.RenderTransform>
+                    <TransformGroup>
+                      <ScaleTransform ScaleX="0.72" ScaleY="0.72"/>
+                      <TranslateTransform X="0" Y="0"/>
+                    </TransformGroup>
+                  </Path.RenderTransform>
+                </Path>
+              </Grid>
+            </Grid>
+          </ToggleButton>
           <ToggleButton Classes="sideToolbarToggle noteParamsToggle" Margin="0" Padding="0"
-                        HorizontalAlignment="Right" VerticalAlignment="Center"
+                        VerticalAlignment="Center"
                         IsChecked="{Binding NotesViewModel.ShowNoteParams}">
             <ToolTip.Tip>
               <TextBlock Text="{DynamicResource pianoroll.toggle.noteparams}" Foreground="{DynamicResource ToolTipForegroundBrush}"/>
@@ -560,6 +601,7 @@
               </Grid>
             </Grid>
           </ToggleButton>
+          </StackPanel>
         </Border>
       </Grid>
       </Border>
@@ -614,7 +656,7 @@
           </Border>
         </Grid>
       </Border>
-      <Grid Grid.Row="2" Grid.Column="1" RowDefinitions="1*,1*">
+      <Grid Grid.Row="2" Grid.Column="1" RowDefinitions="1*,1*" ZIndex="300">
         <Border Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Top">
           <c:LyricBox Name="LyricBox" Width="360" LostFocus="LyricBoxLostFocus"/>
         </Border>
@@ -624,14 +666,7 @@
               PointerWheelChanged="ViewScalerPointerWheelChanged">
         <c:ViewScaler Name="VScaler" DataContext="{Binding NotesViewModel}" Value="{Binding TrackHeight}" Min="{Binding TrackHeightMin}" Max="{Binding TrackHeightMax}"/>
       </Border>
-      <Canvas Name="ValueTipCanvas" Grid.Column="1" Grid.Row="1" Grid.RowSpan="2" IsHitTestVisible="False">
-        <Border Name="ValueTip" BorderThickness="1"
-                BorderBrush="{DynamicResource NeutralAccentBrush}"
-                Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
-          <TextBlock Name="ValueTipText" Margin="2"/>
-        </Border>
-      </Canvas>
-      <ProgressBar Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3" Value="{Binding Progress}" IsVisible="{Binding PianoRollDetached}"/>
+      <ProgressBar Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3" Value="{Binding Progress}" IsVisible="{Binding UsesExpandedPianoRollLayout}"/>
     </Grid>
     </Border>
       <GridSplitter Grid.Row="1" ResizeDirection="Rows" Height="8" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
@@ -749,6 +784,14 @@
         </Grid>
       </Grid>
     </Border>
+      <Canvas Name="ValueTipCanvas" Grid.Row="0" Grid.RowSpan="3" ZIndex="500"
+              IsHitTestVisible="False" ClipToBounds="True">
+        <Border Name="ValueTip" BorderThickness="1"
+                BorderBrush="{DynamicResource NeutralAccentBrush}"
+                Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
+          <TextBlock Name="ValueTipText" Margin="2"/>
+        </Border>
+      </Canvas>
     </Grid>
     <Border Grid.Column="6" Classes="workspaceCard workspaceDockNoteProps"
             IsEnabled="{Binding NotesViewModel.ShowNoteParams}"

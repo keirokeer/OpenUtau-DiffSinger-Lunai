@@ -518,6 +518,8 @@ Warning: this option removes custom presets.</system:String>
 
   <system:String x:Key="pianoroll.key">Key (for scale degree display)</system:String>
   <system:String x:Key="pianoroll.menu.view.pianoroll">Piano Roll</system:String>
+  <system:String x:Key="pianoroll.menu.view.pianoroll.fullscreen">Expand piano roll in window</system:String>
+  <system:String x:Key="pianoroll.toggle.fullscreen">Expand piano roll in window</system:String>
   <system:String x:Key="pianoroll.menu.view.pianoroll.detach">Detach</system:String>
   <system:String x:Key="pianoroll.menu.view.pianoroll.hide">Hide</system:String>
   <system:String x:Key="pianoroll.menu.view.tiktokmode">TikTok recording mode</system:String>
@@ -599,8 +601,9 @@ Warning: this option removes custom presets.</system:String>
   <system:String x:Key="pianoroll.toggle.expressions">View Expressions (L)</system:String>
   <system:String x:Key="pianoroll.toggle.appearance">Appearance Settings</system:String>
   <system:String x:Key="pianoroll.toggle.diffsinger.quality">DiffSinger quality (acoustic 50, variance 50, pitch 20)</system:String>
-  <system:String x:Key="pianoroll.toggle.diffsinger.medium">DiffSinger balanced (acoustic 20, variance 20, pitch 10)</system:String>
-  <system:String x:Key="pianoroll.toggle.diffsinger.fast">DiffSinger low quality (acoustic 10, variance 10, pitch 10)</system:String>
+  <system:String x:Key="pianoroll.toggle.diffsinger.medium">DiffSinger balanced (acoustic 20, variance 20, pitch 20)</system:String>
+  <system:String x:Key="pianoroll.toggle.diffsinger.fast">DiffSinger low quality (acoustic 10, variance 10, pitch 20)</system:String>
+  <system:String x:Key="pianoroll.toggle.diffsinger.extralow">DiffSinger extra low quality (acoustic 1, variance 1, pitch 1)</system:String>
   <system:String x:Key="pianoroll.tool.drawlinepitch">Line Draw Pitch Tool (Shift + 4)
     Left click to draw (draw straight line)
     Right click to reset
@@ -756,6 +759,7 @@ Warning: this option removes custom presets.</system:String>
   <system:String x:Key="prefs.appearance.solidtickgridlines">Solid timeline grid lines (piano roll, tracks &amp; expression panel)</system:String>
   <system:String x:Key="prefs.appearance.solidexppanelgridlines">Solid default-value lines in expression panel</system:String>
   <system:String x:Key="prefs.appearance.classicscrollbars">Classic scrollbars (dedicated track area)</system:String>
+  <system:String x:Key="prefs.appearance.overlayscrollbars">Overlay scrollbars (thin, on top of content)</system:String>
   <system:String x:Key="prefs.appearance.notecornerradius">Note corner radius</system:String>
   <system:String x:Key="prefs.appearance.showicon">Show icon on piano roll</system:String>
   <system:String x:Key="prefs.appearance.showportrait">Show portrait on piano roll</system:String>
@@ -839,6 +843,7 @@ Warning: this option removes custom presets.</system:String>
   <system:String x:Key="progress.loadingsingers">Loading Singers...</system:String>
   <system:String x:Key="progress.saved">Project saved. {0}</system:String>
   <system:String x:Key="progress.waitingrendering">Waiting Rendering</system:String>
+  <system:String x:Key="progress.diffsinger.preset">DiffSinger {0} preset applied (acoustic {1}, variance {2}, pitch {3})</system:String>
 
   <system:String x:Key="singererror.aliasfullwidthspaces">Alias contains full-width spaces.</system:String>
   <system:String x:Key="singererror.aliasisnfd">Alias is NFD.</system:String>

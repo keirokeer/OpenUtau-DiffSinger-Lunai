@@ -507,6 +507,8 @@ OpenUtau стремится стать средой редактирования
 
   <system:String x:Key="pianoroll.key">Тональность (для отображения ступеней)</system:String>
   <system:String x:Key="pianoroll.menu.view.pianoroll">Пианоролл</system:String>
+  <system:String x:Key="pianoroll.menu.view.pianoroll.fullscreen">Пианоролл на всё окно</system:String>
+  <system:String x:Key="pianoroll.toggle.fullscreen">Пианоролл на всё окно</system:String>
   <system:String x:Key="pianoroll.menu.view.pianoroll.detach">Открепить</system:String>
   <system:String x:Key="pianoroll.menu.view.pianoroll.hide">Скрыть</system:String>
   <system:String x:Key="pianoroll.menu.view.tiktokmode">Режим съёмки для TikTok</system:String>
@@ -587,8 +589,9 @@ OpenUtau стремится стать средой редактирования
   <system:String x:Key="pianoroll.toggle.expressions">Показать выражения (L)</system:String>
   <system:String x:Key="pianoroll.toggle.appearance">Настройки оформления</system:String>
   <system:String x:Key="pianoroll.toggle.diffsinger.quality">DiffSinger: качество (акустика 50, вэриэнс 50, питч 20)</system:String>
-  <system:String x:Key="pianoroll.toggle.diffsinger.medium">DiffSinger: баланс (акустика 20, вэриэнс 20, питч 10)</system:String>
-  <system:String x:Key="pianoroll.toggle.diffsinger.fast">DiffSinger: низкое качество (акустика 10, вэриэнс 10, питч 10)</system:String>
+  <system:String x:Key="pianoroll.toggle.diffsinger.medium">DiffSinger: баланс (акустика 20, вэриэнс 20, питч 20)</system:String>
+  <system:String x:Key="pianoroll.toggle.diffsinger.fast">DiffSinger: низкое качество (акустика 10, вэриэнс 10, питч 20)</system:String>
+  <system:String x:Key="pianoroll.toggle.diffsinger.extralow">DiffSinger: очень низкое качество (акустика 1, вэриэнс 1, питч 1)</system:String>
   <system:String x:Key="pianoroll.tool.drawlinepitch">Инструмент для рисования питча линией (Shift + 4)
     ЛКМ, чтобы рисовать (прямая линия)
     ПКМ, чтобы сбросить
@@ -652,6 +655,7 @@ OpenUtau стремится стать средой редактирования
   <system:String x:Key="prefs.appearance.solidtickgridlines">Сплошные линии сетки такта (пианоролл, треки и панель параметров)</system:String>
   <system:String x:Key="prefs.appearance.solidexppanelgridlines">Сплошные линии стандартного значения в панели параметров</system:String>
   <system:String x:Key="prefs.appearance.classicscrollbars">Классические ползунки прокрутки (отдельная полоса)</system:String>
+  <system:String x:Key="prefs.appearance.overlayscrollbars">Наложенные ползунки (тонкие, поверх содержимого)</system:String>
   <system:String x:Key="prefs.appearance.notecornerradius">Скругление углов нот</system:String>
   <system:String x:Key="prefs.appearance.showicon">Отображать иконку на пианоролле</system:String>
   <system:String x:Key="prefs.appearance.showportrait">Отображать портрет на пианоролле</system:String>
@@ -734,6 +738,7 @@ OpenUtau стремится стать средой редактирования
   <system:String x:Key="progress.loadingsingers">Загрузка вокалистов...</system:String>
   <system:String x:Key="progress.saved">Проект сохранен по пути: {0}</system:String>
   <system:String x:Key="progress.waitingrendering">Ожидание рендеринга</system:String>
+  <system:String x:Key="progress.diffsinger.preset">Пресет DiffSinger {0} применён (акустика {1}, вэриэнс {2}, питч {3})</system:String>
 
   <system:String x:Key="singererror.aliasfullwidthspaces">Алиас содержит пробелы во всю ширину.</system:String>
   <system:String x:Key="singererror.aliasisnfd">Алиас представлен в форме NFD (Normalization Form D).</system:String>

@@ -899,6 +899,12 @@
     <Setter Property="VerticalAlignment" Value="Center" />
     <Setter Property="HorizontalAlignment" Value="Stretch" />
   </Style>
+  <Style Selector="Border.pianoRollTopBarPriorityOverlay">
+    <Setter Property="Background" Value="{DynamicResource WorkspaceCardBrush}" />
+    <Setter Property="Padding" Value="6,0,0,0" />
+    <Setter Property="Margin" Value="0" />
+    <Setter Property="ZIndex" Value="100" />
+  </Style>
   <Style Selector="Border.pianoRollTopBar Menu">
     <Setter Property="Height" Value="32" />
     <Setter Property="VerticalAlignment" Value="Center" />
@@ -967,6 +973,22 @@
   </Style>
   <Style Selector="Border.pianoRollTopBar ToggleButton.sideToolbarToggle.noteParamsToggle:pointerover /template/ ContentPresenter#PART_ContentPresenter,
           Border.pianoRollTopBar ToggleButton.sideToolbarToggle.noteParamsToggle:pressed /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource PianoRollSideHoverBackgroundBrush}" />
+  </Style>
+  <Style Selector="Border.pianoRollTopBar ToggleButton.sideToolbarToggle.pianoRollFullscreenToggle /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="CornerRadius" Value="4" />
+    <Setter Property="Margin" Value="0" />
+    <Setter Property="BorderThickness" Value="0" />
+  </Style>
+  <Style Selector="Border.pianoRollTopBar ToggleButton.sideToolbarToggle.pianoRollFullscreenToggle:checked /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Margin" Value="0" />
+    <Setter Property="CornerRadius" Value="4" />
+    <Setter Property="BorderThickness" Value="0" />
+  </Style>
+  <Style Selector="Border.pianoRollTopBar ToggleButton.sideToolbarToggle.pianoRollFullscreenToggle:pointerover /template/ ContentPresenter#PART_ContentPresenter,
+          Border.pianoRollTopBar ToggleButton.sideToolbarToggle.pianoRollFullscreenToggle:pressed /template/ ContentPresenter#PART_ContentPresenter">
     <Setter Property="Background" Value="{DynamicResource PianoRollSideHoverBackgroundBrush}" />
   </Style>
   <Style Selector="Border.pianoRollTopBar ToggleButton.topBarToggleChip Grid.toolbarIconHost">

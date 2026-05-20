@@ -87,6 +87,7 @@ namespace OpenUtau.App.Controls {
             AttachedToVisualTree += (_, _) => {
                 ScheduleApplyPianoRollScrollStyle();
                 ScheduleUpdateDetachedLayout();
+                SchedulePreloadAppearancePane();
             };
             DetachedFromVisualTree += (_, _) => scrollStyleApplyGeneration++;
             MessageBus.Current.Listen<ScrollbarsStyleChangedEvent>()
@@ -95,19 +96,32 @@ namespace OpenUtau.App.Controls {
             ScheduleUpdateDetachedLayout();
         }
 
+        void SchedulePreloadAppearancePane() {
+            Dispatcher.UIThread.Post(() => {
+                PianoRollViewModel.WarmUpAppearancePreferences();
+                if (WorkspaceScrollbarHelper.IsInVisualTree(this)) {
+                    EnsureAppearancePanePreloaded();
+                }
+            }, DispatcherPriority.Background);
+        }
+
+        void EnsureAppearancePanePreloaded() {
+            appearancePane ??= new AppearancePreferencesPane {
+                DataContext = ViewModel.AppearancePreferences,
+            };
+            if (AppearancePaneHost.Content != appearancePane) {
+                AppearancePaneHost.Content = appearancePane;
+            }
+            appearancePane.ScheduleUpdateSectionBrushes(retryIfNeeded: true);
+        }
+
         void UpdateAppearancePane() {
             if (!WorkspaceScrollbarHelper.IsInVisualTree(this)) {
                 return;
             }
+            EnsureAppearancePanePreloaded();
             if (ViewModel.IsAppearancePanelVisible) {
-                appearancePane ??= new AppearancePreferencesPane {
-                    DataContext = ViewModel.AppearancePreferences,
-                };
-                if (AppearancePaneHost.Content != appearancePane) {
-                    AppearancePaneHost.Content = appearancePane;
-                }
-            } else if (AppearancePaneHost.Content != null) {
-                AppearancePaneHost.Content = null;
+                appearancePane?.ScheduleUpdateSectionBrushes(retryIfNeeded: true);
             }
         }
 
@@ -117,6 +131,8 @@ namespace OpenUtau.App.Controls {
                 return;
             }
             ViewModel.RaisePropertyChanged(nameof(ViewModel.PianoRollDetached));
+            ViewModel.RaisePropertyChanged(nameof(ViewModel.PianoRollFullscreen));
+            ViewModel.RaisePropertyChanged(nameof(ViewModel.UsesExpandedPianoRollLayout));
             ViewModel.RaisePropertyChanged(nameof(ViewModel.IsSidePanelVisible));
             ViewModel.RaisePropertyChanged(nameof(ViewModel.IsAppearancePanelVisible));
             ViewModel.RaisePropertyChanged(nameof(ViewModel.PianoRollSideColumnWidth));
@@ -153,7 +169,7 @@ namespace OpenUtau.App.Controls {
             if (!WorkspaceScrollbarHelper.IsInVisualTree(this)) {
                 return;
             }
-            bool classic = Preferences.Default.UseClassicScrollbars;
+            bool classic = !Preferences.Default.UseOverlayScrollbars;
             if (VScrollBar.Parent is Grid pianoGrid && pianoGrid.ColumnDefinitions.Count > 2) {
                 pianoGrid.ColumnDefinitions[2].Width = classic ? new GridLength(16) : new GridLength(0);
             }
@@ -507,6 +523,15 @@ namespace OpenUtau.App.Controls {
 
         void OnMenuDetachPianoRoll(object sender, RoutedEventArgs args) {
             MainWindow?.SetPianoRollAttachment();
+        }
+
+        void OnPianoRollFullscreenToggle(object sender, RoutedEventArgs args) {
+            bool next = !ViewModel.PianoRollFullscreen;
+            MainWindow?.SetPianoRollFullscreen(next);
+        }
+
+        void OnMenuPianoRollFullscreen(object sender, RoutedEventArgs args) {
+            MainWindow?.TogglePianoRollFullscreen();
         }
 
         public void NotifyDetachedLayoutChanged() {
