@@ -229,7 +229,6 @@ namespace OpenUtau.Core.Util {
             public bool ShowWaveform = true;
             public bool ShowPhoneme = true;
             public bool ShowExpressions = true;
-            public bool ShowPhonemizerTags = true;
             public bool ShowNoteParams = true;
             public bool ShowAppearancePanel = false;
             public Dictionary<string, string> DefaultResamplers = new Dictionary<string, string>();
