@@ -36,5 +36,16 @@
         </Grid>
       </Grid>
     </Button>
+    <Button Classes="sideToolbarAction" Margin="0" Padding="0" Focusable="False"
+            Command="{Binding ApplyDiffSingerExtraLowPresetCommand}">
+      <ToolTip.Tip>
+        <TextBlock Text="{DynamicResource pianoroll.toggle.diffsinger.extralow}" Foreground="{DynamicResource ToolTipForegroundBrush}"/>
+      </ToolTip.Tip>
+      <Grid Classes="toolbarIconHostSide">
+        <Grid Classes="toolbarIconHostSideLayout">
+          <TextBlock Classes="sideToolbarGlyph sideToolbarGlyphCompact" Text="ELQ"/>
+        </Grid>
+      </Grid>
+    </Button>
   </StackPanel>
 </UserControl>

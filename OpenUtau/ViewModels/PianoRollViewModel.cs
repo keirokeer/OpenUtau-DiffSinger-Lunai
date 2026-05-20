@@ -72,21 +72,33 @@ namespace OpenUtau.App.ViewModels {
         public bool PlaybackAutoScroll1 { get => Preferences.Default.PlaybackAutoScroll == 1 ? true : false; }
         public bool PlaybackAutoScroll2 { get => Preferences.Default.PlaybackAutoScroll == 2 ? true : false; }
         public bool PianoRollDetached { get => Preferences.Default.DetachPianoRoll; }
-        public bool IsSidePanelVisible => !PianoRollDetached;
-        public bool IsAppearancePanelVisible => ShowAppearancePanel && !PianoRollDetached;
-        public GridLength PianoRollSideColumnWidth => PianoRollDetached ? new GridLength(0) : new GridLength(48);
-        public GridLength PianoRollSideGapWidth => PianoRollDetached ? new GridLength(0) : new GridLength(8);
+        [Reactive] public bool PianoRollFullscreen { get; set; }
+        public bool UsesExpandedPianoRollLayout => PianoRollDetached || PianoRollFullscreen;
+        public bool IsSidePanelVisible => !UsesExpandedPianoRollLayout;
+        public bool IsAppearancePanelVisible => ShowAppearancePanel && !UsesExpandedPianoRollLayout;
+        public GridLength PianoRollSideColumnWidth => UsesExpandedPianoRollLayout ? new GridLength(0) : new GridLength(48);
+        public GridLength PianoRollSideGapWidth => UsesExpandedPianoRollLayout ? new GridLength(0) : new GridLength(8);
         [Reactive] public bool ShowAppearancePanel { get; set; }
         PreferencesViewModel? appearancePreferences;
+        static PreferencesViewModel? sharedAppearancePreferences;
+
+        public static void WarmUpAppearancePreferences() {
+            if (sharedAppearancePreferences != null) {
+                return;
+            }
+            sharedAppearancePreferences = new PreferencesViewModel();
+        }
+
         public PreferencesViewModel AppearancePreferences =>
-            appearancePreferences ??= new PreferencesViewModel();
+            appearancePreferences ??= sharedAppearancePreferences ??= new PreferencesViewModel();
         public GridLength AppearancePanelLeadingGapWidth =>
-            PianoRollDetached || !ShowAppearancePanel ? new GridLength(0) : new GridLength(8);
+            UsesExpandedPianoRollLayout || !ShowAppearancePanel ? new GridLength(0) : new GridLength(8);
         public GridLength AppearancePanelColumnWidth =>
-            PianoRollDetached || !ShowAppearancePanel ? new GridLength(0) : new GridLength(300);
+            UsesExpandedPianoRollLayout || !ShowAppearancePanel ? new GridLength(0) : new GridLength(300);
         public ReactiveCommand<Unit, Unit> ApplyDiffSingerQualityPresetCommand { get; }
         public ReactiveCommand<Unit, Unit> ApplyDiffSingerMediumPresetCommand { get; }
         public ReactiveCommand<Unit, Unit> ApplyDiffSingerLowPresetCommand { get; }
+        public ReactiveCommand<Unit, Unit> ApplyDiffSingerExtraLowPresetCommand { get; }
         public bool ShowPhonemizerTags {
             get => Preferences.Default.ShowPhonemizerTags;
             set {
@@ -178,6 +190,7 @@ namespace OpenUtau.App.ViewModels {
             ApplyDiffSingerQualityPresetCommand = ReactiveCommand.Create(() => ApplyDiffSingerRenderPreset(0));
             ApplyDiffSingerMediumPresetCommand = ReactiveCommand.Create(() => ApplyDiffSingerRenderPreset(1));
             ApplyDiffSingerLowPresetCommand = ReactiveCommand.Create(() => ApplyDiffSingerRenderPreset(2));
+            ApplyDiffSingerExtraLowPresetCommand = ReactiveCommand.Create(() => ApplyDiffSingerRenderPreset(3));
             this.WhenAnyValue(vm => vm.ShowAppearancePanel)
                 .Subscribe(show => {
                     Preferences.Default.ShowAppearancePanel = show;
@@ -386,32 +399,47 @@ namespace OpenUtau.App.ViewModels {
             MessageBus.Current.SendMessage(new NotesRefreshEvent());
         }
 
+        static readonly string[] DiffSingerPresetLabels = { "HQ", "MQ", "LQ", "ELQ" };
+
         void ApplyDiffSingerRenderPreset(int preset) {
+            int acoustic;
+            int variance;
+            int pitch;
             switch (preset) {
                 case 0:
-                    Preferences.Default.DiffSingerSteps = 50;
-                    Preferences.Default.DiffSingerStepsVariance = 50;
-                    Preferences.Default.DiffSingerStepsPitch = 20;
+                    acoustic = Preferences.Default.DiffSingerSteps = 50;
+                    variance = Preferences.Default.DiffSingerStepsVariance = 50;
+                    pitch = Preferences.Default.DiffSingerStepsPitch = 20;
                     break;
                 case 1:
-                    Preferences.Default.DiffSingerSteps = 20;
-                    Preferences.Default.DiffSingerStepsVariance = 20;
-                    Preferences.Default.DiffSingerStepsPitch = 10;
+                    acoustic = Preferences.Default.DiffSingerSteps = 20;
+                    variance = Preferences.Default.DiffSingerStepsVariance = 20;
+                    pitch = Preferences.Default.DiffSingerStepsPitch = 20;
                     break;
                 case 2:
-                    Preferences.Default.DiffSingerSteps = 10;
-                    Preferences.Default.DiffSingerStepsVariance = 10;
-                    Preferences.Default.DiffSingerStepsPitch = 10;
+                    acoustic = Preferences.Default.DiffSingerSteps = 10;
+                    variance = Preferences.Default.DiffSingerStepsVariance = 10;
+                    pitch = Preferences.Default.DiffSingerStepsPitch = 20;
+                    break;
+                case 3:
+                    acoustic = Preferences.Default.DiffSingerSteps = 1;
+                    variance = Preferences.Default.DiffSingerStepsVariance = 1;
+                    pitch = Preferences.Default.DiffSingerStepsPitch = 1;
                     break;
                 default:
                     return;
             }
             Preferences.Save();
             if (appearancePreferences != null) {
-                appearancePreferences.DiffSingerSteps = Preferences.Default.DiffSingerSteps;
-                appearancePreferences.DiffSingerStepsVariance = Preferences.Default.DiffSingerStepsVariance;
-                appearancePreferences.DiffSingerStepsPitch = Preferences.Default.DiffSingerStepsPitch;
+                appearancePreferences.DiffSingerSteps = acoustic;
+                appearancePreferences.DiffSingerStepsVariance = variance;
+                appearancePreferences.DiffSingerStepsPitch = pitch;
             }
+            var label = DiffSingerPresetLabels[preset];
+            var message = string.Format(
+                ThemeManager.GetString("progress.diffsinger.preset"),
+                label, acoustic, variance, pitch);
+            DocManager.Inst.ExecuteCmd(new ProgressBarNotification(0, message, autoClearSeconds: 4));
         }
 
         #region ICmdSubscriber
