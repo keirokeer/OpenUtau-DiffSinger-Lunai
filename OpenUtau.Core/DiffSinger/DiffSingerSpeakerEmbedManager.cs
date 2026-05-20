@@ -5,6 +5,7 @@ using System.Linq;
 
 using Microsoft.ML.OnnxRuntime.Tensors;
 using NumSharp;
+using Serilog;
 
 using OpenUtau.Core.Render;
 
@@ -57,14 +58,28 @@ namespace OpenUtau.Core.DiffSinger
             }
         }
 
+        static readonly HashSet<string> warnedMissingSpeakerSuffixes = new();
+
         public int getSpeakerIndexBySuffix(string suffix) {
             var speakerIndex = dsConfig.speakers.IndexOf(suffix);
             if (speakerIndex >= 0) {
                 return speakerIndex;
             }
-            throw new Exception(
-                $"Speaker suffix \"{suffix}\" not found in dsConfig.speakers. " +
-                $"Candidates: {string.Join(',', dsConfig.speakers)}.");
+            if (dsConfig.speakers == null || dsConfig.speakers.Count == 0) {
+                throw new Exception("No speakers defined in dsConfig.");
+            }
+            var fallback = dsConfig.speakers[0];
+            var warnKey = $"{rootPath}|{suffix}|{fallback}";
+            lock (warnedMissingSpeakerSuffixes) {
+                if (warnedMissingSpeakerSuffixes.Add(warnKey)) {
+                    Log.Warning(
+                        "Speaker suffix \"{Suffix}\" not found in dsConfig.speakers ({Candidates}). Falling back to \"{Fallback}\".",
+                        suffix,
+                        string.Join(", ", dsConfig.speakers),
+                        fallback);
+                }
+            }
+            return 0;
         }
 
         //used by phonemizer (duration model)
