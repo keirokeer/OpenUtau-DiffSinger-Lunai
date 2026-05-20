@@ -5,6 +5,7 @@ using System.Globalization;
 using System.IO;
 using System.Text;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using OpenUtau.Core.Render;
 using Serilog;
 
@@ -108,11 +109,26 @@ namespace OpenUtau.Core.Util {
             Save();
         }
 
+        static void MigrateLegacyPreferences(string json) {
+            if (Default == null) {
+                return;
+            }
+            try {
+                var jo = JObject.Parse(json);
+                if (jo.ContainsKey("UseClassicScrollbars")
+                    && !jo.ContainsKey(nameof(SerializablePreferences.UseOverlayScrollbars))) {
+                    Default.UseOverlayScrollbars = !jo["UseClassicScrollbars"]!.Value<bool>();
+                }
+            } catch {
+                // ignore migration errors
+            }
+        }
+
         private static void Load() {
             try {
                 if (File.Exists(PathManager.Inst.PrefsFilePath)) {
-                    Default = JsonConvert.DeserializeObject<SerializablePreferences>(
-                        File.ReadAllText(PathManager.Inst.PrefsFilePath, Encoding.UTF8));
+                    var json = File.ReadAllText(PathManager.Inst.PrefsFilePath, Encoding.UTF8);
+                    Default = JsonConvert.DeserializeObject<SerializablePreferences>(json);
                     if(Default == null) {
                         Reset();
                         return;
@@ -131,6 +147,7 @@ namespace OpenUtau.Core.Util {
                         Default.Theme = null;
                     }
                     Default.MigrateRealTimePitchMode();
+                    MigrateLegacyPreferences(json);
                 } else {
                     Reset();
                 }
@@ -168,11 +185,11 @@ namespace OpenUtau.Core.Util {
             public string ThemeName = "Light";
             public bool PenPlusDefault = false;
             public int DegreeStyle;
-            public bool UseTrackColor = false;
+            public bool UseTrackColor = true;
             public string DefaultTrackColor = "Blue";
             public bool ClearCacheOnQuit = false;
             public bool PreRender = true;
-            public bool UseSolidPlaybackLine = false;
+            public bool UseSolidPlaybackLine = true;
             public int NumRenderThreads = 2;
             public string DefaultRenderer = string.Empty;
             public int WorldlineR = 0;
@@ -211,11 +228,11 @@ namespace OpenUtau.Core.Util {
             /// <summary>When true, piano-roll notes (including rests/triggers) are drawn with a border stroke.</summary>
             public bool ShowNoteBorder = true;
             /// <summary>When true, tick/timeline grid lines between bar lines are solid; when false, dashed (piano roll, tracks, expression panel).</summary>
-            public bool SolidTickGridLines = false;
+            public bool SolidTickGridLines = true;
             /// <summary>When true, dashed default-value and preview curves in the expression panel are drawn solid.</summary>
-            public bool SolidExpPanelGridLines = false;
-            /// <summary>When true, use the classic dedicated-track scrollbars; when false, thin overlay scrollbars (default).</summary>
-            public bool UseClassicScrollbars = false;
+            public bool SolidExpPanelGridLines = true;
+            /// <summary>When true, thin overlay scrollbars; when false, classic dedicated-track scrollbars (default).</summary>
+            public bool UseOverlayScrollbars = false;
             /// <summary>Corner radius in pixels for piano-roll notes and phonemizer badges (0 = square).</summary>
             public double NoteCornerRadius = 6;
             public EditTool EditTool = new EditTool();

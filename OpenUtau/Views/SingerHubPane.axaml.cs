@@ -44,7 +44,7 @@ namespace OpenUtau.App.Views {
             if (!WorkspaceScrollbarHelper.IsInVisualTree(this)) {
                 return;
             }
-            bool classic = Preferences.Default.UseClassicScrollbars;
+            bool classic = !Preferences.Default.UseOverlayScrollbars;
             WorkspaceScrollbarHelper.ApplyScrollViewer(ContentScroll, classic);
             ContentScroll.Padding = new Thickness(0);
             if (!classic) {

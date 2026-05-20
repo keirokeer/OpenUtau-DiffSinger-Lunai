@@ -174,8 +174,12 @@
               <ToggleSwitch IsChecked="{Binding SolidTickGridLines}"/>
             </Grid>
             <Grid Classes="prefRow" ColumnDefinitions="*,Auto">
-              <TextBlock Text="{DynamicResource prefs.appearance.classicscrollbars}"/>
-              <ToggleSwitch IsChecked="{Binding UseClassicScrollbars}"/>
+              <TextBlock Text="{DynamicResource prefs.appearance.overlayscrollbars}"/>
+              <ToggleSwitch IsChecked="{Binding UseOverlayScrollbars}"/>
+            </Grid>
+            <Grid Classes="prefRow" ColumnDefinitions="*,Auto">
+              <TextBlock Text="{DynamicResource prefs.playback.solidline}"/>
+              <ToggleSwitch IsChecked="{Binding UseSolidPlaybackLine}"/>
             </Grid>
           </StackPanel>
         </Expander>

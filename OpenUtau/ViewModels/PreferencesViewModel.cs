@@ -89,6 +89,7 @@ namespace OpenUtau.App.ViewModels {
         [Reactive] public int LockStartTime { get; set; }
         [Reactive] public int PlaybackAutoScroll { get; set; }
         [Reactive] public double PlayPosMarkerMargin { get; set; }
+        [Reactive] public bool UseSolidPlaybackLine { get; set; }
 
         // Paths
         public string SingerPath => PathManager.Inst.SingersPath;
@@ -135,7 +136,7 @@ namespace OpenUtau.App.ViewModels {
         [Reactive] public bool ShowNoteBorder { get; set; }
         [Reactive] public bool SolidTickGridLines { get; set; }
         [Reactive] public bool SolidExpPanelGridLines { get; set; }
-        [Reactive] public bool UseClassicScrollbars { get; set; }
+        [Reactive] public bool UseOverlayScrollbars { get; set; }
         [Reactive] public double NoteCornerRadius { get; set; }
         [Reactive] public bool ThemeEditable { get; set; }
         public List<string> ThemeItems => ThemeManager.GetAvailableThemes();
@@ -150,7 +151,7 @@ namespace OpenUtau.App.ViewModels {
 
         // Diffsinger
         public static readonly List<int> DiffSingerStepsChoices = new List<int> {
-            2, 5, 10, 20, 30, 40, 50, 100, 200, 500, 1000,
+            1, 2, 5, 10, 20, 30, 40, 50, 100, 200, 500, 1000,
         };
         public List<int> DiffSingerStepsOptions { get; } = DiffSingerStepsChoices;
         public List<int> DiffSingerStepsVarianceOptions { get; } = DiffSingerStepsChoices;
@@ -495,6 +496,7 @@ namespace OpenUtau.App.ViewModels {
             PreferPortAudio = Preferences.Default.PreferPortAudio ? 1 : 0;
             PlaybackAutoScroll = Preferences.Default.PlaybackAutoScroll;
             PlayPosMarkerMargin = Preferences.Default.PlayPosMarkerMargin;
+            UseSolidPlaybackLine = Preferences.Default.UseSolidPlaybackLine;
             LockStartTime = Preferences.Default.LockStartTime;
             InstallToAdditionalSingersPath = Preferences.Default.InstallToAdditionalSingersPath;
             LoadDeepFolders = Preferences.Default.LoadDeepFolderSinger;
@@ -542,7 +544,7 @@ namespace OpenUtau.App.ViewModels {
             ShowNoteBorder = Preferences.Default.ShowNoteBorder;
             SolidTickGridLines = Preferences.Default.SolidTickGridLines;
             SolidExpPanelGridLines = Preferences.Default.SolidExpPanelGridLines;
-            UseClassicScrollbars = Preferences.Default.UseClassicScrollbars;
+            UseOverlayScrollbars = Preferences.Default.UseOverlayScrollbars;
             NoteCornerRadius = Math.Clamp(Preferences.Default.NoteCornerRadius, 0, 12);
             Beta = Preferences.Default.Beta;
             LyricsHelper = LyricsHelpers.FirstOrDefault(option => option.klass.Equals(ActiveLyricsHelper.Inst.GetPreferred()));
@@ -592,6 +594,12 @@ namespace OpenUtau.App.ViewModels {
                     Preferences.Default.PlayPosMarkerMargin = playPosMarkerMargin;
                     Preferences.Save();
                 });
+            this.WhenAnyValue(vm => vm.UseSolidPlaybackLine)
+                .Subscribe(useSolidPlaybackLine => {
+                    Preferences.Default.UseSolidPlaybackLine = useSolidPlaybackLine;
+                    Preferences.Save();
+                    MessageBus.Current.SendMessage(new NotesViewModel.PlaybackLineModeChangedEvent(useSolidPlaybackLine));
+                });
             this.WhenAnyValue(vm => vm.LockStartTime)
                 .Subscribe(lockStartTime => {
                     Preferences.Default.LockStartTime = lockStartTime;
@@ -630,6 +638,7 @@ namespace OpenUtau.App.ViewModels {
                     Preferences.Save();
                 });
             this.WhenAnyValue(vm => vm.ThemeName)
+                .Skip(1)
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(themeName => {
                     ThemeEditable = themeName != "Light" && themeName != "Dark";
@@ -702,10 +711,10 @@ namespace OpenUtau.App.ViewModels {
                     Preferences.Save();
                     MessageBus.Current.SendMessage(new ExpressionCurveStyleChangedEvent());
                 });
-            this.WhenAnyValue(vm => vm.UseClassicScrollbars)
+            this.WhenAnyValue(vm => vm.UseOverlayScrollbars)
                 .ObserveOn(RxApp.MainThreadScheduler)
-                .Subscribe(classic => {
-                    Preferences.Default.UseClassicScrollbars = classic;
+                .Subscribe(overlay => {
+                    Preferences.Default.UseOverlayScrollbars = overlay;
                     Preferences.Save();
                     MessageBus.Current.SendMessage(new ScrollbarsStyleChangedEvent());
                 });
