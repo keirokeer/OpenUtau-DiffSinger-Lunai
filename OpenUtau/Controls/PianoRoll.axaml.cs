@@ -1398,6 +1398,12 @@ namespace OpenUtau.App.Controls {
                         }
                         return;
                     }
+                } else if (args.KeyModifiers == KeyModifiers.Alt) {
+                    var clickAliasInfo = ViewModel.NotesViewModel.HitTest.HitTestAlias(args.GetPosition(control));
+                    if (clickAliasInfo.hit && clickAliasInfo.phoneme.Error && clickAliasInfo.phoneme.ErrorException != null) {
+                        _ = MessageBox.ShowError(RootWindow, clickAliasInfo.phoneme.ErrorException);
+                        return;
+                    }
                 }
                 var hitInfo = ViewModel.NotesViewModel.HitTest.HitTestPhoneme(point.Position);
                 if (hitInfo.hit) {
@@ -1439,19 +1445,33 @@ namespace OpenUtau.App.Controls {
                 editState.Update(point.Pointer, point.Position);
                 return;
             }
+            
             var aliasHitInfo = ViewModel.NotesViewModel.HitTest.HitTestAlias(point.Position);
             if (aliasHitInfo.hit) {
                 ViewModel.MouseoverPhoneme(aliasHitInfo.phoneme);
                 Cursor = null;
+
+                if (aliasHitInfo.phoneme.Error && aliasHitInfo.phoneme.ErrorException != null) {
+                    // Grab just the main message, ignoring the massive stack trace
+                    string briefMessage = aliasHitInfo.phoneme.ErrorException.Message.Split('\n')[0];
+                    ((IValueTip)this).UpdateValueTip($"{briefMessage}\n({ThemeManager.GetString("phoneme.show.error")})");
+                    ((IValueTip)this).ShowValueTip();
+                } else {
+                    ((IValueTip)this).HideValueTip();
+                }
                 return;
             }
+            
             var hitInfo = ViewModel.NotesViewModel.HitTest.HitTestPhoneme(point.Position);
             if (hitInfo.hit) {
                 Cursor = ViewConstants.cursorSizeWE;
                 ViewModel.MouseoverPhoneme(null);
+                ((IValueTip)this).HideValueTip(); // Ensure tooltip hides when moving off alias
                 return;
             }
+            
             ViewModel.MouseoverPhoneme(null);
+            ((IValueTip)this).HideValueTip(); // Ensure tooltip hides when hovering empty space
             Cursor = null;
         }
 

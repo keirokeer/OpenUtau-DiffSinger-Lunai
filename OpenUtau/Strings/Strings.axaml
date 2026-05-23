@@ -1035,4 +1035,6 @@ General
   <system:String x:Key="themeeditor.title">Theme Editor</system:String>
   <system:String x:Key="themeeditor.save">Save</system:String>
   <system:String x:Key="themeeditor.cancel">Cancel</system:String>
+
+   <system:String x:Key="phoneme.show.error">Alt + Click to view the full error</system:String>
 </ResourceDictionary>
