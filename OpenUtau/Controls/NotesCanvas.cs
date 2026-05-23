@@ -363,17 +363,33 @@ namespace OpenUtau.App.Controls {
             Size size = viewModel.TickToneToSize(note.duration, 1);
             size = size.WithWidth(size.Width - 1).WithHeight(Math.Floor(size.Height));
             Point rightBottom = new Point(leftTop.X + size.Width, leftTop.Y + size.Height);
+            bool hasError = note.Error;
+            if (!hasError && Part != null && Part.phonemes != null) {
+                int phonemeCount = 0;
+                foreach (var p in Part.phonemes) {
+                    if (p.Parent == note) {
+                        phonemeCount++;
+                        if (p.Error) {
+                            hasError = true;
+                            break;
+                        }
+                    }
+                }
+                if (!hasError && phonemeCount == 0 && !note.lyric.StartsWith("+") && !note.lyric.StartsWith("-")) {
+                    hasError = true;
+                }
+            }
             bool showBorder = Preferences.Default.ShowNoteBorder;
             if (triggerItems.Contains(note.lyric)) {
-                var brush1 = selectedNotes.Contains(note)
-                ? (note.Error ? ThemeManager.NoteBrushPressed : ThemeManager.NoteBrushPressed)
-                : (note.Error ? ThemeManager.NoteEmptyBrush : ThemeManager.NoteEmptyBrush);
+                var brush1 = hasError
+                    ? (selectedNotes.Contains(note) ? ThemeManager.AccentBrush3Semi : ThemeManager.NeutralAccentBrushSemi)
+                    : (selectedNotes.Contains(note) ? ThemeManager.NoteBrushPressed : ThemeManager.NoteEmptyBrush);
                 IPen? pen = showBorder ? ThemeManager.NoteBorderPen : null;
                 context.DrawRectangle(brush1, pen, new Rect(leftTop, rightBottom), cornerRadius, cornerRadius);
             } else {
-                var brush = selectedNotes.Contains(note)
-                ? (note.Error ? ThemeManager.NoteBrushPressed : ThemeManager.NoteBrushPressed)
-                : (note.Error ? ThemeManager.NoteBrushPressed : ThemeManager.NoteBrush);
+                var brush = hasError
+                    ? (selectedNotes.Contains(note) ? ThemeManager.AccentBrush3Semi : ThemeManager.NeutralAccentBrushSemi)
+                    : (selectedNotes.Contains(note) ? ThemeManager.NoteBrushPressed : ThemeManager.NoteBrush);
                 IPen? borderPen = !showBorder ? null
                     : selectedNotes.Contains(note)
                     ? ThemeManager.NoteBorderPenPressed
@@ -383,6 +399,7 @@ namespace OpenUtau.App.Controls {
             if (TrackHeight < 10 || note.lyric.Length == 0) {
                 return;
             }
+            // grey out the Phonemizer Transition Badges
             if (ShowPhonemizerTags && TrackHeight >= 20) {
                 string currentOver = note.PhonemizerOverride ?? "";
                 bool isCurrentDefault = string.IsNullOrEmpty(currentOver) || currentOver.Equals("Default", StringComparison.OrdinalIgnoreCase);
@@ -397,14 +414,11 @@ namespace OpenUtau.App.Controls {
                 bool isTransition = !isContinuation && ((note.Prev == null && !isCurrentDefault) || (note.Prev != null && currentPh != prevPh));
                 
                 if (isTransition) {
-                    // Match note face colors (track-colored when UseTrackColor / ChangePianorollColor is active).
-                    var badgeBrush = selectedNotes.Contains(note)
-                        ? ThemeManager.NoteBrushPressed
-                        : (note.Error ? ThemeManager.NoteBrushPressed : ThemeManager.NoteBrush);
+                    var badgeBrush = hasError
+                        ? (selectedNotes.Contains(note) ? ThemeManager.AccentBrush3Semi : ThemeManager.NeutralAccentBrushSemi)
+                        : (selectedNotes.Contains(note) ? ThemeManager.NoteBrushPressed : ThemeManager.NoteBrush);
 
                     if (isCurrentDefault) {
-                        // Due to the limitation, we'll display a dot to inndicate
-                        // the transition to default phonemizer instead of showing language tag
                         double boxWidth = 16; 
                         double boxHeight = 16;
                         double dotRadius = 3;
