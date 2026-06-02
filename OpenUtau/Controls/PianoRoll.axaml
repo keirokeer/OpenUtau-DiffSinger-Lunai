@@ -631,6 +631,7 @@
                          DoubleTapped="PhonemeCanvasDoubleTapped"
                          PointerPressed="PhonemeCanvasPointerPressed"
                          PointerMoved="PhonemeCanvasPointerMoved"
+                         PointerExited="PhonemeCanvasPointerLeave"
                          PointerReleased="PhonemeCanvasPointerReleased"/>
         </Border>
       </Grid>

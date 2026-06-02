@@ -375,20 +375,20 @@ namespace OpenUtau.App.Controls {
                         }
                     }
                 }
-                if (!hasError && phonemeCount == 0 && !note.lyric.StartsWith("+") && !note.lyric.StartsWith("-")) {
+                if (!hasError && Part.PhonemesUpToDate && phonemeCount == 0 && !note.lyric.StartsWith("+") && !note.lyric.StartsWith("-")) {
                     hasError = true;
                 }
             }
             bool showBorder = Preferences.Default.ShowNoteBorder;
             if (triggerItems.Contains(note.lyric)) {
-                var brush1 = hasError
-                    ? (selectedNotes.Contains(note) ? ThemeManager.AccentBrush3Semi : ThemeManager.NeutralAccentBrushSemi)
-                    : (selectedNotes.Contains(note) ? ThemeManager.NoteBrushPressed : ThemeManager.NoteEmptyBrush);
+                var brush1 = selectedNotes.Contains(note)
+                    ? ThemeManager.NoteBrushPressed
+                    : ThemeManager.NoteEmptyBrush;
                 IPen? pen = showBorder ? ThemeManager.NoteBorderPen : null;
                 context.DrawRectangle(brush1, pen, new Rect(leftTop, rightBottom), cornerRadius, cornerRadius);
             } else {
                 var brush = hasError
-                    ? (selectedNotes.Contains(note) ? ThemeManager.AccentBrush3Semi : ThemeManager.NeutralAccentBrushSemi)
+                    ? (selectedNotes.Contains(note) ? ThemeManager.NoteBrushPressed : ThemeManager.NoteEmptyBrush)
                     : (selectedNotes.Contains(note) ? ThemeManager.NoteBrushPressed : ThemeManager.NoteBrush);
                 IPen? borderPen = !showBorder ? null
                     : selectedNotes.Contains(note)
@@ -415,7 +415,7 @@ namespace OpenUtau.App.Controls {
                 
                 if (isTransition) {
                     var badgeBrush = hasError
-                        ? (selectedNotes.Contains(note) ? ThemeManager.AccentBrush3Semi : ThemeManager.NeutralAccentBrushSemi)
+                        ? ThemeManager.NeutralAccentBrushSemi
                         : (selectedNotes.Contains(note) ? ThemeManager.NoteBrushPressed : ThemeManager.NoteBrush);
 
                     if (isCurrentDefault) {

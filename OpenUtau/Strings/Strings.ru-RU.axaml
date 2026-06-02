@@ -929,4 +929,6 @@ OpenUtau стремится стать средой редактирования
   <system:String x:Key="themeeditor.title">Редактор Темы</system:String>
   <system:String x:Key="themeeditor.save">Сохранить</system:String>
   <system:String x:Key="themeeditor.cancel">Отмена</system:String>
+
+  <system:String x:Key="phoneme.show.error">Alt + щелчок — полный текст ошибки</system:String>
 </ResourceDictionary>

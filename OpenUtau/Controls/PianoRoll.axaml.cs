@@ -1466,12 +1466,18 @@ namespace OpenUtau.App.Controls {
             if (hitInfo.hit) {
                 Cursor = ViewConstants.cursorSizeWE;
                 ViewModel.MouseoverPhoneme(null);
-                ((IValueTip)this).HideValueTip(); // Ensure tooltip hides when moving off alias
+                ((IValueTip)this).HideValueTip();
                 return;
             }
             
             ViewModel.MouseoverPhoneme(null);
-            ((IValueTip)this).HideValueTip(); // Ensure tooltip hides when hovering empty space
+            ((IValueTip)this).HideValueTip();
+            Cursor = null;
+        }
+
+        public void PhonemeCanvasPointerLeave(object sender, PointerEventArgs args) {
+            ViewModel?.MouseoverPhoneme(null);
+            ((IValueTip)this).HideValueTip();
             Cursor = null;
         }
 
