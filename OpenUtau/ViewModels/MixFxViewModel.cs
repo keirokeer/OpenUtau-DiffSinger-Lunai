@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
+using OpenUtau.Core;
 using OpenUtau.Core.SignalChain.Effects;
 using OpenUtau.Core.Ustx;
 using OpenUtau.Core.Util;
@@ -126,10 +127,10 @@ namespace OpenUtau.App.ViewModels {
             }
 
             // Picking a preset reloads its parameters into the sliders.
-            this.WhenAnyValue(x => x.SelectedEq).Subscribe(opt => { if (opt != null) LoadEqPreset(opt.Key); });
-            this.WhenAnyValue(x => x.SelectedComp).Subscribe(opt => { if (opt != null) LoadCompPreset(opt.Key); });
-            this.WhenAnyValue(x => x.SelectedReverb).Subscribe(opt => { if (opt != null) LoadReverbPreset(opt.Key); });
-            this.WhenAnyValue(x => x.SelectedUserPreset).Subscribe(p => { if (p != null) LoadUserPreset(p); });
+            this.WhenAnyValue(x => x.SelectedEq).Skip(1).Subscribe(opt => { if (opt != null) LoadEqPreset(opt.Key); });
+            this.WhenAnyValue(x => x.SelectedComp).Skip(1).Subscribe(opt => { if (opt != null) LoadCompPreset(opt.Key); });
+            this.WhenAnyValue(x => x.SelectedReverb).Skip(1).Subscribe(opt => { if (opt != null) LoadReverbPreset(opt.Key); });
+            this.WhenAnyValue(x => x.SelectedUserPreset).Skip(1).Subscribe(p => { if (p != null) LoadUserPreset(p); });
 
             this.WhenAnyValue(x => x.SelectedUserPreset)
                 .Select(p => p != null && !ReferenceEquals(p, defaultPreset))
@@ -289,7 +290,10 @@ namespace OpenUtau.App.ViewModels {
         /// <summary>Commit dialog state back to the track + Preferences.  Called on OK.</summary>
         public void Apply() {
             if (track != null) {
-                track.MixFx = BuildUMixFx();
+                DocManager.Inst.StartUndoGroup("command.track.mixfx");
+                DocManager.Inst.ExecuteCmd(new TrackChangeMixFxCommand(DocManager.Inst.Project, track, BuildUMixFx()));
+                DocManager.Inst.EndUndoGroup();
+                MessageBus.Current.SendMessage(new TracksRefreshEvent());
             }
             Preferences.Default.MixFxApplyOnExportMixdown = ApplyOnExportMixdown;
             Preferences.Save();

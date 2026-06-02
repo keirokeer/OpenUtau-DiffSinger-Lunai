@@ -543,6 +543,10 @@ namespace OpenUtau.Core {
                 if (faders != null && faders.Count > _cmd!.TrackNo) {
                     faders[_cmd.TrackNo].Pan = (float)_cmd.Pan;
                 }
+            } else if (cmd is TrackChangeMixFxCommand) {
+                // Mix FX are baked into the per-track signal chain created at playback render time.
+                // Simplest correct behavior is to stop playback so the next play recreates the mix with updated FX.
+                StopPlayback();
             } else if (cmd is BpmCommand ||
                 cmd is TimeSignatureCommand ||
                 cmd is AddTempoChangeCommand ||

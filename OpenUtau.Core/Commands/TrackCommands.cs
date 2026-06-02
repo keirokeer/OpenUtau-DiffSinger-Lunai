@@ -227,4 +227,26 @@ namespace OpenUtau.Core {
             track.RendererSettings.Validate(track);
         }
     }
+
+    public class TrackChangeMixFxCommand : TrackCommand {
+        readonly UMixFx? newMixFx;
+        readonly UMixFx? oldMixFx;
+
+        public TrackChangeMixFxCommand(UProject project, UTrack track, UMixFx? newMixFx) {
+            this.project = project;
+            this.track = track;
+            this.newMixFx = newMixFx?.Clone();
+            oldMixFx = track.MixFx?.Clone();
+        }
+
+        public override string ToString() => "Change mix fx";
+
+        public override void Execute() {
+            track.MixFx = newMixFx?.Clone();
+        }
+
+        public override void Unexecute() {
+            track.MixFx = oldMixFx?.Clone();
+        }
+    }
 }
