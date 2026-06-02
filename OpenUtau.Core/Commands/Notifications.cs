@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using OpenUtau.Core.Render;
 using OpenUtau.Core.Ustx;
 
 namespace OpenUtau.Core {
@@ -238,6 +240,30 @@ namespace OpenUtau.Core {
             this.part = part;
         }
         public override string ToString() => "Part rendered.";
+    }
+
+    public class PhraseRenderedNotification : UNotification {
+        public readonly RenderPhrase phrase;
+        public readonly RenderResult result;
+        public readonly int trackNo;
+        public override bool Silent => true;
+        public PhraseRenderedNotification(UVoicePart part, RenderPhrase phrase, RenderResult result, int trackNo) {
+            this.part = part;
+            this.phrase = phrase;
+            this.result = result;
+            this.trackNo = trackNo;
+        }
+        public override string ToString() => "Phrase rendered.";
+    }
+
+    public class RealCurvesUpdatedNotification : UNotification {
+        public readonly IReadOnlyList<RealCurveUpdate> updates;
+        public override bool Silent => true;
+        public RealCurvesUpdatedNotification(UVoicePart part, IReadOnlyList<RealCurveUpdate> updates) {
+            this.part = part;
+            this.updates = updates;
+        }
+        public override string ToString() => "Real curves updated.";
     }
 
     public class GotoOtoNotification : UNotification {

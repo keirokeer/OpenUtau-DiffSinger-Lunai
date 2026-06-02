@@ -258,13 +258,30 @@ namespace OpenUtau.Core.Render {
                 if (cancellation.IsCancellationRequested) {
                     break;
                 }
-                source.SetSamples(task.Result.samples);
+                var result = task.Result;
+                source.SetSamples(result.samples);
+                DocManager.Inst.ExecuteCmd(new PhraseRenderedNotification(request.part, phrase, result, request.trackNo));
+                PublishRealCurveUpdates(request.part, phrase);
                 if (request.sources.All(s => s.HasSamples)) {
                     request.part.SetMix(request.mix);
                     DocManager.Inst.ExecuteCmd(new PartRenderedNotification(request.part));
                 }
             }
             progress.Clear();
+        }
+
+        private void PublishRealCurveUpdates(UVoicePart part, RenderPhrase phrase) {
+            if (!phrase.renderer.SupportsRealCurve) {
+                return;
+            }
+            try {
+                var updates = RealCurveUpdater.LoadPhraseUpdates(part, phrase);
+                if (updates.Length > 0) {
+                    DocManager.Inst.ExecuteCmd(new RealCurvesUpdatedNotification(part, updates));
+                }
+            } catch (Exception e) {
+                Log.Debug(e, "Failed to refresh rendered real curves.");
+            }
         }
 
         public static void ReleaseSourceTemp() {
