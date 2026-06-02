@@ -199,6 +199,7 @@ namespace OpenUtau.Core.Util {
             public int DiffSingerStepsVariance = 20;
             public int DiffSingerStepsPitch = 10;
             public bool DiffSingerTensorCache = true;
+            public bool DiffSingerVarianceLocalPitchPatch = false;
             public bool DiffSingerLangCodeHide = false;
             public bool DiffSingerPhonemePanelMode = true;
             public bool SkipRenderingMutedTracks = false;
