@@ -9,6 +9,7 @@ using Newtonsoft.Json;
 using OpenUtau.Core.Util;
 using Serilog;
 using SharpCompress.Archives;
+using SharpCompress.Readers;
 
 namespace OpenUtau.Core.SingerHub {
 
@@ -406,7 +407,7 @@ namespace OpenUtau.Core.SingerHub {
                     }
                 }
                 Directory.CreateDirectory(installPath);
-                using var archive = ArchiveFactory.Open(new MemoryStream(data));
+                using var archive = ArchiveFactory.OpenArchive(new MemoryStream(data), new ReaderOptions());
                 foreach (var entry in archive.Entries) {
                     if (string.IsNullOrEmpty(entry.Key) || entry.Key.Contains("..")) continue;
                     var destPath = Path.Combine(installPath, entry.Key);

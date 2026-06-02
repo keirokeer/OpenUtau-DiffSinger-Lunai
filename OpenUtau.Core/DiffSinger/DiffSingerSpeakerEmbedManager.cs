@@ -65,8 +65,18 @@ namespace OpenUtau.Core.DiffSinger
             if (speakerIndex >= 0) {
                 return speakerIndex;
             }
+            speakerIndex = dsConfig.speakers.FindIndex(s => {
+                var spSegs = s.Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+                var sfSegs = suffix.Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+                return sfSegs.Length <= spSegs.Length
+                    && spSegs[^sfSegs.Length..].SequenceEqual(sfSegs);
+            });
+            if (speakerIndex >= 0) {
+                return speakerIndex;
+            }
             if (dsConfig.speakers == null || dsConfig.speakers.Count == 0) {
-                throw new Exception("No speakers defined in dsConfig.");
+                throw new InvalidOperationException(
+                    "Subbanks are defined in character.yaml but \"speakers\" is empty in dsconfig.yaml.");
             }
             var fallback = dsConfig.speakers[0];
             var warnKey = $"{rootPath}|{suffix}|{fallback}";

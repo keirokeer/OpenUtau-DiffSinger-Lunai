@@ -54,7 +54,7 @@ namespace OpenUtau.App.Controls {
         private ReactiveCommand<Unit, Unit>? noteDefaultsCommand;
         private ReactiveCommand<BatchEdit, Unit>? noteBatchEditCommand;
 
-        private Window RootWindow => (Window) TopLevel.GetTopLevel(this)!;
+        private Window RootWindow => (Window)TopLevel.GetTopLevel(this)!;
 
         string? GetActionIdForShortcut(Key pressedKey, KeyModifiers pressedMods) {
             foreach (var sc in Preferences.Default.Shortcuts) {
@@ -341,7 +341,7 @@ namespace OpenUtau.App.Controls {
             } catch (Exception e) {
                 Log.Error(e, "Failed to load external batch edits.");
             }
-            
+
             DocManager.Inst.AddSubscriber(this);
 
             ViewModel.NoteBatchEdits.Insert(6, new MenuItemViewModel() {
@@ -767,7 +767,9 @@ namespace OpenUtau.App.Controls {
         }
 
         private void LyricBoxLostFocus(object sender, RoutedEventArgs e) {
-            this.Focus();
+            if (sender is InputElement { IsKeyboardFocusWithin: false }) {
+                this.Focus();
+            }
         }
 
         public void OnExpButtonClick(object sender, RoutedEventArgs args) {

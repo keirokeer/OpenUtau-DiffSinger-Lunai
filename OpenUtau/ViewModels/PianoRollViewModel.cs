@@ -107,7 +107,6 @@ namespace OpenUtau.App.ViewModels {
                 this.RaisePropertyChanged(nameof(ShowPhonemizerTags));
             }
         }
-
         [Reactive] public bool IsTikTokMode { get; set; }
 
         public EditTool EditTool { get; set; } = Preferences.Default.EditTool;
