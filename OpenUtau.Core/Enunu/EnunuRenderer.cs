@@ -73,7 +73,7 @@ namespace OpenUtau.Core.Enunu {
             };
         }
 
-        public Task<RenderResult> Render(RenderPhrase phrase, Progress progress, int trackNo, CancellationTokenSource cancellation, bool isPreRender) {
+        public Task<RenderResult> Render(RenderPhrase phrase, Progress progress, int trackNo, CancellationTokenSource cancellation, bool isPreRender, RenderPhraseEvents? renderEvents = null) {
             var task = Task.Run(() => {
                 lock (lockObj) {
                     if (cancellation.IsCancellationRequested) {

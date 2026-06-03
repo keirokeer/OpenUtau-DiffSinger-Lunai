@@ -63,7 +63,7 @@ namespace OpenUtau.Classic {
             };
         }
 
-        public Task<RenderResult> Render(RenderPhrase phrase, Progress progress, int trackNo, CancellationTokenSource cancellation, bool isPreRender) {
+        public Task<RenderResult> Render(RenderPhrase phrase, Progress progress, int trackNo, CancellationTokenSource cancellation, bool isPreRender, RenderPhraseEvents? renderEvents = null) {
             var resamplerItems = new List<ResamplerItem>();
             foreach (var phone in phrase.phones) {
                 resamplerItems.Add(new ResamplerItem(phrase, phone));

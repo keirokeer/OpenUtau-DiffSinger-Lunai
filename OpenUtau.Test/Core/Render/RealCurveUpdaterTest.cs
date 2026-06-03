@@ -9,6 +9,23 @@ namespace OpenUtau.Core {
         const string Ene = "ene";
 
         [Fact]
+        public void RenderPhraseEventsReportsNonEmptyRealCurvesOnly() {
+            int reports = 0;
+            var events = new RenderPhraseEvents(_ => reports++);
+
+            events.ReportRealCurves(new List<RenderRealCurveResult>());
+            events.ReportRealCurves(new[] {
+                new RenderRealCurveResult {
+                    abbr = Ene,
+                    ticks = new[] { 0f },
+                    values = new[] { 0.1f },
+                },
+            });
+
+            Assert.Equal(1, reports);
+        }
+
+        [Fact]
         public void BuildUpdatesConvertsTicksToPartLocalCoordinates() {
             var result = new RenderRealCurveResult {
                 abbr = Ene,

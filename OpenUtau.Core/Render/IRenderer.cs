@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using OpenUtau.Core;
 using OpenUtau.Core.Ustx;
 
 namespace OpenUtau.Core.Render {
@@ -59,6 +60,20 @@ namespace OpenUtau.Core.Render {
         public float[] values;
     }
 
+    public class RenderPhraseEvents {
+        readonly Action<IReadOnlyList<RenderRealCurveResult>>? realCurvesCallback;
+
+        public RenderPhraseEvents(Action<IReadOnlyList<RenderRealCurveResult>>? realCurvesCallback = null) {
+            this.realCurvesCallback = realCurvesCallback;
+        }
+
+        public void ReportRealCurves(IReadOnlyList<RenderRealCurveResult> realCurves) {
+            if (realCurves.Count > 0) {
+                realCurvesCallback?.Invoke(realCurves);
+            }
+        }
+    }
+
     /// <summary>
     /// Interface of phrase-based renderer.
     /// </summary>
@@ -68,9 +83,10 @@ namespace OpenUtau.Core.Render {
         bool SupportsRealCurve { get { return false; } }
         bool SupportsExpression(UExpressionDescriptor descriptor);
         RenderResult Layout(RenderPhrase phrase);
-        Task<RenderResult> Render(RenderPhrase phrase, Progress progress, int trackNo, CancellationTokenSource cancellation, bool isPreRender = false);
+        Task<RenderResult> Render(RenderPhrase phrase, Progress progress, int trackNo, CancellationTokenSource cancellation, bool isPreRender = false, RenderPhraseEvents? renderEvents = null);
         RenderPitchResult LoadRenderedPitch(RenderPhrase phrase);
         List<RenderRealCurveResult> LoadRenderedRealCurves(RenderPhrase phrase) { return new List<RenderRealCurveResult>(0);}
+        void ScheduleRealCurveRefresh(UProject project, UVoicePart part, UCommand command) { }
         UExpressionDescriptor[] GetSuggestedExpressions(USinger singer, URenderSettings renderSettings);
     }
 }

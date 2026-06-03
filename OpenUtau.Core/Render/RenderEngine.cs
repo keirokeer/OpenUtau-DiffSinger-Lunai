@@ -253,7 +253,13 @@ namespace OpenUtau.Core.Render {
                 var phrase = tuple.Item1;
                 var source = tuple.Item2;
                 var request = tuple.Item3;
-                var task = phrase.renderer.Render(phrase, progress, request.trackNo, cancellation, true);
+                bool realCurvesPublished = false;
+                var renderEvents = phrase.renderer.SupportsRealCurve
+                    ? new RenderPhraseEvents(realCurves => {
+                        realCurvesPublished = PublishRealCurveUpdates(request.part, phrase, realCurves);
+                    })
+                    : null;
+                var task = phrase.renderer.Render(phrase, progress, request.trackNo, cancellation, true, renderEvents);
                 task.Wait();
                 if (cancellation.IsCancellationRequested) {
                     break;
@@ -261,7 +267,9 @@ namespace OpenUtau.Core.Render {
                 var result = task.Result;
                 source.SetSamples(result.samples);
                 DocManager.Inst.ExecuteCmd(new PhraseRenderedNotification(request.part, phrase, result, request.trackNo));
-                PublishRealCurveUpdates(request.part, phrase);
+                if (!realCurvesPublished) {
+                    PublishRealCurveUpdates(request.part, phrase);
+                }
                 if (request.sources.All(s => s.HasSamples)) {
                     request.part.SetMix(request.mix);
                     DocManager.Inst.ExecuteCmd(new PartRenderedNotification(request.part));
@@ -270,18 +278,39 @@ namespace OpenUtau.Core.Render {
             progress.Clear();
         }
 
-        private void PublishRealCurveUpdates(UVoicePart part, RenderPhrase phrase) {
+        private bool PublishRealCurveUpdates(UVoicePart part, RenderPhrase phrase) {
             if (!phrase.renderer.SupportsRealCurve) {
-                return;
+                return false;
             }
             try {
                 var updates = RealCurveUpdater.LoadPhraseUpdates(part, phrase);
                 if (updates.Length > 0) {
                     DocManager.Inst.ExecuteCmd(new RealCurvesUpdatedNotification(part, updates));
+                    return true;
                 }
             } catch (Exception e) {
                 Log.Debug(e, "Failed to refresh rendered real curves.");
             }
+            return false;
+        }
+
+        private bool PublishRealCurveUpdates(
+            UVoicePart part,
+            RenderPhrase phrase,
+            IReadOnlyList<RenderRealCurveResult> realCurves) {
+            if (realCurves.Count == 0) {
+                return false;
+            }
+            try {
+                var updates = RealCurveUpdater.BuildUpdates(part, phrase, realCurves);
+                if (updates.Length > 0) {
+                    DocManager.Inst.ExecuteCmd(new RealCurvesUpdatedNotification(part, updates));
+                    return true;
+                }
+            } catch (Exception e) {
+                Log.Debug(e, "Failed to publish rendered real curves.");
+            }
+            return false;
         }
 
         public static void ReleaseSourceTemp() {

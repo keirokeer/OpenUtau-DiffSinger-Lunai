@@ -53,7 +53,7 @@ namespace OpenUtau.Core.Vogen {
             };
         }
 
-        public Task<RenderResult> Render(RenderPhrase phrase, Progress progress, int trackNo, CancellationTokenSource cancellation, bool isPreRender = false) {
+        public Task<RenderResult> Render(RenderPhrase phrase, Progress progress, int trackNo, CancellationTokenSource cancellation, bool isPreRender = false, RenderPhraseEvents? renderEvents = null) {
             var task = Task.Run(() => {
                 lock (lockObj) {
                     if (cancellation.IsCancellationRequested) {
