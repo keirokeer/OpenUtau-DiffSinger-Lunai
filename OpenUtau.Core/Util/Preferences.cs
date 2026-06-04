@@ -203,6 +203,7 @@ namespace OpenUtau.Core.Util {
             public bool DiffSingerLangCodeHide = false;
             public bool DiffSingerPhonemePanelMode = true;
             public bool DiffSingerLocalRetaking = false;
+            public bool DiffSingerShowRenderPhraseBoundaries = false;
             public bool SkipRenderingMutedTracks = false;
             public string Language = string.Empty;
             public string? SortingOrder = null;

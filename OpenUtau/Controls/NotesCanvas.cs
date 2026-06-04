@@ -6,8 +6,10 @@ using System.Text.RegularExpressions;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
+using Avalonia.Media.Immutable;
 using OpenUtau.App.ViewModels;
 using OpenUtau.Core;
+using OpenUtau.Core.Render;
 using OpenUtau.Core.Ustx;
 using OpenUtau.Api;
 using OpenUtau.Core.Util;
@@ -312,6 +314,7 @@ namespace OpenUtau.App.Controls {
                         }
                     }
                 }
+                RenderDiffSingerPhraseBoundaries(leftTick, rightTick, viewModel, context);
                 if (!hidePitch) {
                     RenderPhonemeTimingGuides(leftTick, rightTick, viewModel, context);
                     using (context.PushOpacity(PitchFocusCenterLineOpacity)) {
@@ -329,6 +332,7 @@ namespace OpenUtau.App.Controls {
             } else {
                 RenderGhostNotes();
                 RenderNoteBodies();
+                RenderDiffSingerPhraseBoundaries(leftTick, rightTick, viewModel, context);
                 if (ShowFinalPitch && !hidePitch) {
                     RenderFinalPitch(leftTick, rightTick, viewModel, context);
                 }
@@ -535,6 +539,101 @@ namespace OpenUtau.App.Controls {
                     context.DrawLine(guidePen, new Point(x, panelTop), new Point(x, 0));
                 }
             }
+        }
+
+        private static readonly IDashStyle PhraseBoundaryDashStyle = new ImmutableDashStyle(new double[] { 4, 2, 1, 2 }, 0);
+        private static readonly IBrush PhraseOverlapBrush = new ImmutableSolidColorBrush(Color.FromRgb(0xFF, 0x8C, 0x00));
+
+        private void RenderDiffSingerPhraseBoundaries(double viewLeftTick, double viewRightTick, NotesViewModel viewModel, DrawingContext context) {
+            if (!Preferences.Default.DiffSingerShowRenderPhraseBoundaries) {
+                return;
+            }
+            if (!TryGetDiffSingerRenderer(viewModel, out var renderer)) {
+                return;
+            }
+            var accent = ThemeManager.AccentBrush3;
+            var boundaryPen = new Pen(accent, 1) { DashStyle = PhraseBoundaryDashStyle };
+            var railPen = new Pen(accent, 2);
+            var overlapRailPen = new Pen(PhraseOverlapBrush, 2);
+            RenderPhrase[] phrases;
+            lock (Part!) {
+                phrases = Part!.renderPhrases.ToArray();
+            }
+            var visible = new List<(double startTick, double endTick)>(phrases.Length);
+            foreach (var phrase in phrases) {
+                var (startTick, endTick) = GetRenderedPhraseTickBounds(phrase, renderer);
+                if (startTick >= viewRightTick || endTick <= viewLeftTick) {
+                    continue;
+                }
+                visible.Add((startTick, endTick));
+            }
+            foreach (var (startTick, endTick) in visible) {
+                DrawPhraseBoundaryLine(context, boundaryPen, viewModel.TickToneToPoint(startTick, 0).X);
+                DrawPhraseBoundaryLine(context, boundaryPen, viewModel.TickToneToPoint(endTick, 0).X);
+            }
+            var events = new List<(double tick, int delta)>(visible.Count * 2);
+            foreach (var (startTick, endTick) in visible) {
+                events.Add((startTick, +1));
+                events.Add((endTick, -1));
+            }
+            events.Sort((a, b) => a.tick.CompareTo(b.tick));
+            int coverage = 0;
+            double? segStart = null;
+            int i = 0;
+            while (i < events.Count) {
+                double tick = events[i].tick;
+                if (segStart.HasValue && coverage > 0 && tick > segStart.Value) {
+                    double startX = Math.Clamp(viewModel.TickToneToPoint(segStart.Value, 0).X, 0, Bounds.Width);
+                    double endX = Math.Clamp(viewModel.TickToneToPoint(tick, 0).X, 0, Bounds.Width);
+                    if (endX > startX) {
+                        var pen = coverage >= 2 ? overlapRailPen : railPen;
+                        context.DrawLine(pen, new Point(startX, 3.5), new Point(endX, 3.5));
+                    }
+                }
+                while (i < events.Count && events[i].tick == tick) {
+                    coverage += events[i].delta;
+                    i++;
+                }
+                segStart = tick;
+            }
+        }
+
+        private void DrawPhraseBoundaryLine(DrawingContext context, IPen pen, double x) {
+            if (Bounds.Width < 1 || x < 0 || x > Bounds.Width) {
+                return;
+            }
+            double crispX = Math.Clamp(Math.Round(x) + 0.5, 0.5, Bounds.Width - 0.5);
+            context.DrawLine(pen, new Point(crispX, 0), new Point(crispX, Bounds.Height));
+        }
+
+        private bool TryGetDiffSingerRenderer(NotesViewModel viewModel, out IRenderer? renderer) {
+            renderer = null;
+            if (Part == null || viewModel.Project == null || Part.trackNo < 0 || Part.trackNo >= viewModel.Project.tracks.Count) {
+                return false;
+            }
+            var settings = viewModel.Project.tracks[Part.trackNo].RendererSettings;
+            renderer = settings?.Renderer;
+            return string.Equals(renderer?.ToString(), Renderers.DIFFSINGER, StringComparison.OrdinalIgnoreCase)
+                || string.Equals(settings?.renderer, Renderers.DIFFSINGER, StringComparison.OrdinalIgnoreCase);
+        }
+
+        private (double startTick, double endTick) GetRenderedPhraseTickBounds(RenderPhrase phrase, IRenderer? renderer) {
+            if (Part == null) {
+                return (0, 0);
+            }
+            try {
+                var layout = renderer?.Layout(phrase);
+                if (layout != null) {
+                    double startMs = layout.positionMs - layout.leadingMs;
+                    double endMs = startMs + layout.estimatedLengthMs;
+                    return (
+                        phrase.timeAxis.MsPosToTickPos(startMs) - Part.position,
+                        phrase.timeAxis.MsPosToTickPos(endMs) - Part.position);
+                }
+            } catch {
+                // Rendering invalid singers should not break piano roll painting.
+            }
+            return (phrase.position - phrase.leading - Part.position, phrase.end - Part.position);
         }
 
         private void RenderPitchBend(UNote note, NotesViewModel viewModel, DrawingContext context) {

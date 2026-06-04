@@ -165,6 +165,7 @@ namespace OpenUtau.App.ViewModels {
         [Reactive] public bool DiffSingerLangCodeHide { get; set; }
         [Reactive] public bool DiffSingerPhonemePanelMode { get; set; }
         [Reactive] public bool DiffSingerLocalRetaking { get; set; }
+        [Reactive] public bool DiffSingerShowRenderPhraseBoundaries { get; set; }
 
         // Advanced
         [Reactive] public bool RememberMid { get; set; }
@@ -535,6 +536,7 @@ namespace OpenUtau.App.ViewModels {
             DiffSingerLangCodeHide = Preferences.Default.DiffSingerLangCodeHide;
             DiffSingerPhonemePanelMode = Preferences.Default.DiffSingerPhonemePanelMode;
             DiffSingerLocalRetaking = Preferences.Default.DiffSingerLocalRetaking;
+            DiffSingerShowRenderPhraseBoundaries = Preferences.Default.DiffSingerShowRenderPhraseBoundaries;
             SkipRenderingMutedTracks = Preferences.Default.SkipRenderingMutedTracks;
             ThemeName = Preferences.Default.ThemeName;
             PenPlusDefault = Preferences.Default.PenPlusDefault;
@@ -839,6 +841,12 @@ namespace OpenUtau.App.ViewModels {
                 .Subscribe(value => {
                     Preferences.Default.DiffSingerLocalRetaking = value;
                     Preferences.Save();
+                });
+            this.WhenAnyValue(vm => vm.DiffSingerShowRenderPhraseBoundaries)
+                .Subscribe(showBoundaries => {
+                    Preferences.Default.DiffSingerShowRenderPhraseBoundaries = showBoundaries;
+                    Preferences.Save();
+                    MessageBus.Current.SendMessage(new NotesRefreshEvent());
                 });
             this.WhenAnyValue(vm => vm.SkipRenderingMutedTracks)
                 .Subscribe(skipRenderingMutedTracks => {
