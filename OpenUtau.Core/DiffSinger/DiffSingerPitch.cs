@@ -256,24 +256,8 @@ namespace OpenUtau.Core.DiffSinger
             var pitch = Enumerable.Repeat(60f, totalFrames).ToArray();
             var retake = Enumerable.Repeat(true, totalFrames).ToArray();
             if (retakeNoteIndexes != null && existingPitch != null) {
-                int frameOffset = 0;
-                for (int noteIdx = 0; noteIdx < note_dur.Count; noteIdx++) {
-                    bool shouldRetake;
-                    if (noteIdx == 0) {
-                        shouldRetake = retakeNoteIndexes.Contains(0);
-                    } else if (noteIdx == note_dur.Count - 1) {
-                        shouldRetake = retakeNoteIndexes.Contains(phrase.notes.Length - 1);
-                    } else {
-                        shouldRetake = retakeNoteIndexes.Contains(noteIdx - 1);
-                    }
-                    for (int f = 0; f < note_dur[noteIdx]; f++) {
-                        int fi = frameOffset + f;
-                        if (fi < totalFrames) {
-                            retake[fi] = shouldRetake;
-                        }
-                    }
-                    frameOffset += note_dur[noteIdx];
-                }
+                retake = DiffSingerRetake.BuildRetakeFrameMask(
+                    note_dur, phrase.notes.Length, retakeNoteIndexes, totalFrames);
                 for (int i = 0; i < totalFrames && i < existingPitch.Length; i++) {
                     pitch[i] = existingPitch[i];
                 }

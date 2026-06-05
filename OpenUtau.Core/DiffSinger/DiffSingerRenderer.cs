@@ -523,13 +523,12 @@ namespace OpenUtau.Core.DiffSinger {
                 throw new Exception("This singer has no pitch predictor.");
             }
             var pitchPredictor = singer.getPitchPredictor()!;
-            var retakeNoteIndexes = new HashSet<int>();
+            var noteRelativePositions = new int[phrase.notes.Length];
             for (int i = 0; i < phrase.notes.Length; i++) {
-                int absPos = phrase.position + phrase.notes[i].position;
-                if (selectedNotePositions.Contains(absPos)) {
-                    retakeNoteIndexes.Add(i);
-                }
+                noteRelativePositions[i] = phrase.notes[i].position;
             }
+            var retakeNoteIndexes = DiffSingerRetake.MapSelectedPositionsToNoteIndexes(
+                phrase.position, noteRelativePositions, selectedNotePositions);
             if (retakeNoteIndexes.Count == 0 || retakeNoteIndexes.Count == phrase.notes.Length) {
                 lock (pitchPredictor) {
                     return pitchPredictor.Process(phrase);
