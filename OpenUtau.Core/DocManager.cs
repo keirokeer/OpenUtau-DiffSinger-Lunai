@@ -222,11 +222,7 @@ namespace OpenUtau.Core {
                     playPosTick = setPlayPosTickNotif.playPosTick;
                 } else if (cmd is RealCurvesUpdatedNotification realCurvesNotif) {
                     if (realCurvesNotif.part is UVoicePart voicePart) {
-                        if (realCurvesNotif.isFullRefresh) {
-                            RealCurveUpdater.ApplyFullRefresh(Project, voicePart, realCurvesNotif.updates);
-                        } else {
-                            RealCurveUpdater.Apply(Project, voicePart, realCurvesNotif.updates);
-                        }
+                        RealCurveUpdater.Apply(Project, voicePart, realCurvesNotif.updates);
                     }
                 } else if (cmd is SingersChangedNotification) {
                     SingerManager.Inst.SearchAllSingers();
@@ -282,36 +278,6 @@ namespace OpenUtau.Core {
         void ScheduleRealCurveRefresh(IEnumerable<UCommand> commands) {
             foreach (var cmd in commands) {
                 ScheduleRealCurveRefresh(cmd);
-            }
-        }
-
-        // After undo/redo we cannot rely on per-command ExpCommand routing: note moves,
-        // phoneme edits and part-level mutations all change the rendered baseline, and a
-        // cache-hit re-render skips renderEvents.ReportRealCurves entirely. Schedule a full
-        // refresh for every voice part the undone group touched so the variance baseline is
-        // reloaded (and stale ranges cleared) by the same debounced path the curve-edit hook
-        // uses.
-        void ScheduleFullRealCurveRefresh(IEnumerable<UCommand> commands) {
-            var parts = new HashSet<UVoicePart>();
-            foreach (var cmd in commands) {
-                UVoicePart? part = cmd switch {
-                    ExpCommand ec => ec.Part,
-                    NoteCommand nc => nc.Part,
-                    PartCommand pc => pc.part as UVoicePart,
-                    _ => null
-                };
-                if (part != null) {
-                    parts.Add(part);
-                }
-            }
-            foreach (var part in parts) {
-                if (!Project.parts.Contains(part) ||
-                    part.trackNo < 0 ||
-                    part.trackNo >= Project.tracks.Count) {
-                    continue;
-                }
-                Project.tracks[part.trackNo].RendererSettings.Renderer
-                    ?.ScheduleFullRealCurveRefresh(Project, part);
             }
         }
 
@@ -377,7 +343,6 @@ namespace OpenUtau.Core {
             }
             redoQueue.AddToBack(group);
             ScheduleRealCurveRefresh(group.Commands);
-            ScheduleFullRealCurveRefresh(group.Commands);
             ExecuteCmd(new PreRenderNotification());
         }
 
@@ -396,7 +361,6 @@ namespace OpenUtau.Core {
             }
             undoQueue.AddToBack(group);
             ScheduleRealCurveRefresh(group.Commands);
-            ScheduleFullRealCurveRefresh(group.Commands);
             ExecuteCmd(new PreRenderNotification());
         }
 

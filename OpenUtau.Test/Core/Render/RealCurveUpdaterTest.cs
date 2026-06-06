@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using OpenUtau.Core.Render;
@@ -94,44 +93,6 @@ namespace OpenUtau.Core {
             Assert.False(changed);
             Assert.Equal(new[] { 0, 0, 10 }, curve.realXs);
             Assert.Equal(new[] { -1, 10, 20 }, curve.realYs);
-        }
-
-        [Fact]
-        public void ApplyFullRefreshClearsEveryRealCurveInPart() {
-            var project = CreateProjectWithCurve(out var part, out var curve);
-            // Stale data from a previous render that covered a wider tick range than the
-            // restored phrase will after undo.
-            curve.realXs.AddRange(new[] { 0, 0, 10, 50, 50, 80 });
-            curve.realYs.AddRange(new[] { -1, 10, 20, -1, 90, 95 });
-
-            bool changed = RealCurveUpdater.ApplyFullRefresh(project, part, Array.Empty<RealCurveUpdate>());
-
-            Assert.True(changed);
-            Assert.Empty(curve.realXs);
-            Assert.Empty(curve.realYs);
-        }
-
-        [Fact]
-        public void ApplyFullRefreshNoOpWhenAlreadyEmpty() {
-            var project = CreateProjectWithCurve(out var part, out _);
-
-            bool changed = RealCurveUpdater.ApplyFullRefresh(project, part, Array.Empty<RealCurveUpdate>());
-
-            Assert.False(changed);
-        }
-
-        [Fact]
-        public void ApplyFullRefreshNoOpWhenPartNotInProject() {
-            var project = CreateProjectWithCurve(out var part, out var curve);
-            curve.realXs.AddRange(new[] { 0 });
-            curve.realYs.AddRange(new[] { 1 });
-            project.parts.Remove(part);
-
-            bool changed = RealCurveUpdater.ApplyFullRefresh(project, part, Array.Empty<RealCurveUpdate>());
-
-            Assert.False(changed);
-            Assert.Equal(new[] { 0 }, curve.realXs);
-            Assert.Equal(new[] { 1 }, curve.realYs);
         }
 
         static UProject CreateProjectWithCurve(out UVoicePart part, out UCurve curve) {

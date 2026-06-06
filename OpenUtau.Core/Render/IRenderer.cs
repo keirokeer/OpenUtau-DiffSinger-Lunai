@@ -87,7 +87,6 @@ namespace OpenUtau.Core.Render {
         RenderPitchResult LoadRenderedPitch(RenderPhrase phrase);
         List<RenderRealCurveResult> LoadRenderedRealCurves(RenderPhrase phrase) { return new List<RenderRealCurveResult>(0);}
         void ScheduleRealCurveRefresh(UProject project, UVoicePart part, UCommand command) { }
-        void ScheduleFullRealCurveRefresh(UProject project, UVoicePart part) { }
         UExpressionDescriptor[] GetSuggestedExpressions(USinger singer, URenderSettings renderSettings);
     }
 }

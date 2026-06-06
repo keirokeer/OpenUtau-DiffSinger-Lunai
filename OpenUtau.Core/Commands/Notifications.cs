@@ -258,12 +258,10 @@ namespace OpenUtau.Core {
 
     public class RealCurvesUpdatedNotification : UNotification {
         public readonly IReadOnlyList<RealCurveUpdate> updates;
-        public readonly bool isFullRefresh;
         public override bool Silent => true;
-        public RealCurvesUpdatedNotification(UVoicePart part, IReadOnlyList<RealCurveUpdate> updates, bool isFullRefresh = false) {
+        public RealCurvesUpdatedNotification(UVoicePart part, IReadOnlyList<RealCurveUpdate> updates) {
             this.part = part;
             this.updates = updates;
-            this.isFullRefresh = isFullRefresh;
         }
         public override string ToString() => "Real curves updated.";
     }
