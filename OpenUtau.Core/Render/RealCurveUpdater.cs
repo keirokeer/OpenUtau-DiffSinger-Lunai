@@ -87,25 +87,68 @@ namespace OpenUtau.Core.Render {
             return Apply(project, part, updates, phraseHashes);
         }
 
-        // Used by undo/redo: wipe every existing real curve in the part, then apply whatever
-        // baseline came back from the renderer. The wipe guarantees stale ranges (from a render
-        // whose phrase end was past the restored end) don't survive as ghost segments.
-        public static bool ApplyFullRefresh(UProject project, UVoicePart part, IReadOnlyList<RealCurveUpdate> updates) {
-            if (!project.parts.Contains(part)) {
+        // Posted once per part after every phrase has reported its real-curve data. For each abbr
+        // that has at least one update, removes realXs entries that fall outside the union of the
+        // updates' [startTick, endTick] ranges. This clears stale tail data left over from an
+        // earlier render whose phrase ranges were wider than the current ones (e.g., after undo
+        // shrinks a phrase). Abbrs without updates are untouched.
+        public static bool TrimToCoverage(UProject project, UVoicePart part, IReadOnlyList<RealCurveUpdate> updates) {
+            if (!project.parts.Contains(part) || updates.Count == 0) {
                 return false;
+            }
+            var ranges = new Dictionary<string, List<(int start, int end)>>();
+            foreach (var update in updates) {
+                if (!update.IsValid) {
+                    continue;
+                }
+                if (!ranges.TryGetValue(update.abbr, out var list)) {
+                    list = new List<(int, int)>();
+                    ranges[update.abbr] = list;
+                }
+                list.Add((update.startTick, update.endTick));
             }
             bool changed = false;
             foreach (var curve in part.curves) {
-                if (curve.realXs.Count > 0 || curve.realYs.Count > 0) {
-                    curve.realXs.Clear();
-                    curve.realYs.Clear();
-                    changed = true;
+                if (!ranges.TryGetValue(curve.abbr, out var list) || list.Count == 0) {
+                    continue;
+                }
+                var merged = MergeRanges(list);
+                for (int i = curve.realXs.Count - 1; i >= 0; --i) {
+                    if (!InAnyRange(merged, curve.realXs[i])) {
+                        curve.realXs.RemoveAt(i);
+                        curve.realYs.RemoveAt(i);
+                        changed = true;
+                    }
                 }
             }
-            if (updates.Count > 0) {
-                changed |= Apply(project, part, updates);
-            }
             return changed;
+        }
+
+        internal static List<(int start, int end)> MergeRanges(List<(int start, int end)> ranges) {
+            if (ranges.Count <= 1) {
+                return ranges;
+            }
+            ranges.Sort((a, b) => a.start.CompareTo(b.start));
+            var merged = new List<(int start, int end)> { ranges[0] };
+            for (int i = 1; i < ranges.Count; ++i) {
+                var (curStart, curEnd) = merged[merged.Count - 1];
+                var (nextStart, nextEnd) = ranges[i];
+                if (nextStart <= curEnd) {
+                    merged[merged.Count - 1] = (curStart, Math.Max(curEnd, nextEnd));
+                } else {
+                    merged.Add((nextStart, nextEnd));
+                }
+            }
+            return merged;
+        }
+
+        static bool InAnyRange(List<(int start, int end)> ranges, int x) {
+            foreach (var (start, end) in ranges) {
+                if (x >= start && x <= end) {
+                    return true;
+                }
+            }
+            return false;
         }
 
         internal static bool Apply(

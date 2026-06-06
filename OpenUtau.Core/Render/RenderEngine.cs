@@ -249,14 +249,15 @@ namespace OpenUtau.Core.Render {
                 tuples = orderedTuples;
             }
             var progress = new Progress(tuples.Sum(t => t.Item1.phones.Length));
+            var partUpdates = new Dictionary<UVoicePart, List<RealCurveUpdate>>();
             foreach (var tuple in tuples) {
                 var phrase = tuple.Item1;
                 var source = tuple.Item2;
                 var request = tuple.Item3;
-                bool realCurvesPublished = false;
+                RealCurveUpdate[]? callbackUpdates = null;
                 var renderEvents = phrase.renderer.SupportsRealCurve
                     ? new RenderPhraseEvents(realCurves => {
-                        realCurvesPublished = PublishRealCurveUpdates(request.part, phrase, realCurves);
+                        callbackUpdates = PublishRealCurveUpdates(request.part, phrase, realCurves);
                     })
                     : null;
                 var task = phrase.renderer.Render(phrase, progress, request.trackNo, cancellation, true, renderEvents);
@@ -267,50 +268,58 @@ namespace OpenUtau.Core.Render {
                 var result = task.Result;
                 source.SetSamples(result.samples);
                 DocManager.Inst.ExecuteCmd(new PhraseRenderedNotification(request.part, phrase, result, request.trackNo));
-                if (!realCurvesPublished) {
-                    PublishRealCurveUpdates(request.part, phrase);
+                var phraseUpdates = callbackUpdates ?? PublishRealCurveUpdates(request.part, phrase);
+                if (phraseUpdates != null && phraseUpdates.Length > 0) {
+                    if (!partUpdates.TryGetValue(request.part, out var list)) {
+                        list = new List<RealCurveUpdate>();
+                        partUpdates[request.part] = list;
+                    }
+                    list.AddRange(phraseUpdates);
                 }
                 if (request.sources.All(s => s.HasSamples)) {
                     request.part.SetMix(request.mix);
+                    if (partUpdates.TryGetValue(request.part, out var accumulated) && accumulated.Count > 0) {
+                        DocManager.Inst.ExecuteCmd(new RealCurveCoverageNotification(request.part, accumulated));
+                    }
                     DocManager.Inst.ExecuteCmd(new PartRenderedNotification(request.part));
                 }
             }
             progress.Clear();
         }
 
-        private bool PublishRealCurveUpdates(UVoicePart part, RenderPhrase phrase) {
+        private RealCurveUpdate[]? PublishRealCurveUpdates(UVoicePart part, RenderPhrase phrase) {
             if (!phrase.renderer.SupportsRealCurve) {
-                return false;
+                return null;
             }
             try {
                 var updates = RealCurveUpdater.LoadPhraseUpdates(part, phrase);
                 if (updates.Length > 0) {
                     DocManager.Inst.ExecuteCmd(new RealCurvesUpdatedNotification(part, updates));
-                    return true;
+                    return updates;
                 }
             } catch (Exception e) {
                 Log.Debug(e, "Failed to refresh rendered real curves.");
             }
-            return false;
+            return null;
         }
 
-        private bool PublishRealCurveUpdates(
+        private RealCurveUpdate[]? PublishRealCurveUpdates(
             UVoicePart part,
             RenderPhrase phrase,
             IReadOnlyList<RenderRealCurveResult> realCurves) {
             if (realCurves.Count == 0) {
-                return false;
+                return null;
             }
             try {
                 var updates = RealCurveUpdater.BuildUpdates(part, phrase, realCurves);
                 if (updates.Length > 0) {
                     DocManager.Inst.ExecuteCmd(new RealCurvesUpdatedNotification(part, updates));
-                    return true;
+                    return updates;
                 }
             } catch (Exception e) {
                 Log.Debug(e, "Failed to publish rendered real curves.");
             }
-            return false;
+            return null;
         }
 
         public static void ReleaseSourceTemp() {
