@@ -45,7 +45,7 @@ namespace OpenUtau.Core.Render {
         /// <summary>
         /// Per-frame mask indicating retaken frames. Null means full retake.
         /// </summary>
-        public bool[] retakeMask;
+        public bool[]? retakeMask;
     }
 
     public class RenderRealCurveResult {

@@ -533,7 +533,7 @@ namespace OpenUtau.Core.Editing {
                     if (result.tones[i] < 0) {
                         continue;
                     }
-                    if (result.retakeMask != null && !result.retakeMask[i]) {
+                    if (result.retakeMask != null && i < result.retakeMask.Length && !result.retakeMask[i]) {
                         continue;
                     }
                     int x = phrase.position - part.position + (int)result.ticks[i];

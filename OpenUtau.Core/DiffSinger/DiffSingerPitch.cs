@@ -188,21 +188,29 @@ namespace OpenUtau.Core.DiffSinger
             var noteDurMsList = new List<double>();
             var noteMidiList = new List<float>();
             var noteRestList = new List<bool>();
+            //paddedToRealNoteIndex is kept in lockstep with noteDurMsList so the retake
+            //frame mask can map each padded segment to the real note it belongs to.
+            //Gap-rest segments inserted below follow the preceding real note.
+            var paddedToRealNoteIndex = new List<int>();
             //Head padding
             noteDurMsList.Add(Math.Max(0, phrase.notes[0].positionMs - startMs));
             noteMidiList.Add(phrase.notes[0].adjustedTone);
             noteRestList.Add(true);
+            paddedToRealNoteIndex.Add(0);
             double prevNoteEndMs = phrase.notes[0].positionMs;
-            foreach (var note in phrase.notes) {
+            for (int realIdx = 0; realIdx < phrase.notes.Length; realIdx++) {
+                var note = phrase.notes[realIdx];
                 double gapMs = note.positionMs - prevNoteEndMs;
                 if (gapMs > 0) {
-                    //Insert a rest note for the gap
+                    //Insert a rest note for the gap; associate it with the previous real note
                     noteDurMsList.Add(gapMs);
                     noteMidiList.Add(note.adjustedTone);
                     noteRestList.Add(true);
+                    paddedToRealNoteIndex.Add(realIdx - 1);
                 }
                 noteDurMsList.Add(note.durationMs);
                 noteMidiList.Add(note.adjustedTone);
+                paddedToRealNoteIndex.Add(realIdx);
                 //Slur notes follow the previous note's rest status
                 if (note.lyric.StartsWith("+")) {
                     noteRestList.Add(noteRestList[^1]);
@@ -221,6 +229,7 @@ namespace OpenUtau.Core.DiffSinger
             noteDurMsList.Add(DiffSingerUtils.GetTailMs(frameMs));
             noteMidiList.Add(phrase.notes[^1].adjustedTone);
             noteRestList.Add(true);
+            paddedToRealNoteIndex.Add(phrase.notes.Length - 1);
 
             //Set tone for each rest group using nearest non-rest note
             var note_rest = noteRestList;
@@ -257,7 +266,7 @@ namespace OpenUtau.Core.DiffSinger
             var retake = Enumerable.Repeat(true, totalFrames).ToArray();
             if (retakeNoteIndexes != null && existingPitch != null) {
                 retake = DiffSingerRetake.BuildRetakeFrameMask(
-                    note_dur, phrase.notes.Length, retakeNoteIndexes, totalFrames);
+                    note_dur, paddedToRealNoteIndex, retakeNoteIndexes, totalFrames);
                 for (int i = 0; i < totalFrames && i < existingPitch.Length; i++) {
                     pitch[i] = existingPitch[i];
                 }
