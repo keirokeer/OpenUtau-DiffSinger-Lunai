@@ -258,26 +258,14 @@ namespace OpenUtau.Core {
 
     public class RealCurvesUpdatedNotification : UNotification {
         public readonly IReadOnlyList<RealCurveUpdate> updates;
+        public readonly bool isFullRefresh;
         public override bool Silent => true;
-        public RealCurvesUpdatedNotification(UVoicePart part, IReadOnlyList<RealCurveUpdate> updates) {
+        public RealCurvesUpdatedNotification(UVoicePart part, IReadOnlyList<RealCurveUpdate> updates, bool isFullRefresh = false) {
             this.part = part;
             this.updates = updates;
+            this.isFullRefresh = isFullRefresh;
         }
         public override string ToString() => "Real curves updated.";
-    }
-
-    // Posted once per part when every phrase in a render pass has reported real-curve data.
-    // The accumulated updates define which tick ranges the renderer actually covered this pass,
-    // so DocManager can trim stale realXs/realYs entries that fell outside the new coverage
-    // (e.g., a phrase shrank at its tail after undo).
-    public class RealCurveCoverageNotification : UNotification {
-        public readonly IReadOnlyList<RealCurveUpdate> updates;
-        public override bool Silent => true;
-        public RealCurveCoverageNotification(UVoicePart part, IReadOnlyList<RealCurveUpdate> updates) {
-            this.part = part;
-            this.updates = updates;
-        }
-        public override string ToString() => "Real curve coverage.";
     }
 
     public class GotoOtoNotification : UNotification {

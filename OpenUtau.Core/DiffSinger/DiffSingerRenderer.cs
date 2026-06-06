@@ -518,6 +518,10 @@ namespace OpenUtau.Core.DiffSinger {
             DiffSingerRealCurveScheduler.TrySchedule(project, part, command);
         }
 
+        public void ScheduleFullRealCurveRefresh(UProject project, UVoicePart part) {
+            DiffSingerRealCurveScheduler.ScheduleForUndo(project, part);
+        }
+
         public List<RenderRealCurveResult> LoadRenderedRealCurves(RenderPhrase phrase) {
             if (!Preferences.Default.DiffSingerTensorCache) {
                 throw new Exception("Please enable DiffSinger tensor cache and re-render the phrase to display correct base curves.");

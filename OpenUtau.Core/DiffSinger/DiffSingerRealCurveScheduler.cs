@@ -22,7 +22,21 @@ namespace OpenUtau.Core.DiffSinger {
                 !CanRefresh(project, part, expCommand.Key)) {
                 return;
             }
-            Schedule(project, part);
+            Schedule(project, part, isFullRefresh: false);
+        }
+
+        // Triggered by undo/redo: bypass command-type / abbr filter so any project mutation
+        // forces a full reload of variance-curve baselines, including the cache-hit path
+        // where Render() short-circuits and renderEvents.ReportRealCurves never fires.
+        public static void ScheduleForUndo(UProject project, UVoicePart part) {
+            if (part == null ||
+                !project.parts.Contains(part) ||
+                part.trackNo < 0 ||
+                part.trackNo >= project.tracks.Count ||
+                project.tracks[part.trackNo].RendererSettings.Renderer is not DiffSingerRenderer) {
+                return;
+            }
+            Schedule(project, part, isFullRefresh: true);
         }
 
         static bool IsCurveEditCommand(UCommand command) {
@@ -42,7 +56,7 @@ namespace OpenUtau.Core.DiffSinger {
             return project.tracks[part.trackNo].RendererSettings.Renderer is DiffSingerRenderer;
         }
 
-        static void Schedule(UProject project, UVoicePart part) {
+        static void Schedule(UProject project, UVoicePart part, bool isFullRefresh) {
             var cancellation = new CancellationTokenSource();
             lock (lockObj) {
                 if (pending.TryGetValue(part, out var previous)) {
@@ -50,17 +64,21 @@ namespace OpenUtau.Core.DiffSinger {
                 }
                 pending[part] = cancellation;
             }
-            _ = Task.Run(() => RefreshAsync(project, part, cancellation));
+            _ = Task.Run(() => RefreshAsync(project, part, cancellation, isFullRefresh));
         }
 
-        static async Task RefreshAsync(UProject project, UVoicePart part, CancellationTokenSource cancellation) {
+        static async Task RefreshAsync(UProject project, UVoicePart part, CancellationTokenSource cancellation, bool isFullRefresh) {
             try {
                 await Task.Delay(DebounceMs, cancellation.Token);
                 var updates = LoadPartUpdates(project, part, cancellation.Token);
-                if (cancellation.IsCancellationRequested || updates.Count == 0) {
+                if (cancellation.IsCancellationRequested) {
                     return;
                 }
-                DocManager.Inst.ExecuteCmd(new RealCurvesUpdatedNotification(part, updates));
+                // For undo/redo always publish so stale real curves get cleared even when
+                // LoadPartUpdates returns nothing (e.g. all phrases removed by the undo).
+                if (isFullRefresh || updates.Count > 0) {
+                    DocManager.Inst.ExecuteCmd(new RealCurvesUpdatedNotification(part, updates, isFullRefresh));
+                }
             } catch (OperationCanceledException) {
             } catch (Exception e) {
                 Log.Debug(e, "Failed to refresh DiffSinger real curves after curve edit.");
