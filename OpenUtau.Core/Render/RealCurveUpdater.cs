@@ -87,6 +87,27 @@ namespace OpenUtau.Core.Render {
             return Apply(project, part, updates, phraseHashes);
         }
 
+        // Used by undo/redo: wipe every existing real curve in the part, then apply whatever
+        // baseline came back from the renderer. The wipe guarantees stale ranges (from a render
+        // whose phrase end was past the restored end) don't survive as ghost segments.
+        public static bool ApplyFullRefresh(UProject project, UVoicePart part, IReadOnlyList<RealCurveUpdate> updates) {
+            if (!project.parts.Contains(part)) {
+                return false;
+            }
+            bool changed = false;
+            foreach (var curve in part.curves) {
+                if (curve.realXs.Count > 0 || curve.realYs.Count > 0) {
+                    curve.realXs.Clear();
+                    curve.realYs.Clear();
+                    changed = true;
+                }
+            }
+            if (updates.Count > 0) {
+                changed |= Apply(project, part, updates);
+            }
+            return changed;
+        }
+
         internal static bool Apply(
             UProject project,
             UVoicePart part,
