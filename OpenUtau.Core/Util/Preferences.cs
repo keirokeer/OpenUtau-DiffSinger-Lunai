@@ -187,7 +187,7 @@ namespace OpenUtau.Core.Util {
             public bool UseTrackColor = true;
             public string DefaultTrackColor = "Blue";
             public bool ClearCacheOnQuit = false;
-            public bool PreRender = true;
+            public bool PreRender = false;
             public bool UseSolidPlaybackLine = true;
             public int NumRenderThreads = 2;
             public string DefaultRenderer = string.Empty;
