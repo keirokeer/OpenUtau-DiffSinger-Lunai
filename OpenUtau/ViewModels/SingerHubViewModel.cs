@@ -260,26 +260,25 @@ namespace OpenUtau.App.ViewModels {
             }
         }
 
+        async Task<List<SingerHubEntry>> FetchRegistrySafeAsync(string? registryUrl = null) {
+            try {
+                return await client.FetchRegistryAsync(registryUrl);
+            } catch (Exception e) {
+                Serilog.Log.Warning(e, "Failed to fetch Singer Hub registry from {Url}", registryUrl ?? SingerHubClient.DefaultRegistryUrl);
+                return new List<SingerHubEntry>();
+            }
+        }
+
         public async Task RefreshAsync() {
             try {
                 Status = ThemeManager.GetString("lunai.status.fetching");
-                var lunaiList = await client.FetchRegistryAsync();
+                var lunaiList = await FetchRegistrySafeAsync();
 
                 // UFR registry: remote JSON only; on error just skip.
-                List<SingerHubEntry> ufrList;
-                try {
-                    ufrList = await client.FetchRegistryAsync("https://utaufrance.com/ufr-pack/singers.json");
-                } catch {
-                    ufrList = new List<SingerHubEntry>();
-                }
+                var ufrList = await FetchRegistrySafeAsync("https://utaufrance.com/ufr-pack/singers.json");
 
                 // BRAPA registry: remote JSON only (errors are ignored).
-                List<SingerHubEntry> brapaList;
-                try {
-                    brapaList = await client.FetchRegistryAsync("https://www.teambrapa.com.br/singers.json");
-                } catch {
-                    brapaList = new List<SingerHubEntry>();
-                }
+                var brapaList = await FetchRegistrySafeAsync("https://www.teambrapa.com.br/singers.json");
 
                 var registry = lunaiList.Concat(ufrList).Concat(brapaList).ToList();
                 Status = ThemeManager.GetString("lunai.status.listing");
@@ -320,7 +319,10 @@ namespace OpenUtau.App.ViewModels {
                 foreach (var r in ordered) Rows.Add(r);
                 ApplyFilter();
                 _ = LoadIconsAsync(ordered);
-                Status = ThemeManager.GetString("lunai.status.ready");
+                var hadRegistry = registry.Count > 0;
+                Status = hadRegistry
+                    ? ThemeManager.GetString("lunai.status.ready")
+                    : ThemeManager.GetString("lunai.status.offline");
             } catch (Exception e) {
                 Status = ThemeManager.GetString("lunai.status.error");
                 DocManager.Inst.ExecuteCmd(new ErrorMessageNotification(e));

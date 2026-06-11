@@ -496,6 +496,7 @@ Warning: this option removes custom presets.</system:String>
   <system:String x:Key="lunai.status.fetching">Fetching list...</system:String>
   <system:String x:Key="lunai.status.listing">Scanning installed...</system:String>
   <system:String x:Key="lunai.status.ready">Ready</system:String>
+  <system:String x:Key="lunai.status.offline">Ready (cached list, network unavailable)</system:String>
   <system:String x:Key="lunai.status.error">Error</system:String>
   <system:String x:Key="lunai.status.installing">Installing {0}...</system:String>
   <system:String x:Key="lunai.status.updating">Updating {0}...</system:String>

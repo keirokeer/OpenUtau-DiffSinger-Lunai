@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Security.Cryptography;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
@@ -80,6 +82,25 @@ namespace OpenUtau.Core.SingerHub {
             @"^(.+?)\s+(?:DS\s+)?v(\d+)\s*$",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
+        static string RegistryCachePath(string url) {
+            var hash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(url))).Substring(0, 16);
+            return Path.Combine(PathManager.Inst.CachePath, $"singerhub-registry-{hash}.json");
+        }
+
+        static List<SingerHubEntry> ParseRegistryJson(string json) {
+            var registry = JsonConvert.DeserializeObject<SingerHubRegistry>(json);
+            return registry?.Singers ?? new List<SingerHubEntry>();
+        }
+
+        static async Task<List<SingerHubEntry>> TryLoadCachedRegistryAsync(string url) {
+            var cachePath = RegistryCachePath(url);
+            if (!File.Exists(cachePath)) {
+                return new List<SingerHubEntry>();
+            }
+            Log.Warning("Singer Hub registry fetch failed for {Url}; using cached registry at {Path}", url, cachePath);
+            return await FetchRegistryFromFileAsync(cachePath).ConfigureAwait(false);
+        }
+
         /// <summary>Fetch the registry JSON from URL (HTTP) or local file path.</summary>
         public async Task<List<SingerHubEntry>> FetchRegistryAsync(string? registryUrl = null) {
             var url = (registryUrl ?? DefaultRegistryUrl).Trim();
@@ -91,14 +112,20 @@ namespace OpenUtau.Core.SingerHub {
             if (File.Exists(url)) {
                 return await FetchRegistryFromFileAsync(url).ConfigureAwait(false);
             }
-            using var client = new HttpClient();
-            client.DefaultRequestHeaders.Add("User-Agent", "OpenUtau-LUNAI");
-            client.Timeout = TimeSpan.FromSeconds(30);
-            using var response = await client.GetAsync(url);
-            response.EnsureSuccessStatusCode();
-            var json = await response.Content.ReadAsStringAsync();
-            var registry = JsonConvert.DeserializeObject<SingerHubRegistry>(json);
-            return registry?.Singers ?? new List<SingerHubEntry>();
+            try {
+                using var client = new HttpClient();
+                client.DefaultRequestHeaders.Add("User-Agent", "OpenUtau-LUNAI");
+                client.Timeout = TimeSpan.FromSeconds(90);
+                using var response = await client.GetAsync(url).ConfigureAwait(false);
+                response.EnsureSuccessStatusCode();
+                var json = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                Directory.CreateDirectory(PathManager.Inst.CachePath);
+                await File.WriteAllTextAsync(RegistryCachePath(url), json).ConfigureAwait(false);
+                return ParseRegistryJson(json);
+            } catch (Exception e) when (e is HttpRequestException or TaskCanceledException or TimeoutException) {
+                Log.Warning(e, "Failed to download Singer Hub registry from {Url}", url);
+                return await TryLoadCachedRegistryAsync(url).ConfigureAwait(false);
+            }
         }
 
         /// <summary>Load registry from a local JSON file (e.g. UFR singers).</summary>
