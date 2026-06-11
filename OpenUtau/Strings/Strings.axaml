@@ -600,6 +600,7 @@ Warning: this option removes custom presets.</system:String>
   <system:String x:Key="pianoroll.toggle.vibrato">View Vibrato (U)</system:String>
   <system:String x:Key="pianoroll.toggle.waveform">View Waveform (W)</system:String>
   <system:String x:Key="pianoroll.toggle.expressions">View Expressions (L)</system:String>
+  <system:String x:Key="pianoroll.toggle.realcurves">View Real Curves</system:String>
   <system:String x:Key="pianoroll.toggle.appearance">Appearance Settings</system:String>
   <system:String x:Key="pianoroll.toggle.diffsinger.quality">DiffSinger quality (acoustic 50, variance 50, pitch 20)</system:String>
   <system:String x:Key="pianoroll.toggle.diffsinger.medium">DiffSinger balanced (acoustic 20, variance 20, pitch 20)</system:String>

@@ -585,6 +585,11 @@
           ToggleButton.sideToolbarToggle.expressionsToggle:checked:pressed /template/ ContentPresenter#PART_ContentPresenter">
     <Setter Property="Background" Value="{DynamicResource PianoRollSideAccentExpressionsCheckedBrush}" />
   </Style>
+  <Style Selector="ToggleButton.sideToolbarToggle.realCurvesToggle:checked /template/ ContentPresenter#PART_ContentPresenter,
+          ToggleButton.sideToolbarToggle.realCurvesToggle:checked:pointerover /template/ ContentPresenter#PART_ContentPresenter,
+          ToggleButton.sideToolbarToggle.realCurvesToggle:checked:pressed /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource PianoRollSideAccentRealCurvesCheckedBrush}" />
+  </Style>
   <Style Selector="ToggleButton.sideToolbarToggle.snapToggle:checked /template/ ContentPresenter#PART_ContentPresenter,
           ToggleButton.sideToolbarToggle.snapToggle:checked:pointerover /template/ ContentPresenter#PART_ContentPresenter,
           ToggleButton.sideToolbarToggle.snapToggle:checked:pressed /template/ ContentPresenter#PART_ContentPresenter">
@@ -748,6 +753,13 @@
   <Style Selector="ToggleButton.sideToolbarToggle:checked.expressionsToggle Path.stroked,
           ToggleButton.sideToolbarToggle:checked.expressionsToggle Ellipse.stroked">
     <Setter Property="Stroke" Value="{DynamicResource PianoRollSideAccentExpressionsBrush}" />
+  </Style>
+  <Style Selector="ToggleButton.sideToolbarToggle:checked.realCurvesToggle Path.stroked">
+    <Setter Property="Stroke" Value="{DynamicResource PianoRollSideAccentRealCurvesBrush}" />
+  </Style>
+  <Style Selector="ToggleButton.sideToolbarToggle:checked.realCurvesToggle Path.filled.realCurveFill">
+    <Setter Property="Fill" Value="{DynamicResource PianoRollSideAccentRealCurvesBrush}" />
+    <Setter Property="Opacity" Value="0.35" />
   </Style>
   <Style Selector="ToggleButton.sideToolbarToggle:checked.snapToggle Path.stroked">
     <Setter Property="Stroke" Value="{DynamicResource PianoRollSideAccentSnapBrush}" />

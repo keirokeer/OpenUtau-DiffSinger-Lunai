@@ -107,15 +107,16 @@
         </Grid>
       </Grid>
     </ToggleButton>
-    <ToggleButton Name="SnapToggle" Classes="sideToolbarToggle snapToggle" Margin="0" Padding="0" IsChecked="{Binding NotesViewModel.IsSnapOn}">
+    <ToggleButton Classes="sideToolbarToggle realCurvesToggle" Margin="0" Padding="0" IsChecked="{Binding NotesViewModel.ShowRealCurves}">
       <ToolTip.Tip>
-        <TextBlock Text="{DynamicResource pianoroll.toggle.snap}" Foreground="{DynamicResource ToolTipForegroundBrush}"/>
+        <TextBlock Text="{DynamicResource pianoroll.toggle.realcurves}" Foreground="{DynamicResource ToolTipForegroundBrush}"/>
       </ToolTip.Tip>
-      <Border Classes="toolbarIconHostSide">
+      <Grid Classes="toolbarIconHostSide">
         <Grid Classes="toolbarIconHostSideLayout">
-          <Path Classes="stroked" Data="M 4.5 13.5 L 7.5 13.5 L 7.5 9.5 A 1,1 0 1 1 10.5,9.5 L 10.5 13.5 L 13.5 13.5 L 13.5 8.5 A 1,1 0 1 0 4.5,8.5 Z"/>
+          <Path Classes="filled realCurveFill" Data="M 2.5 12 C 5.5 6.5, 8 10.5, 10.5 6.5 C 12 5, 13.5 6, 14.5 8 L 14.5 14 L 2.5 14 Z"/>
+          <Path Classes="stroked" Data="M 2.5 12 C 5.5 6.5, 8 10.5, 10.5 6.5 C 12 5, 13.5 6, 14.5 8"/>
         </Grid>
-      </Border>
+      </Grid>
     </ToggleButton>
     <ToggleButton Classes="sideToolbarToggle phonemizerTagsToggle" Margin="0" Padding="0" IsChecked="{Binding ShowPhonemizerTags}">
       <ToolTip.Tip>
@@ -133,6 +134,16 @@
           </Path>
         </Grid>
       </Grid>
+    </ToggleButton>
+    <ToggleButton Name="SnapToggle" Classes="sideToolbarToggle snapToggle" Margin="0" Padding="0" IsChecked="{Binding NotesViewModel.IsSnapOn}">
+      <ToolTip.Tip>
+        <TextBlock Text="{DynamicResource pianoroll.toggle.snap}" Foreground="{DynamicResource ToolTipForegroundBrush}"/>
+      </ToolTip.Tip>
+      <Border Classes="toolbarIconHostSide">
+        <Grid Classes="toolbarIconHostSideLayout">
+          <Path Classes="stroked" Data="M 4.5 13.5 L 7.5 13.5 L 7.5 9.5 A 1,1 0 1 1 10.5,9.5 L 10.5 13.5 L 13.5 13.5 L 13.5 8.5 A 1,1 0 1 0 4.5,8.5 Z"/>
+        </Grid>
+      </Border>
     </ToggleButton>
     <Border Classes="sideToolbarSeparator"/>
     <ToggleButton Classes="sideToolbarToggle livePitchToggle" Margin="0" Padding="0" IsChecked="{Binding NotesViewModel.LivePitchNormal}">

@@ -56,6 +56,7 @@
   <SolidColorBrush x:Key="PianoRollSideAccentWaveformBrush" Color="#6FA882"/>
   <SolidColorBrush x:Key="PianoRollSideAccentPhonemeBrush" Color="#D48AAF"/>
   <SolidColorBrush x:Key="PianoRollSideAccentExpressionsBrush" Color="#E07855"/>
+  <SolidColorBrush x:Key="PianoRollSideAccentRealCurvesBrush" Color="#A8B8D8"/>
   <SolidColorBrush x:Key="PianoRollSideAccentSnapBrush" Color="#7E94B2"/>
   <SolidColorBrush x:Key="PianoRollSideAccentPhonemizerTagsBrush" Color="#9D8FDC"/>
   <SolidColorBrush x:Key="PianoRollSideAccentTipsCheckedBrush" Color="#8E9AAB" Opacity="0.10"/>
@@ -68,6 +69,7 @@
   <SolidColorBrush x:Key="PianoRollSideAccentWaveformCheckedBrush" Color="#6FA882" Opacity="0.10"/>
   <SolidColorBrush x:Key="PianoRollSideAccentPhonemeCheckedBrush" Color="#D48AAF" Opacity="0.10"/>
   <SolidColorBrush x:Key="PianoRollSideAccentExpressionsCheckedBrush" Color="#E07855" Opacity="0.10"/>
+  <SolidColorBrush x:Key="PianoRollSideAccentRealCurvesCheckedBrush" Color="#A8B8D8" Opacity="0.10"/>
   <SolidColorBrush x:Key="PianoRollSideAccentSnapCheckedBrush" Color="#7E94B2" Opacity="0.10"/>
   <SolidColorBrush x:Key="PianoRollSideAccentPhonemizerTagsCheckedBrush" Color="#9D8FDC" Opacity="0.10"/>
   <SolidColorBrush x:Key="SystemControlBackgroundAltHighBrush"

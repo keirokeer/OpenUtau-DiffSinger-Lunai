@@ -66,6 +66,7 @@ namespace OpenUtau.App.ViewModels {
         [Reactive] public bool ShowPhoneme { get; set; }
         [Reactive] public bool ShowNoteParams { get; set; }
         [Reactive] public bool ShowExpressions { get; set; }
+        [Reactive] public bool ShowRealCurves { get; set; }
         [Reactive] public bool IsSnapOn { get; set; }
         [Reactive] public string SnapDivText { get; set; }
         [Reactive] public string KeyText { get; set; }
@@ -324,6 +325,12 @@ namespace OpenUtau.App.ViewModels {
                 Preferences.Save();
                 this.RaisePropertyChanged(nameof(ExpGapGridLength));
                 this.RaisePropertyChanged(nameof(ExpPanelGridLength));
+            });
+            ShowRealCurves = Preferences.Default.ShowRealCurves;
+            this.WhenAnyValue(x => x.ShowRealCurves)
+            .Subscribe(showRealCurves => {
+                Preferences.Default.ShowRealCurves = showRealCurves;
+                Preferences.Save();
             });
             ShowNoteParams = Preferences.Default.ShowNoteParams;
             this.WhenAnyValue(x => x.ShowNoteParams)

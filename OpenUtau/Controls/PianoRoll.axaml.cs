@@ -1767,6 +1767,7 @@ namespace OpenUtau.App.Controls {
                 case "TogglePitch": notesVm.ShowPitch = !notesVm.ShowPitch; return true;
                 case "TogglePhoneme": notesVm.ShowPhoneme = !notesVm.ShowPhoneme; return true;
                 case "ToggleExpressions": notesVm.ShowExpressions = !notesVm.ShowExpressions; return true;
+                case "ToggleRealCurves": notesVm.ShowRealCurves = !notesVm.ShowRealCurves; return true;
                 case "ToggleSnap": notesVm.IsSnapOn = !notesVm.IsSnapOn; return true;
                 case "OpenSnapMenu": SnapDivMenu.Open(); return true;
                 case "ToggleNoteParams": notesVm.ShowNoteParams = !notesVm.ShowNoteParams; return true;
