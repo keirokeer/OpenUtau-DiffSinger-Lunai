@@ -635,7 +635,8 @@
                          PointerReleased="PhonemeCanvasPointerReleased"/>
         </Border>
       </Grid>
-      <Border Grid.Row="1" Grid.RowSpan="2" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+      <Border Grid.Row="1" Grid.RowSpan="2" Grid.Column="1" ZIndex="150"
+              HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
               ClipToBounds="True" IsHitTestVisible="False">
         <Grid>
           <Border Classes="tips" HorizontalAlignment="Center" VerticalAlignment="Center"
