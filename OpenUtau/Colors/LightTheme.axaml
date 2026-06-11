@@ -46,6 +46,7 @@
   <Color x:Key="WorkspaceCardColor">#FCFCFC</Color>
   <Color x:Key="WorkspaceElevatedSurfaceColor">#E8E8EC</Color>
   <Color x:Key="MutedIconColor">#808080</Color>
+  <Color x:Key="PianoRollWaveformPeakColor">#59999999</Color>
   <Color x:Key="PianoRollToolbarStripColor">#202020</Color>
   <Color x:Key="PianoRollToolbarButtonHoverColor">#313131</Color>
   <Color x:Key="AppTopBarTransportStripColor">#E8E8EC</Color>

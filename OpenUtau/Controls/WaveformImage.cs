@@ -5,6 +5,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
+using OpenUtau.App;
 using OpenUtau.App.ViewModels;
 using ReactiveUI;
 using Serilog;
@@ -56,6 +57,8 @@ namespace OpenUtau.App.Controls {
                 .Subscribe(e => {
                     InvalidateVisual();
                 });
+            MessageBus.Current.Listen<ThemeChangedEvent>()
+                .Subscribe(e => InvalidateVisual());
         }
 
         protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change) {
@@ -196,8 +199,16 @@ namespace OpenUtau.App.Controls {
             return bitmap;
         }
 
+        private static int GetWaveformPeakColor() {
+            if (Application.Current?.TryFindResource("PianoRollWaveformPeakColor", out var resource) == true
+                && resource is Color color) {
+                return unchecked((int)(((uint)color.A << 24) | ((uint)color.R << 16) | ((uint)color.G << 8) | color.B));
+            }
+            return unchecked((int)0x59B5B5B5);
+        }
+
         private void DrawPeak(int[] data, int width, int x, int y1, int y2) {
-            const int color = 0x7F7F7F7F;
+            int color = GetWaveformPeakColor();
             if (y1 > y2) {
                 int temp = y2;
                 y2 = y1;
