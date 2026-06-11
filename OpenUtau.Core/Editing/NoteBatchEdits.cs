@@ -516,7 +516,8 @@ namespace OpenUtau.Core.Editing {
                 var phrase = phrases[ph_i];
                 RenderPitchResult result;
                 if (pitchSteps.HasValue && renderer is DiffSinger.DiffSingerRenderer diffSingerRenderer) {
-                    result = diffSingerRenderer.LoadRenderedPitch(phrase, pitchSteps.Value, fastRealtime);
+                    result = diffSingerRenderer.LoadRenderedPitchLive(
+                        phrase, positions, pitchSteps.Value, fastRealtime);
                 } else {
                     result = renderer.LoadRenderedPitch(phrase, positions);
                 }
