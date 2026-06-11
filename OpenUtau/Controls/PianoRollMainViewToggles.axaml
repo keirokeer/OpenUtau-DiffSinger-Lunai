@@ -141,7 +141,7 @@
       </ToolTip.Tip>
       <Grid Classes="toolbarIconHostSide">
         <Grid Classes="toolbarIconHostSideLayout">
-          <TextBlock Classes="sideToolbarGlyph" Text="~"/>
+          <TextBlock Classes="sideToolbarGlyph livePitchLabel" Text="Live"/>
         </Grid>
       </Grid>
     </ToggleButton>
@@ -151,7 +151,7 @@
       </ToolTip.Tip>
       <Grid Classes="toolbarIconHostSide">
         <Grid Classes="toolbarIconHostSideLayout">
-          <TextBlock Classes="sideToolbarGlyph" Text="~"/>
+          <TextBlock Classes="sideToolbarGlyph livePitchLabel livePitchFastLabel" Text="Live+"/>
         </Grid>
       </Grid>
     </ToggleButton>

@@ -699,9 +699,19 @@
   <Style Selector="ToggleButton.sideToolbarToggle.tipsToggle TextBlock.sideToolbarGlyph">
     <Setter Property="Margin" Value="0,-4,0,0" />
   </Style>
-  <Style Selector="ToggleButton.sideToolbarToggle.livePitchToggle TextBlock.sideToolbarGlyph,
-          ToggleButton.sideToolbarToggle.livePitchFastToggle TextBlock.sideToolbarGlyph">
-    <Setter Property="Margin" Value="0,-2,0,0" />
+  <Style Selector="ToggleButton.sideToolbarToggle.livePitchToggle Grid.toolbarIconHostSide,
+          ToggleButton.sideToolbarToggle.livePitchFastToggle Grid.toolbarIconHostSide">
+    <Setter Property="RenderTransform">
+      <ScaleTransform ScaleX="1" ScaleY="1" />
+    </Setter>
+  </Style>
+  <Style Selector="ToggleButton.sideToolbarToggle TextBlock.livePitchLabel">
+    <Setter Property="Margin" Value="0" />
+    <Setter Property="FontSize" Value="8.5" />
+    <Setter Property="TextWrapping" Value="NoWrap" />
+  </Style>
+  <Style Selector="ToggleButton.sideToolbarToggle TextBlock.livePitchFastLabel">
+    <Setter Property="FontSize" Value="7.5" />
   </Style>
   <Style Selector="ToggleButton.sideToolbarToggle:checked.tipsToggle TextBlock.sideToolbarGlyph">
     <Setter Property="Foreground" Value="{DynamicResource PianoRollSideAccentTipsBrush}" />
