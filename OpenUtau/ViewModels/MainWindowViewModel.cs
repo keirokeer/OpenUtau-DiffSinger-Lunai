@@ -85,13 +85,12 @@ namespace OpenUtau.App.ViewModels {
         [Reactive] public double PianoRollMaxHeight { get; set; }
         [Reactive] public double PianoRollMinHeight { get; set; }
         public bool ShowTracksArea => !PianoRollFullscreen;
+        public double TracksRowMinHeight => PianoRollFullscreen ? 0 : ViewConstants.TracksPanelMinHeight;
         public bool ShowPianoRollSplitter => ShowPianoRoll && !PianoRollFullscreen;
-        public GridLength TracksRowHeight => PianoRollFullscreen
-            ? new GridLength(0)
-            : new GridLength(1, GridUnitType.Star);
-        public GridLength PianoRollRowHeight => PianoRollFullscreen
-            ? new GridLength(1, GridUnitType.Star)
-            : new GridLength(3, GridUnitType.Star);
+        [Reactive] public GridLength TracksRowHeight { get; set; } = new GridLength(1, GridUnitType.Star);
+        [Reactive] public GridLength PianoRollRowHeight { get; set; } = new GridLength(3, GridUnitType.Star);
+        GridLength savedTracksRowHeight = new GridLength(1, GridUnitType.Star);
+        GridLength savedPianoRollRowHeight = new GridLength(3, GridUnitType.Star);
         public GridLength PianoRollSplitterRowHeight =>
             ShowPianoRoll && !PianoRollFullscreen ? new GridLength(8) : new GridLength(0);
         [Reactive] public bool UseOverlayScrollbars { get; private set; }
@@ -159,12 +158,20 @@ namespace OpenUtau.App.ViewModels {
                     this.RaisePropertyChanged(nameof(PianoRollSplitterRowHeight));
                 });
             this.WhenAnyValue(vm => vm.PianoRollFullscreen)
-                .Subscribe(_ => {
+                .Subscribe(fullscreen => {
+                    if (fullscreen) {
+                        savedTracksRowHeight = TracksRowHeight;
+                        savedPianoRollRowHeight = PianoRollRowHeight;
+                        TracksRowHeight = new GridLength(0);
+                        PianoRollRowHeight = new GridLength(1, GridUnitType.Star);
+                    } else {
+                        TracksRowHeight = savedTracksRowHeight;
+                        PianoRollRowHeight = savedPianoRollRowHeight;
+                    }
                     this.RaisePropertyChanged(nameof(ShowTracksArea));
                     this.RaisePropertyChanged(nameof(ShowPianoRollSplitter));
                     this.RaisePropertyChanged(nameof(PianoRollSplitterRowHeight));
-                    this.RaisePropertyChanged(nameof(TracksRowHeight));
-                    this.RaisePropertyChanged(nameof(PianoRollRowHeight));
+                    this.RaisePropertyChanged(nameof(TracksRowMinHeight));
                 });
             RefreshScrollbarStylePreference();
             MessageBus.Current.Listen<ScrollbarsStyleChangedEvent>()

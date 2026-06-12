@@ -270,7 +270,7 @@
         <Grid Classes="workspaceLayout" ColumnDefinitions="300,*,16"
               VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
           <Grid.RowDefinitions>
-            <RowDefinition Height="{Binding TracksRowHeight}" MinHeight="0"/>
+            <RowDefinition Height="{Binding TracksRowHeight}" MinHeight="{Binding TracksRowMinHeight}"/>
             <RowDefinition Height="{Binding PianoRollSplitterRowHeight}" MinHeight="0"/>
             <RowDefinition Height="{Binding PianoRollRowHeight}"
                            MinHeight="{Binding PianoRollMinHeight}"

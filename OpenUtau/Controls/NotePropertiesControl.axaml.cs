@@ -13,6 +13,7 @@ using Avalonia.LogicalTree;
 using OpenUtau.App.ViewModels;
 using OpenUtau.App.Views;
 using Avalonia.Threading;
+using OpenUtau.App;
 using OpenUtau.Core;
 using OpenUtau.Core.Ustx;
 using OpenUtau.Core.Util;
@@ -50,17 +51,42 @@ foreach (var box in this.GetLogicalDescendants().OfType<TextBox>()) {
 
             DocManager.Inst.AddSubscriber(this);
 
-            AttachedToVisualTree += (_, _) => {
-                ScheduleApplyNotePropsScrollStyle();
-                ScheduleApplySectionBrushes(retryIfNeeded: true);
-            };
+            AttachedToVisualTree += (_, _) => RefreshWorkspaceChrome();
+            Loaded += (_, _) => RefreshWorkspaceChrome();
             DetachedFromVisualTree += (_, _) => {
                 scrollStyleApplyGeneration++;
                 sectionBrushApplyGeneration++;
             };
+            this.GetObservable(IsVisibleProperty).Subscribe(visible => {
+                if (visible) {
+                    RefreshWorkspaceChrome();
+                }
+            });
             MessageBus.Current.Listen<ScrollbarsStyleChangedEvent>()
                 .Subscribe(_ => ScheduleApplyNotePropsScrollStyle());
+            MessageBus.Current.Listen<ThemeChangedEvent>()
+                .Subscribe(_ => {
+                    if (IsVisible) {
+                        RefreshWorkspaceChrome();
+                    }
+                });
+            MessageBus.Current.Listen<PianorollRefreshEvent>()
+                .Subscribe(e => {
+                    if (IsVisible && e.refreshItem is "TrackColor" or "Part") {
+                        ScheduleApplySectionBrushes(retryIfNeeded: true);
+                    }
+                });
             ViewModel.PropertyChanged += OnViewModelPropertyChanged;
+        }
+
+        public void RefreshWorkspaceChrome() {
+            if (!IsVisible) {
+                return;
+            }
+            ClosePanelButton.IsVisible = IsHostedInPianoRollDock();
+            ViewModel.UpdateSectionHeaderBrushes();
+            ScheduleApplyNotePropsScrollStyle();
+            ScheduleApplySectionBrushes(retryIfNeeded: true);
         }
 
         void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e) {
@@ -125,6 +151,17 @@ foreach (var box in this.GetLogicalDescendants().OfType<TextBox>()) {
                 return;
             }
             WorkspaceScrollbarHelper.ApplyScrollViewer(ContentScroll, !Preferences.Default.UseOverlayScrollbars);
+        }
+
+        bool IsHostedInPianoRollDock() {
+            return this.GetVisualAncestors().OfType<PianoRoll>().Any();
+        }
+
+        void OnCloseDockedPanel(object? sender, RoutedEventArgs e) {
+            var pianoRoll = this.GetVisualAncestors().OfType<PianoRoll>().FirstOrDefault();
+            if (pianoRoll?.ViewModel?.NotesViewModel != null) {
+                pianoRoll.ViewModel.NotesViewModel.ShowNoteParams = false;
+            }
         }
 
         private void LoadPart(UPart? part) {

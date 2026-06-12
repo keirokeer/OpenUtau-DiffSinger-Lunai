@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive.Linq;
+using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Media;
 using OpenUtau.App;
 using OpenUtau.App.Controls;
@@ -175,10 +177,17 @@ namespace OpenUtau.App.ViewModels {
         }
 
         public void UpdateSectionHeaderBrushes() {
-            Color noteColor = ThemeManager.GetTrackColor(GetTrackColorName()).NoteColor.Color;
-            SectionHeaderBackground = new SolidColorBrush(NoteColorWithOpacity(noteColor, 0.25));
-            SectionHeaderBackgroundPointerOver = new SolidColorBrush(NoteColorWithOpacity(noteColor, 0.55));
-            SectionHeaderBackgroundPressed = new SolidColorBrush(NoteColorWithOpacity(noteColor, 0.80));
+            if (Preferences.Default.UseTrackColor) {
+                Color noteColor = ThemeManager.GetTrackColor(GetTrackColorName()).NoteColor.Color;
+                SectionHeaderBackground = new SolidColorBrush(NoteColorWithOpacity(noteColor, 0.25));
+                SectionHeaderBackgroundPointerOver = new SolidColorBrush(NoteColorWithOpacity(noteColor, 0.55));
+                SectionHeaderBackgroundPressed = new SolidColorBrush(NoteColorWithOpacity(noteColor, 0.80));
+            } else {
+                var brushes = WorkspaceSectionExpanderChrome.CreateThemeAccentHeaderBrushes();
+                SectionHeaderBackground = brushes.Normal;
+                SectionHeaderBackgroundPointerOver = brushes.PointerOver;
+                SectionHeaderBackgroundPressed = brushes.Pressed;
+            }
             SectionContentBackground = ThemeManager.WorkspaceElevatedSurfaceBrush;
         }
 

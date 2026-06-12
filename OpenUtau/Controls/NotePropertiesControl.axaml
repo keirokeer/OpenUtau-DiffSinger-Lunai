@@ -3,7 +3,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:OpenUtau.App.ViewModels"
-             mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="600" Width="400"
+             mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="600"
              x:Class="OpenUtau.App.Controls.NotePropertiesControl"
              x:Name="NotePropsRoot"
              KeyDown="OnKeyDown" Focusable="True">
@@ -26,11 +26,17 @@
 
   <Grid>
     <TextBlock Text="{Binding Title}" Classes="notePropsPanelTitle"
-               Height="32" Margin="16,16,8,0"
+               Height="32" Margin="16,16,40,0"
                HorizontalAlignment="Left" VerticalAlignment="Top"/>
-    <ScrollViewer Name="ContentScroll" Classes="workspaceScroll" Margin="10,48,0,0" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Visible" AllowAutoHide="False">
-      <StackPanel Margin="0,0,4,0" Spacing="12">
-        <Expander Classes="notePropsExpander" Header="{DynamicResource noteproperty.basic}" HorizontalAlignment="Stretch" Margin="0,0,4,0">
+    <Button x:Name="ClosePanelButton" Classes="workspacePanelClose"
+            HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,8,8,0"
+            IsVisible="False" Click="OnCloseDockedPanel"
+            ToolTip.Tip="{DynamicResource workspace.panel.close}">
+      <Path/>
+    </Button>
+    <ScrollViewer Name="ContentScroll" Classes="workspaceScroll workspaceDockPanelScroll" Margin="10,48,10,10" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Visible" AllowAutoHide="False">
+      <StackPanel Margin="0" Spacing="12" HorizontalAlignment="Stretch">
+        <Expander Classes="notePropsExpander" Header="{DynamicResource noteproperty.basic}" HorizontalAlignment="Stretch" Margin="0">
           <StackPanel IsEnabled="{Binding IsNoteSelected}" Spacing="4">
             <Grid ColumnDefinitions="*,*">
               <TextBlock Classes="notePropLabel" Text="{DynamicResource notedefaults.lyric}" Grid.Column="0"/>
@@ -72,7 +78,7 @@
           </StackPanel>
         </Expander>
 
-        <Expander Classes="notePropsExpander" Header="{DynamicResource notedefaults.portamento}" HorizontalAlignment="Stretch" Margin="0,0,4,0">
+        <Expander Classes="notePropsExpander" Header="{DynamicResource notedefaults.portamento}" HorizontalAlignment="Stretch" Margin="0">
           <StackPanel IsEnabled="{Binding IsNoteSelected}" Spacing="4">
             <Grid ColumnDefinitions="*,20,*">
               <TextBlock Classes="notePropLabel" Text="{DynamicResource notedefaults.preset}"/>
@@ -114,7 +120,7 @@
           </StackPanel>
         </Expander>
 
-        <Expander Classes="notePropsExpander" Header="{DynamicResource notedefaults.vibrato}" HorizontalAlignment="Stretch" Margin="0,0,4,0">
+        <Expander Classes="notePropsExpander" Header="{DynamicResource notedefaults.vibrato}" HorizontalAlignment="Stretch" Margin="0">
           <StackPanel IsEnabled="{Binding IsNoteSelected}" Spacing="4">
             <ToggleSwitch IsChecked="{Binding VibratoEnable, Mode=OneWay}" OnContent="{DynamicResource prefs.on}" OffContent="{DynamicResource prefs.off}"
                           Click="VibratoEnableClicked"/>
@@ -200,7 +206,7 @@
           </StackPanel>
         </Expander>
 
-        <Expander Classes="notePropsExpander" Header="{DynamicResource exps.caption}" HorizontalAlignment="Stretch" Margin="0,0,4,0">
+        <Expander Classes="notePropsExpander" Header="{DynamicResource exps.caption}" HorizontalAlignment="Stretch" Margin="0">
           <StackPanel Name="ExpressionsPanel" Spacing="4" />
         </Expander>
 

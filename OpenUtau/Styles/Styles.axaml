@@ -377,13 +377,23 @@
     <Setter Property="Margin" Value="0" />
     <Setter Property="Padding" Value="8" />
   </Style>
-  <Style Selector="Border.workspaceDockAppearance">
+  <Style Selector="Border.workspaceCard.workspaceDockAppearance,
+                 Border.workspaceDockAppearance">
     <Setter Property="CornerRadius" Value="8" />
     <Setter Property="Margin" Value="0" />
     <Setter Property="Padding" Value="0" />
+    <Setter Property="ClipToBounds" Value="False" />
+  </Style>
+  <Style Selector="Border.workspaceCard.workspaceDockThemeEditor,
+                 Border.workspaceDockThemeEditor">
+    <Setter Property="CornerRadius" Value="8" />
+    <Setter Property="Margin" Value="0" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="ClipToBounds" Value="False" />
   </Style>
   <Style Selector="Border.workspaceDockPianoRoll,
                  Border.workspaceDockPianoRollMain,
+                 Border.workspaceDockPianoRollPhoneme,
                  Border.workspaceDockPianoRollExp">
     <Setter Property="CornerRadius" Value="8" />
     <Setter Property="Margin" Value="0" />
@@ -391,18 +401,21 @@
   </Style>
   <Style Selector="Border.workspaceDockPianoRoll.FlushRight,
                  Border.workspaceDockPianoRollMain.FlushRight,
+                 Border.workspaceDockPianoRollPhoneme.FlushRight,
                  Border.workspaceDockPianoRollExp.FlushRight">
     <Setter Property="CornerRadius" Value="8,0,0,8" />
     <Setter Property="Padding" Value="0" />
   </Style>
   <Style Selector="Border.workspaceDockPianoRoll.FlushLeft,
                  Border.workspaceDockPianoRollMain.FlushLeft,
+                 Border.workspaceDockPianoRollPhoneme.FlushLeft,
                  Border.workspaceDockPianoRollExp.FlushLeft">
     <Setter Property="CornerRadius" Value="0,8,8,0" />
     <Setter Property="Padding" Value="0" />
   </Style>
   <Style Selector="Border.workspaceDockPianoRoll.FlushLeft.FlushRight,
                  Border.workspaceDockPianoRollMain.FlushLeft.FlushRight,
+                 Border.workspaceDockPianoRollPhoneme.FlushLeft.FlushRight,
                  Border.workspaceDockPianoRollExp.FlushLeft.FlushRight">
     <Setter Property="CornerRadius" Value="0,0,0,0" />
   </Style>
@@ -410,11 +423,13 @@
                  Border.workspaceDockPianoRoll.FlushRight > Grid > Border.pianoRollTopBar">
     <Setter Property="Padding" Value="8,8,8,8" />
   </Style>
-  <Style Selector="Border.workspaceDockNoteProps">
+  <Style Selector="Border.workspaceCard.workspaceDockNoteProps,
+                 Border.workspaceDockNoteProps">
     <Setter Property="CornerRadius" Value="8,0,0,8" />
     <Setter Property="Margin" Value="0" />
     <!-- Match piano-roll dock: no top card inset so header aligns with Edit/View row. -->
     <Setter Property="Padding" Value="0" />
+    <Setter Property="ClipToBounds" Value="False" />
   </Style>
   <Style Selector="TextBlock.workspacePanelTitle">
     <Setter Property="FontSize" Value="12" />
@@ -425,6 +440,29 @@
     <Setter Property="FontSize" Value="12" />
     <Setter Property="Foreground" Value="{DynamicResource SystemControlForegroundBaseHighBrush}" />
     <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
+  <Style Selector="Button.workspacePanelClose">
+    <Setter Property="Width" Value="32"/>
+    <Setter Property="Height" Value="32"/>
+    <Setter Property="Padding" Value="0"/>
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="BorderThickness" Value="0"/>
+    <Setter Property="CornerRadius" Value="4"/>
+    <Setter Property="HorizontalContentAlignment" Value="Center"/>
+    <Setter Property="VerticalContentAlignment" Value="Center"/>
+    <Setter Property="Opacity" Value="0.65"/>
+  </Style>
+  <Style Selector="Button.workspacePanelClose:pointerover">
+    <Setter Property="Opacity" Value="1"/>
+    <Setter Property="Background" Value="{DynamicResource NeutralAccentBrushSemi2}"/>
+  </Style>
+  <Style Selector="Button.workspacePanelClose Path">
+    <Setter Property="Stroke" Value="{DynamicResource SystemControlForegroundBaseHighBrush}"/>
+    <Setter Property="StrokeThickness" Value="1.5"/>
+    <Setter Property="Stretch" Value="Uniform"/>
+    <Setter Property="Width" Value="10"/>
+    <Setter Property="Height" Value="10"/>
+    <Setter Property="Data" Value="M3,3 L11,11 M11,3 L3,11"/>
   </Style>
 
   <!-- Welcome (home) screen -->
@@ -1138,7 +1176,16 @@
     <Setter Property="Opacity" Value="0" />
     <Setter Property="BorderThickness" Value="0" />
   </Style>
-  <Style Selector="ScrollViewer.workspaceScroll.overlay /template/ ScrollBar:vertical /template/ Thumb">
+  <Style Selector="ScrollViewer.workspaceDockPanelScroll">
+    <Setter Property="ClipToBounds" Value="False"/>
+  </Style>
+  <Style Selector="ScrollViewer.workspaceDockPanelScroll.overlay /template/ ScrollBar:vertical">
+    <Setter Property="Margin" Value="0"/>
+    <Setter Property="Width" Value="10"/>
+    <Setter Property="MinWidth" Value="10"/>
+    <Setter Property="MaxWidth" Value="10"/>
+  </Style>
+  <Style Selector="ScrollViewer.workspaceScroll:not(.workspaceDockPanelScroll).overlay /template/ ScrollBar:vertical /template/ Thumb">
     <Setter Property="Background" Value="Transparent" />
     <Setter Property="Padding" Value="0" />
     <Setter Property="Margin" Value="0" />
@@ -1158,13 +1205,33 @@
       </ControlTemplate>
     </Setter>
   </Style>
-  <Style Selector="ScrollViewer.workspaceScroll.overlay /template/ ScrollBar:vertical /template/ Thumb:pointerover /template/ Border#PART_Border">
+  <Style Selector="ScrollViewer.workspaceScroll:not(.workspaceDockPanelScroll).overlay /template/ ScrollBar:vertical /template/ Thumb:pointerover /template/ Border#PART_Border">
     <Setter Property="Opacity" Value="1" />
     <Setter Property="Background" Value="#C4C4C4" />
   </Style>
-  <Style Selector="ScrollViewer.workspaceScroll.overlay /template/ ScrollBar:vertical /template/ Thumb:pressed /template/ Border#PART_Border">
+  <Style Selector="ScrollViewer.workspaceScroll:not(.workspaceDockPanelScroll).overlay /template/ ScrollBar:vertical /template/ Thumb:pressed /template/ Border#PART_Border">
     <Setter Property="Opacity" Value="1" />
     <Setter Property="Background" Value="#D9D9D9" />
+  </Style>
+  <Style Selector="ScrollViewer.workspaceScroll.workspaceDockPanelScroll.overlay /template/ ScrollBar:vertical /template/ Thumb">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="Margin" Value="0" />
+    <Setter Property="Template">
+      <ControlTemplate TargetType="Thumb">
+        <Border x:Name="PART_Border"
+                Width="8"
+                MinWidth="8"
+                MaxWidth="8"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Stretch"
+                Background="{DynamicResource ScrollBarThumbBrush}"
+                Opacity="0.85"
+                CornerRadius="4"
+                BorderThickness="0"
+                ClipToBounds="True"/>
+      </ControlTemplate>
+    </Setter>
   </Style>
 
   <!-- Avalonia 11 Fluent ScrollBar.music: style colors/corners only; never set Thumb size or alignment (breaks drag and viewport ratio). -->
