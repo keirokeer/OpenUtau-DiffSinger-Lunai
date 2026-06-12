@@ -4,6 +4,8 @@ using System.Reactive.Linq;
 using Avalonia;
 using Avalonia.Controls.Primitives;
 using Avalonia.Media;
+using OpenUtau.App;
+using OpenUtau.App.ViewModels;
 using OpenUtau.Core;
 using OpenUtau.Core.Util;
 using ReactiveUI;
@@ -75,7 +77,9 @@ namespace OpenUtau.App.Controls {
 
         public TrackBackground() {
             MessageBus.Current.Listen<ThemeChangedEvent>()
-                .Subscribe(e => InvalidateVisual());
+                .Subscribe(_ => InvalidateVisual());
+            MessageBus.Current.Listen<PianorollRefreshEvent>()
+                .Subscribe(_ => InvalidateVisual());
         }
 
         protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change) {
@@ -117,7 +121,8 @@ namespace OpenUtau.App.Controls {
                 bool isCenterKey = IsKeyboard && IsCenterKey(track);
                 var brush = isCenterKey ? ThemeManager.CenterKeyBrush
                     : IsKeyboard ? (isAltTrack ? ThemeManager.BlackKeyBrush : ThemeManager.WhiteKeyBrush)
-                    : isAltTrack ? Foreground : Background;
+                    : isAltTrack ? GetPianoRollTintedBrush(Foreground ?? ThemeManager.TrackBackgroundAltBrush, 0.04)
+                    : GetPianoRollTintedBrush(Background ?? ThemeManager.BackgroundBrush, 0.01);
                 var rowRect = new Rect(0, (int)top, Bounds.Width, TrackHeight);
                 context.DrawRectangle(
                     brush,
@@ -151,6 +156,27 @@ namespace OpenUtau.App.Controls {
                 track++;
                 top += TrackHeight;
             }
+        }
+
+        IBrush GetPianoRollTintedBrush(IBrush baseBrush, double trackWeight) {
+            if (!IsPianoRoll
+                || !Preferences.Default.UseTrackColor
+                || !Preferences.Default.TintPianoRollBackgroundWithTrackColor) {
+                return baseBrush;
+            }
+            if (baseBrush is not SolidColorBrush baseColorBrush || ThemeManager.NoteBrush is not SolidColorBrush trackBrush) {
+                return baseBrush;
+            }
+            return new SolidColorBrush(BlendColors(baseColorBrush.Color, trackBrush.Color, trackWeight));
+        }
+
+        static Color BlendColors(Color baseColor, Color trackColor, double trackWeight) {
+            double baseWeight = 1.0 - trackWeight;
+            return Color.FromArgb(
+                255,
+                (byte)Math.Clamp((int)Math.Round(baseColor.R * baseWeight + trackColor.R * trackWeight), 0, 255),
+                (byte)Math.Clamp((int)Math.Round(baseColor.G * baseWeight + trackColor.G * trackWeight), 0, 255),
+                (byte)Math.Clamp((int)Math.Round(baseColor.B * baseWeight + trackColor.B * trackWeight), 0, 255));
         }
 
         private bool IsAltTrack(int track) {

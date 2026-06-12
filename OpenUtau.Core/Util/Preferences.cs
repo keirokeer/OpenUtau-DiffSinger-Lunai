@@ -137,6 +137,8 @@ namespace OpenUtau.Core.Util {
                     if (!ValidString(new Action(() => CultureInfo.GetCultureInfo(Default.Language)))) Default.Language = string.Empty;
                     if (!ValidString(new Action(() => CultureInfo.GetCultureInfo(Default.SortingOrder)))) Default.SortingOrder = string.Empty;
                     Default.NoteCornerRadius = Math.Clamp(Default.NoteCornerRadius, 0, 12);
+                    Default.AppearancePanelWidth = Math.Clamp(Default.AppearancePanelWidth, 300, 450);
+                    Default.ThemeEditorPanelWidth = Math.Clamp(Default.ThemeEditorPanelWidth, 300, 450);
                     if (!Renderers.getRendererOptions().Contains(Default.DefaultRenderer)) Default.DefaultRenderer = string.Empty;
                     if (!Onnx.getRunnerOptions().Contains(Default.OnnxRunner)) Default.OnnxRunner = string.Empty;
                     if (Default.Theme != null) {
@@ -185,6 +187,7 @@ namespace OpenUtau.Core.Util {
             public bool PenPlusDefault = false;
             public int DegreeStyle;
             public bool UseTrackColor = true;
+            public bool TintPianoRollBackgroundWithTrackColor = false;
             public string DefaultTrackColor = "Blue";
             public bool ClearCacheOnQuit = false;
             public bool PreRender = false;
@@ -248,10 +251,12 @@ namespace OpenUtau.Core.Util {
             public bool ShowWaveform = true;
             public bool ShowPhoneme = true;
             public bool ShowExpressions = true;
-            public bool ShowRealCurves = true;
+            public bool ShowRealCurves = false;
             public bool ShowPhonemizerTags = true;
             public bool ShowNoteParams = true;
             public bool ShowAppearancePanel = false;
+            public double AppearancePanelWidth = 300;
+            public double ThemeEditorPanelWidth = 300;
             public Dictionary<string, string> DefaultResamplers = new Dictionary<string, string>();
             public Dictionary<string, string> DefaultWavtools = new Dictionary<string, string>();
             public string LyricHelper = string.Empty;
