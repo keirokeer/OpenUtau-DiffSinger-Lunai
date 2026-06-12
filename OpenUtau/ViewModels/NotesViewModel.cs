@@ -643,13 +643,13 @@ namespace OpenUtau.App.ViewModels {
         private void LoadTrackColor(UPart? part, UProject? project) {
             if (part == null || project == null) {
                 TrackAccentColor = ThemeManager.GetTrackColor("Blue").AccentColor;
-                TrackNoteColor = ThemeManager.GetTrackColor("Blue").NoteColor;
+                TrackNoteColor = new SolidColorBrush(ThemeManager.GetTrackColor("Blue").NoteColor.Color) { Opacity = 0.5 };
                 ThemeManager.ChangePianorollColor("Blue");
                 return;
             }
             var trackColor = ThemeManager.GetTrackColor(project.tracks[part.trackNo].TrackColor);
             TrackAccentColor = trackColor.AccentColor;
-            TrackNoteColor = trackColor.NoteColor;
+            TrackNoteColor = new SolidColorBrush(trackColor.NoteColor.Color) { Opacity = 0.5 };
             string name = Preferences.Default.UseTrackColor
                 ? project.tracks[part.trackNo].TrackColor
                 : "Blue";

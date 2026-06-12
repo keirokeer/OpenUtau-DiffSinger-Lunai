@@ -165,12 +165,14 @@
           </Style>
         </ScrollBar.Styles>
       </ScrollBar>
-      <Border Grid.Row="1" Grid.Column="0" Background="{Binding NotesViewModel.TrackNoteColor}"
-              ClipToBounds="True" Padding="4,0" IsHitTestVisible="False">
+      <Border Name="PartNameCorner" Grid.Row="1" Grid.Column="0"
+              Background="{Binding NotesViewModel.TrackNoteColor}"
+              ClipToBounds="True" Padding="4,0" Cursor="IBeam"
+              DoubleTapped="PartNameCornerDoubleTapped">
         <TextBlock Text="{Binding NotesViewModel.PartDisplayName}"
                    VerticalAlignment="Center" HorizontalAlignment="Stretch"
                    TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"
-                   FontSize="10" Foreground="{DynamicResource ForegroundColor}"/>
+                   FontSize="12" Foreground="{DynamicResource ForegroundColor}"/>
       </Border>
       <Border Grid.Row="1" Grid.Column="1"
               Background="{DynamicResource PianoRollTimelineStripBrush}"

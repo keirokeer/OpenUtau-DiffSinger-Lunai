@@ -820,6 +820,26 @@ namespace OpenUtau.App.Controls {
             dialog.ShowDialog(RootWindow);
         }
 
+        void PartNameCornerDoubleTapped(object? sender, TappedEventArgs args) {
+            args.Handled = true;
+            var part = ViewModel.NotesViewModel.Part;
+            if (part == null) {
+                return;
+            }
+            var dialog = new TypeInDialog {
+                Title = ThemeManager.GetString("context.part.rename"),
+                onFinish = name => {
+                    if (!string.IsNullOrWhiteSpace(name) && name != part.name) {
+                        DocManager.Inst.StartUndoGroup("command.part.edit");
+                        DocManager.Inst.ExecuteCmd(new RenamePartCommand(DocManager.Inst.Project, part, name));
+                        DocManager.Inst.EndUndoGroup();
+                    }
+                },
+            };
+            dialog.SetText(part.name);
+            dialog.ShowDialog(RootWindow);
+        }
+
         void QuantizeNotes() {
             var notesVM = ViewModel.NotesViewModel;
             if (notesVM.Part == null) {
