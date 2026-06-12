@@ -1,0 +1,22 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        x:Class="OpenUtau.App.Views.CreateCustomThemeDialog"
+        Icon="/Assets/open-utau.ico"
+        Title="{DynamicResource prefs.appearance.customtheme.create.title}"
+        Height="180" Width="360" WindowStartupLocation="CenterOwner">
+  <StackPanel VerticalAlignment="Center" Margin="{Binding $parent.WindowDecorationMargin}" Spacing="8">
+    <TextBlock Margin="12,12,12,0" Text="{DynamicResource prefs.appearance.customtheme.create.prompt}" TextWrapping="Wrap"/>
+    <TextBox Name="NameBox" Margin="12,0"/>
+    <Panel Margin="12,0">
+      <TextBlock VerticalAlignment="Center" Text="{DynamicResource prefs.appearance.customtheme.create.base}"/>
+      <ComboBox Name="BaseThemeBox" HorizontalAlignment="Right" MinWidth="140" SelectedIndex="0">
+        <ComboBoxItem Content="{DynamicResource prefs.appearance.customtheme.create.baselight}"/>
+        <ComboBoxItem Content="{DynamicResource prefs.appearance.customtheme.create.basedark}"/>
+      </ComboBox>
+    </Panel>
+    <Button Name="OkButton" Content="OK" Margin="12,0,12,12" HorizontalAlignment="Stretch"/>
+  </StackPanel>
+</Window>

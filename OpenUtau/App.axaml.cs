@@ -94,7 +94,6 @@ namespace OpenUtau.App {
             }
             var light = (IResourceDictionary) Current.Resources["themes-light"]!;
             var dark = (IResourceDictionary) Current.Resources["themes-dark"]!;
-            var custom = (IResourceDictionary) Current.Resources["themes-custom"]!;
             switch (Core.Util.Preferences.Default.ThemeName) { 
                 case "Light":
                     ApplyTheme(light);
@@ -105,13 +104,7 @@ namespace OpenUtau.App {
                     Current.RequestedThemeVariant = ThemeVariant.Dark;
                     break;
                 default:
-                    ApplyTheme(custom);
                     CustomTheme.ApplyTheme(Core.Util.Preferences.Default.ThemeName);
-                    if (CustomTheme.Default.IsDarkMode == true) {
-                        Current.RequestedThemeVariant = ThemeVariant.Dark;
-                    } else {
-                        Current.RequestedThemeVariant = ThemeVariant.Light;
-                    }
                     break;
             }
             ThemeManager.LoadTheme();

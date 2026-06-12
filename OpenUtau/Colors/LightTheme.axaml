@@ -49,6 +49,7 @@
   <Color x:Key="PianoRollWaveformPeakColor">#59999999</Color>
   <Color x:Key="PianoRollToolbarStripColor">#202020</Color>
   <Color x:Key="PianoRollToolbarButtonHoverColor">#313131</Color>
+  <Color x:Key="PianoRollTimelineStripColor">#D8D8DE</Color>
   <Color x:Key="AppTopBarTransportStripColor">#E8E8EC</Color>
   <Color x:Key="AppTopBarTransportHoverColor">#F4F4F8</Color>
   <Color x:Key="AppTopBarValueStripColor">#D8D8DE</Color>

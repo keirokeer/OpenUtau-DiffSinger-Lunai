@@ -43,6 +43,10 @@
                    Color="{DynamicResource AppTopBarValueDividerColor}"/>
   <SolidColorBrush x:Key="PianoRollToolbarButtonHoverBrush"
                    Color="{DynamicResource PianoRollToolbarButtonHoverColor}"/>
+  <LinearGradientBrush x:Key="PianoRollTimelineStripBrush" StartPoint="0%,0%" EndPoint="0%,100%">
+    <GradientStop Color="{DynamicResource PianoRollTimelineStripColor}" Offset="0"/>
+    <GradientStop Color="{DynamicResource WorkspaceCardColor}" Offset="1"/>
+  </LinearGradientBrush>
   <!-- Piano roll left sidebar toggles -->
   <SolidColorBrush x:Key="PianoRollSideIconOffBrush" Color="{DynamicResource MutedIconColor}"/>
   <SolidColorBrush x:Key="PianoRollSideHoverBackgroundBrush" Color="{DynamicResource AppTopBarTransportStripColor}"/>

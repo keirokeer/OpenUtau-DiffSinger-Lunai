@@ -1,7 +1,4 @@
-﻿using System.Linq;
-using Avalonia;
-using Avalonia.Controls;
-using Avalonia.Controls.ApplicationLifetimes;
+﻿using Avalonia.Controls;
 using Avalonia.Interactivity;
 using OpenUtau.App.ViewModels;
 using ReactiveUI;
@@ -15,16 +12,8 @@ namespace OpenUtau.App.Views {
 
         private ThemeEditorWindow(string customThemePath) {
             InitializeComponent();
-            DataContext = new ThemeEditorViewModel(customThemePath);
-        }
-
-        void OnCancel(object? sender, RoutedEventArgs e) {
-            Close();
-        }
-
-        void OnSave(object? sender, RoutedEventArgs e) {
-            (DataContext as ThemeEditorViewModel)!.Save();
-            Close();
+            EditorPane.LoadTheme(customThemePath);
+            EditorPane.Finished += (_, _) => Close();
         }
 
         void WindowClosing(object? sender, WindowClosingEventArgs e) {
@@ -33,12 +22,18 @@ namespace OpenUtau.App.Views {
             App.SetTheme();
         }
 
+        public static void CloseIfOpen() {
+            _instance?.Close();
+        }
+
         public static void Show(string customThemePath) {
+            MessageBus.Current.SendMessage(new CloseDockedThemeEditorEvent());
             if (_instance == null) {
                 _instance = new ThemeEditorWindow(customThemePath);
                 _instance.Show();
                 MessageBus.Current.SendMessage(new ThemeEditorStateChangedEvent());
             } else {
+                _instance.EditorPane.LoadTheme(customThemePath);
                 _instance.Activate();
             }
         }
