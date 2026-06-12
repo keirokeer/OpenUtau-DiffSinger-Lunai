@@ -102,7 +102,9 @@ namespace OpenUtau.App.ViewModels {
         [Reactive] public Bitmap? Portrait { get; set; }
         [Reactive] public IBrush? PortraitMask { get; set; }
         [Reactive] public string WindowTitle { get; set; } = "Piano Roll";
+        [Reactive] public string PartDisplayName { get; set; } = string.Empty;
         [Reactive] public SolidColorBrush TrackAccentColor { get; set; } = ThemeManager.GetTrackColor("Blue").AccentColor;
+        [Reactive] public SolidColorBrush TrackNoteColor { get; set; } = ThemeManager.GetTrackColor("Blue").NoteColor;
         public double ViewportTicks => viewportTicks.Value;
         public double ViewportTracks => viewportTracks.Value;
         public double SmallChangeX => smallChangeX.Value;
@@ -631,18 +633,23 @@ namespace OpenUtau.App.ViewModels {
         private void LoadWindowTitle(UPart? part, UProject? project) {
             if (part == null || project == null) {
                 WindowTitle = "Piano Roll";
+                PartDisplayName = string.Empty;
                 return;
             }
             WindowTitle = project.tracks[part.trackNo].TrackName + " - " + part.DisplayName;
+            PartDisplayName = part.DisplayName;
         }
 
         private void LoadTrackColor(UPart? part, UProject? project) {
             if (part == null || project == null) {
                 TrackAccentColor = ThemeManager.GetTrackColor("Blue").AccentColor;
+                TrackNoteColor = ThemeManager.GetTrackColor("Blue").NoteColor;
                 ThemeManager.ChangePianorollColor("Blue");
                 return;
             }
-            TrackAccentColor = ThemeManager.GetTrackColor(project.tracks[part.trackNo].TrackColor).AccentColor;
+            var trackColor = ThemeManager.GetTrackColor(project.tracks[part.trackNo].TrackColor);
+            TrackAccentColor = trackColor.AccentColor;
+            TrackNoteColor = trackColor.NoteColor;
             string name = Preferences.Default.UseTrackColor
                 ? project.tracks[part.trackNo].TrackColor
                 : "Blue";
