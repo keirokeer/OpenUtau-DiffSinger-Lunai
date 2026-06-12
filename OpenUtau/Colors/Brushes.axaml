@@ -32,7 +32,8 @@
   <SolidColorBrush x:Key="TransportAccentMetronomeBrush" Color="#5EC8E8"/>
   <!-- Track header -->
   <SolidColorBrush x:Key="TrackHeaderSelectedBackgroundBrush" Color="{DynamicResource WorkspaceElevatedSurfaceColor}"/>
-  <SolidColorBrush x:Key="TrackHeaderUnselectedBorderBrush" Color="{DynamicResource MutedIconColor}"/>
+  <SolidColorBrush x:Key="TrackHeaderBorderBrush"
+                   Color="{DynamicResource NeutralAccentColor}" Opacity="0.6"/>
   <SolidColorBrush x:Key="TrackAccentMuteBrush" Color="#E85A5A"/>
   <SolidColorBrush x:Key="TrackAccentMuteCheckedBrush" Color="#E85A5A" Opacity="0.08"/>
   <SolidColorBrush x:Key="TrackAccentSoloBrush" Color="#4CBD6A"/>
@@ -43,6 +44,8 @@
                    Color="{DynamicResource AppTopBarValueDividerColor}"/>
   <SolidColorBrush x:Key="PianoRollToolbarButtonHoverBrush"
                    Color="{DynamicResource PianoRollToolbarButtonHoverColor}"/>
+  <SolidColorBrush x:Key="PianoRollTimelineStripFillBrush"
+                   Color="{DynamicResource PianoRollTimelineStripColor}"/>
   <LinearGradientBrush x:Key="PianoRollTimelineStripBrush" StartPoint="0%,0%" EndPoint="0%,100%">
     <GradientStop Color="{DynamicResource PianoRollTimelineStripColor}" Offset="0"/>
     <GradientStop Color="{DynamicResource WorkspaceCardColor}" Offset="1"/>

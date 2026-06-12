@@ -72,6 +72,8 @@ namespace OpenUtau.App {
         public static IBrush ExpActiveNameBrush = Brushes.White;
         public static IBrush TrackBackgroundAltBrush = Brushes.Gray;
         public static IBrush WorkspaceElevatedSurfaceBrush = Brushes.Gray;
+        public static IBrush WorkspaceCardBrush = Brushes.Gray;
+        public static IBrush TrackHeaderBorderBrush = Brushes.Gray;
         public static IBrush MutedIconBrush = Brushes.Gray;
 
         /// <summary>Theme values for CenterKey/BlackKey colors, restored when UseTrackColor is off.</summary>
@@ -198,6 +200,12 @@ namespace OpenUtau.App {
             }
             if (resDict.TryGetResource("WorkspaceElevatedSurfaceBrush", themeVariant, out outVar)) {
                 WorkspaceElevatedSurfaceBrush = (IBrush)outVar!;
+            }
+            if (resDict.TryGetResource("WorkspaceCardBrush", themeVariant, out outVar)) {
+                WorkspaceCardBrush = (IBrush)outVar!;
+            }
+            if (resDict.TryGetResource("TrackHeaderBorderBrush", themeVariant, out outVar)) {
+                TrackHeaderBorderBrush = (IBrush)outVar!;
             }
             if (resDict.TryGetResource("MutedIconBrush", themeVariant, out outVar)) {
                 MutedIconBrush = (IBrush)outVar!;

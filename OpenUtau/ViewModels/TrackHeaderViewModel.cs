@@ -210,12 +210,10 @@ namespace OpenUtau.App.ViewModels {
         }
 
         public void RefreshSelectionStyle() {
-            HeaderBorderBrush = IsSelected
-                ? TrackAccentColor
-                : ThemeManager.MutedIconBrush;
+            HeaderBorderBrush = IsSelected ? TrackAccentColor : ThemeManager.TrackHeaderBorderBrush;
             HeaderBackgroundBrush = IsSelected
                 ? ThemeManager.WorkspaceElevatedSurfaceBrush
-                : Brushes.Transparent;
+                : ThemeManager.WorkspaceCardBrush;
         }
 
         public void ToggleSolo() {

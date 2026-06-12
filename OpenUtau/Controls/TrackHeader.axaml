@@ -181,7 +181,7 @@
     <Grid ColumnDefinitions="auto,*,auto" Background="Transparent">
       <Panel Grid.Column="0" VerticalAlignment="Stretch">
         <Border x:Name="AvatarChrome" BorderThickness="0,0,1,0" VerticalAlignment="Top"
-                CornerRadius="6,0,0,6" BorderBrush="{DynamicResource NeutralAccentBrushSemi}"
+                CornerRadius="6,0,0,6" BorderBrush="{Binding HeaderBorderBrush}"
                 ClipToBounds="True" UseLayoutRounding="True">
           <Image Source="{Binding Avatar}" Stretch="Uniform"
                  HorizontalAlignment="Center" VerticalAlignment="Center"
