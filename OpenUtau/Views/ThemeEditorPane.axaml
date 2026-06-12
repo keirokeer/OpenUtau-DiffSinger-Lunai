@@ -1,0 +1,58 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="300" d:DesignHeight="600"
+             x:Class="OpenUtau.App.Views.ThemeEditorPane">
+  <Grid>
+    <TextBlock Text="{DynamicResource themeeditor.title}" Classes="notePropsPanelTitle"
+               Height="32" Margin="16,16,40,0"
+               HorizontalAlignment="Left" VerticalAlignment="Top"/>
+    <Button x:Name="ClosePanelButton" Classes="workspacePanelClose"
+            HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,8,8,0"
+            IsVisible="False" Click="OnCloseDockedPanel"
+            ToolTip.Tip="{DynamicResource workspace.panel.close}">
+      <Path/>
+    </Button>
+    <Grid RowDefinitions="*,auto" Margin="0,48,0,10">
+      <ScrollViewer x:Name="ContentScroll" Grid.Row="0" Classes="workspaceScroll workspaceDockPanelScroll"
+                    Margin="10,0,10,0"
+                    HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto"
+                    AllowAutoHide="False">
+        <StackPanel Spacing="5" HorizontalAlignment="Stretch">
+          <Grid ColumnDefinitions="*,auto" Margin="0,0,0,4">
+            <TextBlock Grid.Column="0" VerticalAlignment="Center" Text="IsDarkMode"/>
+            <ToggleSwitch Grid.Column="1" IsChecked="{Binding IsDarkMode}"/>
+          </Grid>
+          <Separator Margin="0"/>
+          <ItemsControl ItemsSource="{Binding Sections}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <StackPanel Spacing="5" Margin="0,0,0,8">
+                  <TextBlock Text="{Binding Title}" FontWeight="SemiBold" Margin="0,4,0,0"/>
+                  <ItemsControl ItemsSource="{Binding Fields}">
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate>
+                        <Grid ColumnDefinitions="*,auto,auto" Margin="0,0,0,4">
+                          <TextBlock Grid.Column="0" VerticalAlignment="Center" Text="{Binding Key}" TextWrapping="Wrap"/>
+                          <TextBlock Grid.Column="1" VerticalAlignment="Center" Margin="8,0,8,0" Opacity="0.7"
+                                     Text="{Binding HexCode}"/>
+                          <ColorPicker Grid.Column="2" Color="{Binding Color, Mode=TwoWay}" ColorSpectrumShape="Ring"/>
+                        </Grid>
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                  <Separator Margin="0"/>
+                </StackPanel>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </ScrollViewer>
+      <Grid Grid.Row="1" HorizontalAlignment="Stretch" ColumnDefinitions="*,10,*" Margin="10,8,10,0">
+        <Button Grid.Column="0" Content="{DynamicResource themeeditor.cancel}" HorizontalAlignment="Stretch" Click="OnCancel"/>
+        <Button Grid.Column="2" Content="{DynamicResource themeeditor.save}" HorizontalAlignment="Stretch" Click="OnSave"/>
+      </Grid>
+    </Grid>
+  </Grid>
+</UserControl>

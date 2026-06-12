@@ -49,6 +49,11 @@ namespace OpenUtau.App.Controls {
         private int scrollStyleApplyGeneration;
         private int detachedLayoutGeneration;
         private AppearancePreferencesPane? appearancePane;
+        private ThemeEditorPane? themeEditorPane;
+        private bool appearancePanelResizing;
+        private bool themeEditorPanelResizing;
+        private double dockPanelResizeStartX;
+        private double dockPanelResizeStartWidth;
 
         private ReactiveCommand<Unit, Unit>? lyricsDialogCommand;
         private ReactiveCommand<Unit, Unit>? noteDefaultsCommand;
@@ -83,6 +88,16 @@ namespace OpenUtau.App.Controls {
             ViewModel.WhenAnyValue(x => x.ShowAppearancePanel)
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(_ => ScheduleUpdateDetachedLayout());
+            ViewModel.WhenAnyValue(x => x.ShowThemeEditorPanel, x => x.ThemeEditorPath)
+                .ObserveOn(RxApp.MainThreadScheduler)
+                .Subscribe(_ => UpdateThemeEditorPane());
+            ViewModel.NotesViewModel.WhenAnyValue(x => x.ShowNoteParams)
+                .ObserveOn(RxApp.MainThreadScheduler)
+                .Subscribe(show => {
+                    if (show) {
+                        ScheduleRefreshNotePropertiesChrome();
+                    }
+                });
 
             AttachedToVisualTree += (_, _) => {
                 ScheduleApplyPianoRollScrollStyle();
@@ -105,6 +120,18 @@ namespace OpenUtau.App.Controls {
             }, DispatcherPriority.Background);
         }
 
+        void ScheduleRefreshNotePropertiesChrome() {
+            Dispatcher.UIThread.Post(() => {
+                if (!WorkspaceScrollbarHelper.IsInVisualTree(this)) {
+                    return;
+                }
+                NoteProperties?.RefreshWorkspaceChrome();
+                Dispatcher.UIThread.Post(() => {
+                    NoteProperties?.RefreshWorkspaceChrome();
+                }, DispatcherPriority.Render);
+            }, DispatcherPriority.Loaded);
+        }
+
         void EnsureAppearancePanePreloaded() {
             appearancePane ??= new AppearancePreferencesPane {
                 DataContext = ViewModel.AppearancePreferences,
@@ -125,6 +152,75 @@ namespace OpenUtau.App.Controls {
             }
         }
 
+        void UpdateThemeEditorPane() {
+            if (!WorkspaceScrollbarHelper.IsInVisualTree(this)) {
+                return;
+            }
+            if (!ViewModel.IsThemeEditorPanelVisible || string.IsNullOrEmpty(ViewModel.ThemeEditorPath)) {
+                if (themeEditorPane != null) {
+                    themeEditorPane.Finished -= OnThemeEditorFinished;
+                    themeEditorPane = null;
+                }
+                ThemeEditorPaneHost.Content = null;
+                return;
+            }
+            themeEditorPane ??= new ThemeEditorPane();
+            themeEditorPane.Finished -= OnThemeEditorFinished;
+            themeEditorPane.Finished += OnThemeEditorFinished;
+            themeEditorPane.LoadTheme(ViewModel.ThemeEditorPath);
+            if (ThemeEditorPaneHost.Content != themeEditorPane) {
+                ThemeEditorPaneHost.Content = themeEditorPane;
+            }
+        }
+
+        void OnThemeEditorFinished(object? sender, ThemeEditorFinishedEventArgs e) {
+            ViewModel.CloseThemeEditor();
+        }
+
+        public void AppearancePanelResizePointerPressed(object? sender, PointerPressedEventArgs args) {
+            if (args.GetCurrentPoint(this).Properties.IsLeftButtonPressed) {
+                appearancePanelResizing = true;
+                dockPanelResizeStartX = args.GetPosition(this).X;
+                dockPanelResizeStartWidth = ViewModel.AppearancePanelWidth;
+            }
+        }
+
+        public void AppearancePanelResizePointerMoved(object? sender, PointerEventArgs args) {
+            if (!appearancePanelResizing) {
+                return;
+            }
+            var deltaX = args.GetPosition(this).X - dockPanelResizeStartX;
+            ViewModel.AppearancePanelWidth = WorkspaceDockPanelMetrics.ClampWidth(dockPanelResizeStartWidth + deltaX);
+        }
+
+        public void AppearancePanelResizePointerReleased(object? sender, PointerReleasedEventArgs args) {
+            if (args.GetCurrentPoint((Control)sender!).Pointer.Type == PointerType.Mouse) {
+                appearancePanelResizing = false;
+            }
+        }
+
+        public void ThemeEditorPanelResizePointerPressed(object? sender, PointerPressedEventArgs args) {
+            if (args.GetCurrentPoint(this).Properties.IsLeftButtonPressed) {
+                themeEditorPanelResizing = true;
+                dockPanelResizeStartX = args.GetPosition(this).X;
+                dockPanelResizeStartWidth = ViewModel.ThemeEditorPanelWidth;
+            }
+        }
+
+        public void ThemeEditorPanelResizePointerMoved(object? sender, PointerEventArgs args) {
+            if (!themeEditorPanelResizing) {
+                return;
+            }
+            var deltaX = args.GetPosition(this).X - dockPanelResizeStartX;
+            ViewModel.ThemeEditorPanelWidth = WorkspaceDockPanelMetrics.ClampWidth(dockPanelResizeStartWidth + deltaX);
+        }
+
+        public void ThemeEditorPanelResizePointerReleased(object? sender, PointerReleasedEventArgs args) {
+            if (args.GetCurrentPoint((Control)sender!).Pointer.Type == PointerType.Mouse) {
+                themeEditorPanelResizing = false;
+            }
+        }
+
         void UpdateDetachedLayoutCore() {
             if (!WorkspaceScrollbarHelper.IsInVisualTree(this)) {
                 ScheduleUpdateDetachedLayout();
@@ -139,7 +235,14 @@ namespace OpenUtau.App.Controls {
             ViewModel.RaisePropertyChanged(nameof(ViewModel.PianoRollSideGapWidth));
             ViewModel.RaisePropertyChanged(nameof(ViewModel.AppearancePanelLeadingGapWidth));
             ViewModel.RaisePropertyChanged(nameof(ViewModel.AppearancePanelColumnWidth));
+            if (ViewModel.UsesExpandedPianoRollLayout && ViewModel.ShowThemeEditorPanel) {
+                ViewModel.CloseThemeEditor();
+            }
+            ViewModel.RaisePropertyChanged(nameof(ViewModel.IsThemeEditorPanelVisible));
+            ViewModel.RaisePropertyChanged(nameof(ViewModel.ThemeEditorPanelLeadingGapWidth));
+            ViewModel.RaisePropertyChanged(nameof(ViewModel.ThemeEditorPanelColumnWidth));
             UpdateAppearancePane();
+            UpdateThemeEditorPane();
         }
 
         void ScheduleUpdateDetachedLayout() {
@@ -175,6 +278,9 @@ namespace OpenUtau.App.Controls {
             }
             if (ExpPanelGrid != null && ExpPanelGrid.ColumnDefinitions.Count > 2) {
                 ExpPanelGrid.ColumnDefinitions[2].Width = classic ? new GridLength(16) : new GridLength(0);
+            }
+            if (PhonemePanelGrid != null && PhonemePanelGrid.ColumnDefinitions.Count > 2) {
+                PhonemePanelGrid.ColumnDefinitions[2].Width = classic ? new GridLength(16) : new GridLength(0);
             }
             Grid.SetColumn(VScrollBar, classic ? 2 : 1);
             WorkspaceScrollbarHelper.ApplyVerticalScrollBar(VScrollBar, classic);

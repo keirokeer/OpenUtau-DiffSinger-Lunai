@@ -669,8 +669,16 @@ OpenUtau стремится стать средой редактирования
   <system:String x:Key="prefs.appearance.customtheme.delete.message">Вы уверены, что хотите удалить эту тему?</system:String>
   <system:String x:Key="prefs.appearance.customtheme.create.title">Создать Пользовательскую Тему</system:String>
   <system:String x:Key="prefs.appearance.customtheme.create.prompt">Введите Название Темы</system:String>
+  <system:String x:Key="prefs.appearance.customtheme.create.base">Базовая тема</system:String>
+  <system:String x:Key="prefs.appearance.customtheme.create.baselight">Светлая</system:String>
+  <system:String x:Key="prefs.appearance.customtheme.create.basedark">Тёмная</system:String>
   <system:String x:Key="prefs.appearance.customtheme.create.empty">Название темы не может быть пустым.</system:String>
+  <system:String x:Key="workspace.panel.close">Закрыть панель</system:String>
+  <system:String x:Key="themeditor.title">Редактор темы</system:String>
+  <system:String x:Key="themeditor.cancel">Отмена</system:String>
+  <system:String x:Key="themeditor.save">Сохранить</system:String>
   <system:String x:Key="prefs.appearance.trackcolor">Использовать цвет трека в интерфейсе</system:String>
+  <system:String x:Key="prefs.appearance.tintpianorollbackgroundwithtrackcolor">Подкрашивать фон пианоролла цветом трека</system:String>
   <system:String x:Key="prefs.appearance.defaulttrackcolor">Цвет трека по умолчанию для новых треков</system:String>
   <system:String x:Key="prefs.cache">Кэш</system:String>
   <system:String x:Key="prefs.cache.clearonquit">Очищать кэш при выходе</system:String>

@@ -128,6 +128,7 @@ namespace OpenUtau.App.ViewModels {
         [Reactive] public string ThemeName { get; set; }
         [Reactive] public int DegreeStyle { get; set; }
         [Reactive] public bool UseTrackColor { get; set; }
+        [Reactive] public bool TintPianoRollBackgroundWithTrackColor { get; set; }
         public ObservableCollection<TrackColor> TrackColors { get; } = new ObservableCollection<TrackColor>(ThemeManager.TrackColors);
         [Reactive] public TrackColor DefaultTrackColor { get; set; }
         [Reactive] public bool ShowPortrait { get; set; }
@@ -140,7 +141,7 @@ namespace OpenUtau.App.ViewModels {
         [Reactive] public double NoteCornerRadius { get; set; }
         [Reactive] public bool ThemeEditable { get; set; }
         public List<string> ThemeItems => ThemeManager.GetAvailableThemes();
-        public bool IsThemeEditorOpen => Views.ThemeEditorWindow.IsOpen;
+        public bool IsThemeEditorOpen => Views.ThemeEditorWindow.IsOpen || ThemeEditorDockState.IsOpen;
 
         // UTAU
         public List<string> DefaultRendererOptions { get; set; }
@@ -539,9 +540,11 @@ namespace OpenUtau.App.ViewModels {
             DiffSingerShowRenderPhraseBoundaries = Preferences.Default.DiffSingerShowRenderPhraseBoundaries;
             SkipRenderingMutedTracks = Preferences.Default.SkipRenderingMutedTracks;
             ThemeName = Preferences.Default.ThemeName;
+            ThemeEditable = ThemeName != "Light" && ThemeName != "Dark";
             PenPlusDefault = Preferences.Default.PenPlusDefault;
             DegreeStyle = Preferences.Default.DegreeStyle;
             UseTrackColor = Preferences.Default.UseTrackColor;
+            TintPianoRollBackgroundWithTrackColor = Preferences.Default.TintPianoRollBackgroundWithTrackColor;
             DefaultTrackColor = TrackColors.FirstOrDefault(c => c.Name == Preferences.Default.DefaultTrackColor)
                 ?? TrackColors.First(c => c.Name == "Blue");
             ShowPortrait = Preferences.Default.ShowPortrait;
@@ -665,6 +668,13 @@ namespace OpenUtau.App.ViewModels {
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(trackColor => {
                     Preferences.Default.UseTrackColor = trackColor;
+                    Preferences.Save();
+                    MessageBus.Current.SendMessage(new PianorollRefreshEvent("TrackColor"));
+                });
+            this.WhenAnyValue(vm => vm.TintPianoRollBackgroundWithTrackColor)
+                .ObserveOn(RxApp.MainThreadScheduler)
+                .Subscribe(tint => {
+                    Preferences.Default.TintPianoRollBackgroundWithTrackColor = tint;
                     Preferences.Save();
                     MessageBus.Current.SendMessage(new PianorollRefreshEvent("TrackColor"));
                 });

@@ -19,6 +19,7 @@ namespace OpenUtau.App {
         public const double PianoRollMinTicklineWidth = 12.0;
 
         public const double PianoRollMinHeight = 24;
+        public const double TracksPanelMinHeight = 24;
 
         public const double NoteHeightMax = 128;
         public const double NoteHeightMin = 8;
@@ -57,10 +58,10 @@ namespace OpenUtau.App {
         public const double ExpHeightMin = 132;
         public const double ExpHeightMax = 600;
 
-        public const double PhonemePanelHeightDefault = 45;
-        public const double PhonemePanelHeightMin = 45;
+        public const double PhonemePanelHeightDefault = 44;
+        public const double PhonemePanelHeightMin = 44;
         public const double PhonemePanelHeightMax = 250;
-        public const double PhonemePanelResizeHandleHeight = 10;
+        public const double PhonemePanelResizeHandleHeight = 8;
         public const double PhonemeTagStripHeight = 20;  // DiffSinger: space for tag above bars
     }
 }

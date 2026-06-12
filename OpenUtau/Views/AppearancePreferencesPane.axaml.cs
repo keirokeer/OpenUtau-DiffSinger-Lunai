@@ -24,6 +24,7 @@ namespace OpenUtau.App.Views {
         public AppearancePreferencesPane() {
             InitializeComponent();
             AttachedToVisualTree += (_, _) => {
+                ClosePanelButton.IsVisible = IsHostedInPianoRollDock();
                 ScheduleApplyScrollStyle();
                 ScheduleUpdateSectionBrushes(retryIfNeeded: true);
             };
@@ -76,7 +77,7 @@ namespace OpenUtau.App.Views {
             if (!IsLoaded) {
                 return;
             }
-            sectionChrome.UpdateFromTrackColor(GetTrackColorName());
+            sectionChrome.UpdateFromWorkspace(GetTrackColorName());
             sectionChrome.Apply(
                 this,
                 sectionChrome.SectionHeaderBackground,
@@ -125,23 +126,37 @@ namespace OpenUtau.App.Views {
 
         Window? GetOwnerWindow() => TopLevel.GetTopLevel(this) as Window;
 
+        bool IsHostedInPianoRollDock() {
+            return this.GetVisualAncestors().OfType<PianoRoll>().Any();
+        }
+
+        void OnCloseDockedPanel(object? sender, RoutedEventArgs e) {
+            var pianoRoll = this.GetVisualAncestors().OfType<PianoRoll>().FirstOrDefault();
+            if (pianoRoll?.ViewModel != null) {
+                pianoRoll.ViewModel.ShowAppearancePanel = false;
+            }
+        }
+
         void OpenCustomThemeEditor(object? sender, RoutedEventArgs e) {
             var vm = ViewModel;
             if (string.IsNullOrEmpty(vm.ThemeName) || !CustomTheme.Themes.TryGetValue(vm.ThemeName, out var path)) {
                 return;
             }
-            ThemeEditorWindow.Show(path);
+            if (IsHostedInPianoRollDock()) {
+                ThemeEditorWindow.CloseIfOpen();
+                MessageBus.Current.SendMessage(new OpenDockedThemeEditorEvent { Path = path });
+            } else {
+                MessageBus.Current.SendMessage(new CloseDockedThemeEditorEvent());
+                ThemeEditorWindow.Show(path);
+            }
         }
 
         void OnCustomThemeCreate(object? sender, RoutedEventArgs e) {
             var vm = ViewModel;
             var owner = GetOwnerWindow();
-            var dialog = new TypeInDialog {
-                Title = ThemeManager.GetString("prefs.appearance.customtheme.create.title")
-            };
-            dialog.SetPrompt(ThemeManager.GetString("prefs.appearance.customtheme.create.prompt"));
-            dialog.onFinish = s => {
-                if (string.IsNullOrEmpty(s)) {
+            var dialog = new CreateCustomThemeDialog();
+            dialog.onFinish = (name, baseTheme) => {
+                if (string.IsNullOrEmpty(name)) {
                     if (owner != null) {
                         MessageBox.ShowModal(owner,
                             ThemeManager.GetString("prefs.appearance.customtheme.create.empty"),
@@ -150,14 +165,18 @@ namespace OpenUtau.App.Views {
                     return;
                 }
 
-                string filename = string.Join("", s.Where(c => char.IsLetterOrDigit(c) || c == ' '))
+                string filename = string.Join("", name.Where(c => char.IsLetterOrDigit(c) || c == ' '))
                     .Replace(" ", "-").ToLower() + ".yaml";
 
-                var themeYaml = new CustomTheme.ThemeYaml { Name = s };
-
-                File.WriteAllText(Path.Join(PathManager.Inst.ThemesPath, filename),
-                    Yaml.DefaultSerializer.Serialize(themeYaml));
+                string themePath = Path.Join(PathManager.Inst.ThemesPath, filename);
+                var themeYaml = BuiltInThemeLoader.CreateFromBuiltIn(baseTheme, name);
+                themeYaml.SaveToFile(themePath);
+                CustomTheme.ListThemes();
                 vm.RefreshThemes();
+                var themeKey = CustomTheme.Themes.FirstOrDefault(pair => pair.Value == themePath).Key;
+                if (!string.IsNullOrEmpty(themeKey)) {
+                    vm.ThemeName = themeKey;
+                }
             };
             if (owner != null) {
                 dialog.ShowDialog(owner);

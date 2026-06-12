@@ -43,14 +43,21 @@
   </Design.DataContext>
   <Grid>
     <TextBlock Text="{DynamicResource prefs.appearance}" Classes="notePropsPanelTitle"
-               Height="32" Margin="16,16,8,0"
+               Height="32" Margin="16,16,40,0"
                HorizontalAlignment="Left" VerticalAlignment="Top"/>
-    <ScrollViewer x:Name="ContentScroll" Classes="workspaceScroll" Margin="10,48,10,10"
+    <Button x:Name="ClosePanelButton" Classes="workspacePanelClose"
+            HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,8,8,0"
+            IsVisible="False" Click="OnCloseDockedPanel"
+            ToolTip.Tip="{DynamicResource workspace.panel.close}">
+      <Path/>
+    </Button>
+    <ScrollViewer x:Name="ContentScroll" Classes="workspaceScroll workspaceDockPanelScroll"
+                  Margin="10,48,10,10"
                   HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto"
                   AllowAutoHide="False">
-      <StackPanel Margin="0,0,4,0" Spacing="12">
+      <StackPanel Margin="0" Spacing="12" HorizontalAlignment="Stretch">
         <Expander Classes="notePropsExpander" Header="{DynamicResource prefs.appearance.section.theme}"
-                  HorizontalAlignment="Stretch" Margin="0,0,4,0">
+                  HorizontalAlignment="Stretch" Margin="0">
           <StackPanel Classes="appearanceSectionContent">
             <Grid HorizontalAlignment="Stretch" ColumnDefinitions="*,auto,auto,auto">
               <ComboBox Grid.Column="0" IsEnabled="{Binding !IsThemeEditorOpen}" ItemsSource="{Binding ThemeItems}" SelectedItem="{Binding ThemeName}"/>
@@ -87,7 +94,7 @@
         </Expander>
 
         <Expander Classes="notePropsExpander" Header="{DynamicResource prefs.appearance.section.pianoroll}"
-                  HorizontalAlignment="Stretch" Margin="0,0,4,0">
+                  HorizontalAlignment="Stretch" Margin="0">
           <StackPanel Classes="appearanceSectionContent">
             <TextBlock Text="{DynamicResource prefs.appearance.degree}" FontWeight="SemiBold"/>
             <ComboBox SelectedIndex="{Binding DegreeStyle}">
@@ -98,6 +105,10 @@
             <Grid Classes="prefRow" ColumnDefinitions="*,Auto">
               <TextBlock Text="{DynamicResource prefs.appearance.trackcolor}"/>
               <ToggleSwitch IsChecked="{Binding UseTrackColor}"/>
+            </Grid>
+            <Grid Classes="prefRow" ColumnDefinitions="*,Auto" IsEnabled="{Binding UseTrackColor}">
+              <TextBlock Text="{DynamicResource prefs.appearance.tintpianorollbackgroundwithtrackcolor}"/>
+              <ToggleSwitch IsChecked="{Binding TintPianoRollBackgroundWithTrackColor}"/>
             </Grid>
             <TextBlock Text="{DynamicResource prefs.appearance.defaulttrackcolor}" FontWeight="SemiBold"/>
             <ListBox ItemsSource="{Binding TrackColors}" SelectedItem="{Binding DefaultTrackColor}"
@@ -167,7 +178,7 @@
         </Expander>
 
         <Expander Classes="notePropsExpander" Header="{DynamicResource prefs.appearance.section.grid}"
-                  HorizontalAlignment="Stretch" Margin="0,0,4,0">
+                  HorizontalAlignment="Stretch" Margin="0">
           <StackPanel Classes="appearanceSectionContent">
             <Grid Classes="prefRow" ColumnDefinitions="*,Auto">
               <TextBlock Text="{DynamicResource prefs.appearance.solidtickgridlines}"/>
@@ -185,7 +196,7 @@
         </Expander>
 
         <Expander Classes="notePropsExpander" Header="{DynamicResource prefs.appearance.section.expressions}"
-                  HorizontalAlignment="Stretch" Margin="0,0,4,0">
+                  HorizontalAlignment="Stretch" Margin="0">
           <StackPanel Classes="appearanceSectionContent">
             <Grid Classes="prefRow" ColumnDefinitions="*,Auto">
               <TextBlock Text="{DynamicResource prefs.appearance.solidexppanelgridlines}"/>

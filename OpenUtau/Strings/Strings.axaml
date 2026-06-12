@@ -774,8 +774,16 @@ Warning: this option removes custom presets.</system:String>
   <system:String x:Key="prefs.appearance.customtheme.delete.message">Are you sure you want to delete this theme?</system:String>
   <system:String x:Key="prefs.appearance.customtheme.create.title">Create Custom Theme</system:String>
   <system:String x:Key="prefs.appearance.customtheme.create.prompt">Enter Theme Name</system:String>
+  <system:String x:Key="prefs.appearance.customtheme.create.base">Base theme</system:String>
+  <system:String x:Key="prefs.appearance.customtheme.create.baselight">Light</system:String>
+  <system:String x:Key="prefs.appearance.customtheme.create.basedark">Dark</system:String>
   <system:String x:Key="prefs.appearance.customtheme.create.empty">Theme name cannot be empty.</system:String>
+  <system:String x:Key="workspace.panel.close">Close panel</system:String>
+  <system:String x:Key="themeditor.title">Theme Editor</system:String>
+  <system:String x:Key="themeditor.cancel">Cancel</system:String>
+  <system:String x:Key="themeditor.save">Save</system:String>
   <system:String x:Key="prefs.appearance.trackcolor">Use track color in UI</system:String>
+  <system:String x:Key="prefs.appearance.tintpianorollbackgroundwithtrackcolor">Tint piano roll background with track color</system:String>
   <system:String x:Key="prefs.appearance.defaulttrackcolor">Default track color for new tracks</system:String>
   <system:String x:Key="prefs.cache">Cache</system:String>
   <system:String x:Key="prefs.cache.clearonquit">Clear cache on quit</system:String>

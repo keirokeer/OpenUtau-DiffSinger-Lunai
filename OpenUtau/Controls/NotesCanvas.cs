@@ -514,13 +514,7 @@ namespace OpenUtau.App.Controls {
             if (!viewModel.ShowPhoneme || Part == null || Part.phonemes.Count == 0) {
                 return;
             }
-            double panelTop = Bounds.Height
-                - ViewConstants.PhonemePanelResizeHandleHeight
-                - viewModel.PhonemePanelHeight
-                - viewModel.PhonemePanelTagStripHeight;
-            if (panelTop >= Bounds.Height) {
-                return;
-            }
+            double panelTop = Bounds.Height;
             var guideBrush = ThemeManager.NoteBorderPenPressed.Brush;
             if (guideBrush == null) {
                 return;

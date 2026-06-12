@@ -84,17 +84,13 @@ namespace OpenUtau.App.ViewModels {
         [Reactive] public double PhonemePanelHeightMax { get; set; }
         // Tag strip (20px) only in DiffSinger panel mode; in normal mode never add it (avoids white strip, keeps height)
         public double PhonemePanelTagStripHeight => (Preferences.Default.DiffSingerPhonemePanelMode && !Preferences.Default.DiffSingerLangCodeHide) ? ViewConstants.PhonemeTagStripHeight : 0;
-        public Thickness PhonemePanelBottomMargin => ShowPhoneme
-            ? new Thickness(0, 0, 0, ViewConstants.PhonemePanelResizeHandleHeight + PhonemePanelHeight + PhonemePanelTagStripHeight)
-            : new Thickness(0);
-        public Thickness PianoRollHScrollBottomMargin {
-            get {
-                var phoneme = PhonemePanelBottomMargin;
-                const double gapAbovePhoneme = 4;
-                return new Thickness(phoneme.Left, phoneme.Top, phoneme.Right,
-                    phoneme.Bottom + gapAbovePhoneme);
-            }
-        }
+        public Thickness PianoRollHScrollBottomMargin => new Thickness(0, 0, 0, 4);
+        public GridLength PhonemeGapGridLength => ShowPhoneme ? new GridLength(8) : new GridLength(0);
+        public double PhonemePanelOuterHeight => PhonemePanelHeight + PhonemePanelTagStripHeight;
+        public GridLength PhonemePanelOuterGridLength => ShowPhoneme ? new GridLength(PhonemePanelOuterHeight) : new GridLength(0);
+        public double PhonemePanelOuterMinHeight => ShowPhoneme
+            ? PhonemePanelHeightMin + PhonemePanelTagStripHeight
+            : 0;
         public GridLength ExpGapGridLength => ShowExpressions ? new GridLength(8) : new GridLength(0);
         public GridLength ExpPanelGridLength => ShowExpressions ? new GridLength(ViewConstants.ExpPanelHeightDefault) : new GridLength(0);
         public GridLength PhonemePanelHeightGridLength => new GridLength(PhonemePanelHeight + PhonemePanelTagStripHeight);
@@ -296,23 +292,26 @@ namespace OpenUtau.App.ViewModels {
             PhonemePanelHeightMax = ViewConstants.PhonemePanelHeightMax;
             this.WhenAnyValue(x => x.PhonemePanelHeight)
                 .Subscribe(_ => {
-                    this.RaisePropertyChanged(nameof(PhonemePanelBottomMargin));
-                    this.RaisePropertyChanged(nameof(PianoRollHScrollBottomMargin));
+                    this.RaisePropertyChanged(nameof(PhonemePanelOuterHeight));
+                    this.RaisePropertyChanged(nameof(PhonemePanelOuterGridLength));
                     this.RaisePropertyChanged(nameof(PhonemePanelHeightGridLength));
                 });
             MessageBus.Current.Listen<NotesRefreshEvent>()
                 .Subscribe(_ => {
                     this.RaisePropertyChanged(nameof(PhonemePanelTagStripHeight));
-                    this.RaisePropertyChanged(nameof(PhonemePanelBottomMargin));
-                    this.RaisePropertyChanged(nameof(PianoRollHScrollBottomMargin));
+                    this.RaisePropertyChanged(nameof(PhonemePanelOuterHeight));
+                    this.RaisePropertyChanged(nameof(PhonemePanelOuterGridLength));
+                    this.RaisePropertyChanged(nameof(PhonemePanelOuterMinHeight));
                     this.RaisePropertyChanged(nameof(PhonemePanelHeightGridLength));
                 });
             this.WhenAnyValue(x => x.ShowPhoneme)
             .Subscribe(showPhoneme => {
                 Preferences.Default.ShowPhoneme = showPhoneme;
                 Preferences.Save();
-                this.RaisePropertyChanged(nameof(PhonemePanelBottomMargin));
-                this.RaisePropertyChanged(nameof(PianoRollHScrollBottomMargin));
+                this.RaisePropertyChanged(nameof(PhonemeGapGridLength));
+                this.RaisePropertyChanged(nameof(PhonemePanelOuterHeight));
+                this.RaisePropertyChanged(nameof(PhonemePanelOuterGridLength));
+                this.RaisePropertyChanged(nameof(PhonemePanelOuterMinHeight));
             });
             ShowExpressions = Preferences.Default.ShowExpressions;
             this.WhenAnyValue(x => x.ShowExpressions)

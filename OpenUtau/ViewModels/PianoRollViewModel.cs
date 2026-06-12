@@ -2,12 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
+using System.Reactive.Linq;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Threading;
 using DynamicData.Binding;
+using OpenUtau.App;
 using OpenUtau.App.Controls;
+using OpenUtau.App.Views;
 using OpenUtau.Classic;
 using OpenUtau.Core;
 using OpenUtau.Core.Ustx;
@@ -76,9 +79,15 @@ namespace OpenUtau.App.ViewModels {
         public bool UsesExpandedPianoRollLayout => PianoRollDetached || PianoRollFullscreen;
         public bool IsSidePanelVisible => !UsesExpandedPianoRollLayout;
         public bool IsAppearancePanelVisible => ShowAppearancePanel && !UsesExpandedPianoRollLayout;
+        public bool IsThemeEditorPanelVisible => ShowThemeEditorPanel && IsAppearancePanelVisible;
+        public bool IsAppearanceOnlyGapResizeVisible => IsAppearancePanelVisible && !IsThemeEditorPanelVisible;
         public GridLength PianoRollSideColumnWidth => UsesExpandedPianoRollLayout ? new GridLength(0) : new GridLength(48);
         public GridLength PianoRollSideGapWidth => UsesExpandedPianoRollLayout ? new GridLength(0) : new GridLength(8);
         [Reactive] public bool ShowAppearancePanel { get; set; }
+        [Reactive] public bool ShowThemeEditorPanel { get; set; }
+        [Reactive] public string? ThemeEditorPath { get; set; }
+        [Reactive] public double AppearancePanelWidth { get; set; }
+        [Reactive] public double ThemeEditorPanelWidth { get; set; }
         PreferencesViewModel? appearancePreferences;
         static PreferencesViewModel? sharedAppearancePreferences;
 
@@ -94,7 +103,15 @@ namespace OpenUtau.App.ViewModels {
         public GridLength AppearancePanelLeadingGapWidth =>
             UsesExpandedPianoRollLayout || !ShowAppearancePanel ? new GridLength(0) : new GridLength(8);
         public GridLength AppearancePanelColumnWidth =>
-            UsesExpandedPianoRollLayout || !ShowAppearancePanel ? new GridLength(0) : new GridLength(300);
+            UsesExpandedPianoRollLayout || !ShowAppearancePanel
+                ? new GridLength(0)
+                : new GridLength(WorkspaceDockPanelMetrics.ClampWidth(AppearancePanelWidth));
+        public GridLength ThemeEditorPanelLeadingGapWidth =>
+            !IsThemeEditorPanelVisible ? new GridLength(0) : new GridLength(8);
+        public GridLength ThemeEditorPanelColumnWidth =>
+            !IsThemeEditorPanelVisible
+                ? new GridLength(0)
+                : new GridLength(WorkspaceDockPanelMetrics.ClampWidth(ThemeEditorPanelWidth));
         public ReactiveCommand<Unit, Unit> ApplyDiffSingerQualityPresetCommand { get; }
         public ReactiveCommand<Unit, Unit> ApplyDiffSingerMediumPresetCommand { get; }
         public ReactiveCommand<Unit, Unit> ApplyDiffSingerLowPresetCommand { get; }
@@ -186,6 +203,30 @@ namespace OpenUtau.App.ViewModels {
             NotesViewModel = new NotesViewModel();
             CurveViewModel = new CurveViewModel();
             ShowAppearancePanel = Preferences.Default.ShowAppearancePanel;
+            AppearancePanelWidth = WorkspaceDockPanelMetrics.ClampWidth(Preferences.Default.AppearancePanelWidth);
+            ThemeEditorPanelWidth = WorkspaceDockPanelMetrics.ClampWidth(Preferences.Default.ThemeEditorPanelWidth);
+            this.WhenAnyValue(vm => vm.AppearancePanelWidth)
+                .Subscribe(width => {
+                    var clamped = WorkspaceDockPanelMetrics.ClampWidth(width);
+                    if (Math.Abs(clamped - width) > 0.5) {
+                        AppearancePanelWidth = clamped;
+                        return;
+                    }
+                    Preferences.Default.AppearancePanelWidth = clamped;
+                    Preferences.Save();
+                    this.RaisePropertyChanged(nameof(AppearancePanelColumnWidth));
+                });
+            this.WhenAnyValue(vm => vm.ThemeEditorPanelWidth)
+                .Subscribe(width => {
+                    var clamped = WorkspaceDockPanelMetrics.ClampWidth(width);
+                    if (Math.Abs(clamped - width) > 0.5) {
+                        ThemeEditorPanelWidth = clamped;
+                        return;
+                    }
+                    Preferences.Default.ThemeEditorPanelWidth = clamped;
+                    Preferences.Save();
+                    this.RaisePropertyChanged(nameof(ThemeEditorPanelColumnWidth));
+                });
             ApplyDiffSingerQualityPresetCommand = ReactiveCommand.Create(() => ApplyDiffSingerRenderPreset(0));
             ApplyDiffSingerMediumPresetCommand = ReactiveCommand.Create(() => ApplyDiffSingerRenderPreset(1));
             ApplyDiffSingerLowPresetCommand = ReactiveCommand.Create(() => ApplyDiffSingerRenderPreset(2));
@@ -194,10 +235,23 @@ namespace OpenUtau.App.ViewModels {
                 .Subscribe(show => {
                     Preferences.Default.ShowAppearancePanel = show;
                     Preferences.Save();
+                    if (!show) {
+                        CloseThemeEditor();
+                    }
+                    RaiseThemeEditorLayoutProperties();
+                    this.RaisePropertyChanged(nameof(IsAppearanceOnlyGapResizeVisible));
                     this.RaisePropertyChanged(nameof(IsAppearancePanelVisible));
                     this.RaisePropertyChanged(nameof(AppearancePanelLeadingGapWidth));
                     this.RaisePropertyChanged(nameof(AppearancePanelColumnWidth));
                 });
+            this.WhenAnyValue(vm => vm.ShowThemeEditorPanel)
+                .Subscribe(_ => RaiseThemeEditorLayoutProperties());
+            MessageBus.Current.Listen<OpenDockedThemeEditorEvent>()
+                .ObserveOn(RxApp.MainThreadScheduler)
+                .Subscribe(e => OpenThemeEditor(e.Path));
+            MessageBus.Current.Listen<CloseDockedThemeEditorEvent>()
+                .ObserveOn(RxApp.MainThreadScheduler)
+                .Subscribe(_ => CloseThemeEditor());
 
             this.WhenAnyValue(vm => vm.ToolIndex)
                 .Subscribe(index => EditTool.BaseTool = index);
@@ -439,6 +493,32 @@ namespace OpenUtau.App.ViewModels {
                 ThemeManager.GetString("progress.diffsinger.preset"),
                 label, acoustic, variance, pitch);
             DocManager.Inst.ExecuteCmd(new ProgressBarNotification(0, message, autoClearSeconds: 4));
+        }
+
+        public void OpenThemeEditor(string path) {
+            ThemeEditorWindow.CloseIfOpen();
+            ThemeEditorPath = path;
+            ShowThemeEditorPanel = true;
+            ThemeEditorDockState.SetOpen(true);
+            RaiseThemeEditorLayoutProperties();
+        }
+
+        public void CloseThemeEditor() {
+            if (!ShowThemeEditorPanel && ThemeEditorPath == null) {
+                return;
+            }
+            ShowThemeEditorPanel = false;
+            ThemeEditorPath = null;
+            ThemeEditorDockState.SetOpen(false);
+            RaiseThemeEditorLayoutProperties();
+            App.SetTheme();
+        }
+
+        void RaiseThemeEditorLayoutProperties() {
+            this.RaisePropertyChanged(nameof(IsThemeEditorPanelVisible));
+            this.RaisePropertyChanged(nameof(IsAppearanceOnlyGapResizeVisible));
+            this.RaisePropertyChanged(nameof(ThemeEditorPanelLeadingGapWidth));
+            this.RaisePropertyChanged(nameof(ThemeEditorPanelColumnWidth));
         }
 
         #region ICmdSubscriber

@@ -62,7 +62,7 @@ namespace OpenUtau.App.Controls {
             private set => SetAndRaise(ShowPhonemeProperty, ref showPhoneme, value);
         }
 
-        private IBrush background = Brushes.White;
+        private IBrush background = Brushes.Transparent;
         private double tickWidth;
         private double tickOffset;
         private UVoicePart? part;
@@ -111,8 +111,9 @@ namespace OpenUtau.App.Controls {
                 return;
             }
             bool diffSingerMode = Preferences.Default.DiffSingerPhonemePanelMode;
-            var bgBrush = Background;
-            context.DrawRectangle(bgBrush, null, Bounds.WithX(0).WithY(0));
+            if (Background is SolidColorBrush { Color.A: > 0 } solidBg) {
+                context.DrawRectangle(solidBg, null, Bounds.WithX(0).WithY(0));
+            }
             double leftTick = TickOffset - 480;
             double rightTick = TickOffset + Bounds.Width / TickWidth + 480;
             bool raiseText = false;
