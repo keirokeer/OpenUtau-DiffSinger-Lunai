@@ -203,6 +203,8 @@ namespace OpenUtau.Core.Util {
             public int DiffSingerStepsPitch = 10;
             public bool DiffSingerTensorCache = true;
             public bool DiffSingerVarianceLocalPitchPatch = true;
+            public bool DiffSingerUnvoicedConsonantAcousticF0Interpolate = true;
+            public bool DiffSingerShowAcousticF0PatchPreview = false;
             public bool DiffSingerLangCodeHide = false;
             public bool DiffSingerPhonemePanelMode = true;
             public bool DiffSingerLocalRetaking = true;

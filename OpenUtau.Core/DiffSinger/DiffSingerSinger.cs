@@ -45,6 +45,7 @@ namespace OpenUtau.Core.DiffSinger {
         public List<string> phonemes = new List<string>();
         Dictionary<string, int> phonemeTokens;
         public Dictionary<string, int> languageIds = new Dictionary<string, int>();
+        internal HashSet<string> unvoicedPhonemes = new HashSet<string>(StringComparer.Ordinal);
         public DsConfig dsConfig;
         public ulong acousticHash;
         public InferenceSession acousticSession = null;
@@ -131,6 +132,8 @@ namespace OpenUtau.Core.DiffSinger {
                         }
                     }
                 }
+
+                LoadUnvoicedPhonemes();
             }
 
             var dummyOtoSet = new UOtoSet(new OtoSet(), Location);
@@ -170,6 +173,35 @@ namespace OpenUtau.Core.DiffSinger {
             return string.IsNullOrEmpty(Portrait)
                 ? null
                 : File.ReadAllBytes(Portrait);
+        }
+
+        void LoadUnvoicedPhonemes() {
+            unvoicedPhonemes.Clear();
+            if (string.IsNullOrWhiteSpace(dsConfig.unvoiced_phonemes)) {
+                return;
+            }
+            string path = Path.Combine(Location, dsConfig.unvoiced_phonemes);
+            if (!File.Exists(path)) {
+                Log.Information("Unvoiced phoneme list not found at {Path}", path);
+                return;
+            }
+            try {
+                var config = Core.Yaml.DefaultDeserializer.Deserialize<DsUnvoicedConfig>(
+                    File.ReadAllText(path, Encoding.UTF8));
+                if (config?.phonemes == null) {
+                    return;
+                }
+                foreach (var phoneme in config.phonemes) {
+                    if (string.IsNullOrWhiteSpace(phoneme)) {
+                        continue;
+                    }
+                    unvoicedPhonemes.Add(phoneme.Trim());
+                }
+                Log.Information("Loaded {Count} unvoiced phonemes from {Path}", unvoicedPhonemes.Count, path);
+            } catch (Exception e) {
+                Log.Error(e, "Failed to load unvoiced phoneme list from {Path}", path);
+                errors.Add($"Failed to load unvoiced phoneme list: {e.Message}");
+            }
         }
 
         public InferenceSession getAcousticSession() {

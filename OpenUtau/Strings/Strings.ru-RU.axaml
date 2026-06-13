@@ -726,6 +726,8 @@ OpenUtau стремится стать средой редактирования
   <system:String x:Key="prefs.rendering.diffsingersteps">Количество шагов рендера DiffSinger для Acoustic</system:String>
   <system:String x:Key="prefs.rendering.diffsingerstepspitch">Количество шагов рендера DiffSinger для питча</system:String>
   <system:String x:Key="prefs.rendering.diffsingerstepsvariance">Количество шагов рендера DiffSinger для Variance</system:String>
+  <system:String x:Key="prefs.rendering.diffsingerunvoicedconsonantacousticf0interpolate">Интерполяция F0 acoustic на глухих согласных DiffSinger (тест)</system:String>
+  <system:String x:Key="prefs.rendering.diffsingershowacousticf0patchpreview">Показывать превью F0 патча на piano roll</system:String>
   <system:String x:Key="prefs.rendering.onnxgpu">Графический процессор (GPU)</system:String>
   <system:String x:Key="prefs.rendering.onnxrunner">Устройство для рендеринга</system:String>
   <system:String x:Key="prefs.rendering.phasecomp">Фазовая компенсация</system:String>

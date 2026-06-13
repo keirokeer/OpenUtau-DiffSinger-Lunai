@@ -9,6 +9,7 @@ using Avalonia.Media;
 using Avalonia.Media.Immutable;
 using OpenUtau.App.ViewModels;
 using OpenUtau.Core;
+using OpenUtau.Core.DiffSinger;
 using OpenUtau.Core.Render;
 using OpenUtau.Core.Ustx;
 using OpenUtau.Api;
@@ -328,6 +329,7 @@ namespace OpenUtau.App.Controls {
                     if (ShowFinalPitch) {
                         RenderFinalPitch(leftTick, rightTick, viewModel, context, PitchFocusFinalPitchThickness);
                     }
+                    RenderAcousticF0PatchPreview(leftTick, rightTick, viewModel, context);
                 }
             } else {
                 RenderGhostNotes();
@@ -336,6 +338,7 @@ namespace OpenUtau.App.Controls {
                 if (ShowFinalPitch && !hidePitch) {
                     RenderFinalPitch(leftTick, rightTick, viewModel, context);
                 }
+                RenderAcousticF0PatchPreview(leftTick, rightTick, viewModel, context);
                 foreach (var note in Part.notes) {
                     if (note.LeftBound >= rightTick || note.RightBound <= leftTick) {
                         continue;
@@ -532,6 +535,52 @@ namespace OpenUtau.App.Controls {
                     double x = viewModel.TickToneToPoint(phoneme.position, 0).X;
                     context.DrawLine(guidePen, new Point(x, panelTop), new Point(x, 0));
                 }
+            }
+        }
+
+        private static readonly IDashStyle AcousticF0PatchPreviewDashStyle = new ImmutableDashStyle(new double[] { 6, 3 }, 0);
+        private static readonly IBrush AcousticF0PatchPreviewBrush = new ImmutableSolidColorBrush(Color.FromRgb(0xFF, 0xA5, 0x3A));
+
+        private void RenderAcousticF0PatchPreview(
+            double leftTick, double rightTick, NotesViewModel viewModel, DrawingContext context) {
+            if (!Preferences.Default.DiffSingerUnvoicedConsonantAcousticF0Interpolate
+                || !Preferences.Default.DiffSingerShowAcousticF0PatchPreview) {
+                return;
+            }
+            if (!TryGetDiffSingerRenderer(viewModel, out _)) {
+                return;
+            }
+            var pen = new Pen(AcousticF0PatchPreviewBrush, 2) { DashStyle = AcousticF0PatchPreviewDashStyle };
+            RenderPhrase[] phrases;
+            lock (Part!) {
+                phrases = Part!.renderPhrases.ToArray();
+            }
+            int headFrames = DiffSingerUtils.headFrames;
+            foreach (var phrase in phrases) {
+                if (phrase.position - Part!.position > rightTick || phrase.end - Part.position < leftTick) {
+                    continue;
+                }
+                if (!DiffSingerRenderer.TryBuildAcousticF0PatchPreview(phrase, out float frameMs, out float[] acousticF0Hz)) {
+                    continue;
+                }
+                points.Clear();
+                double startMs = phrase.positionMs - headFrames * frameMs;
+                for (int i = 0; i < acousticF0Hz.Length; ++i) {
+                    double posMs = startMs + i * frameMs;
+                    int tick = phrase.timeAxis.MsPosToTickPos(posMs) - Part.position;
+                    if (tick < leftTick - 480 || tick > rightTick + 480) {
+                        continue;
+                    }
+                    if (acousticF0Hz[i] <= 0f) {
+                        continue;
+                    }
+                    float pitch = (float)MusicMath.FreqToTone(acousticF0Hz[i]) * 100f;
+                    points.Add(viewModel.TickToneToPoint(tick, pitch / 100f - 0.5));
+                }
+                if (points.Count < 2) {
+                    continue;
+                }
+                context.DrawGeometry(null, pen, new PolylineGeometry(points.ToArray(), false));
             }
         }
 

@@ -163,6 +163,8 @@ namespace OpenUtau.App.ViewModels {
         [Reactive] public double DiffSingerDepth { get; set; }
         [Reactive] public bool DiffSingerTensorCache { get; set; }
         [Reactive] public bool DiffSingerVarianceLocalPitchPatch { get; set; }
+        [Reactive] public bool DiffSingerUnvoicedConsonantAcousticF0Interpolate { get; set; }
+        [Reactive] public bool DiffSingerShowAcousticF0PatchPreview { get; set; }
         [Reactive] public bool DiffSingerLangCodeHide { get; set; }
         [Reactive] public bool DiffSingerPhonemePanelMode { get; set; }
         [Reactive] public bool DiffSingerLocalRetaking { get; set; }
@@ -534,6 +536,8 @@ namespace OpenUtau.App.ViewModels {
             DiffSingerStepsPitch = Preferences.Default.DiffSingerStepsPitch;
             DiffSingerTensorCache = Preferences.Default.DiffSingerTensorCache;
             DiffSingerVarianceLocalPitchPatch = Preferences.Default.DiffSingerVarianceLocalPitchPatch;
+            DiffSingerUnvoicedConsonantAcousticF0Interpolate = Preferences.Default.DiffSingerUnvoicedConsonantAcousticF0Interpolate;
+            DiffSingerShowAcousticF0PatchPreview = Preferences.Default.DiffSingerShowAcousticF0PatchPreview;
             DiffSingerLangCodeHide = Preferences.Default.DiffSingerLangCodeHide;
             DiffSingerPhonemePanelMode = Preferences.Default.DiffSingerPhonemePanelMode;
             DiffSingerLocalRetaking = Preferences.Default.DiffSingerLocalRetaking;
@@ -839,6 +843,16 @@ namespace OpenUtau.App.ViewModels {
             this.WhenAnyValue(vm => vm.DiffSingerVarianceLocalPitchPatch)
                 .Subscribe(useLocalPatch => {
                     Preferences.Default.DiffSingerVarianceLocalPitchPatch = useLocalPatch;
+                    Preferences.Save();
+                });
+            this.WhenAnyValue(vm => vm.DiffSingerUnvoicedConsonantAcousticF0Interpolate)
+                .Subscribe(enabled => {
+                    Preferences.Default.DiffSingerUnvoicedConsonantAcousticF0Interpolate = enabled;
+                    Preferences.Save();
+                });
+            this.WhenAnyValue(vm => vm.DiffSingerShowAcousticF0PatchPreview)
+                .Subscribe(show => {
+                    Preferences.Default.DiffSingerShowAcousticF0PatchPreview = show;
                     Preferences.Save();
                 });
             this.WhenAnyValue(vm => vm.DiffSingerLangCodeHide)

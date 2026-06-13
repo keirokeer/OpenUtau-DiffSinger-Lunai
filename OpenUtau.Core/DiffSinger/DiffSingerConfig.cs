@@ -67,6 +67,8 @@ namespace OpenUtau.Core.DiffSinger {
         public double mel_fmax = 16000;
         public string mel_base = "10";  // or "e"
         public string mel_scale = "slaney";  // or "htk"
+        /// <summary>Relative path to unvoiced phoneme list for acoustic F0 patch (default: dsunvoiced.yaml).</summary>
+        public string unvoiced_phonemes = "dsunvoiced.yaml";
 
         public float frameMs() {
             return 1000f * hop_size / sample_rate;

@@ -231,7 +231,9 @@ namespace OpenUtau.Core.DiffSinger {
             float[] f0 = DiffSingerUtils.SampleCurve(phrase, phrase.pitches, 0, frameMs, totalFrames, headFrames, tailFrames, 
                 x => MusicMath.ToneToFreq(x * 0.01))
                 .Select(f => (float)f).ToArray();
-            float[] shiftedF0 = f0.Zip(DiffSingerUtils.SampleCurve(phrase, phrase.toneShift, 0, frameMs, totalFrames,
+            float[] acousticF0 = f0.ToArray();
+            DiffSingerUnvoicedConsonantPatch.ApplyAcousticF0(phrase, durations, (float)frameMs, acousticF0);
+            float[] shiftedF0 = acousticF0.Zip(DiffSingerUtils.SampleCurve(phrase, phrase.toneShift, 0, frameMs, totalFrames,
                 headFrames, tailFrames, x => x),
                 (x, d) => x * (float) Math.Pow(2, d / 1200)).ToArray();
 
@@ -242,8 +244,8 @@ namespace OpenUtau.Core.DiffSinger {
             acousticInputs.Add(NamedOnnxValue.CreateFromTensor("durations",
                 new DenseTensor<long>(durations.Select(x=>(long)x).ToArray(), new int[] { durations.Count }, false)
                 .Reshape(new int[] { 1, durations.Count })));
-            var f0Tensor = new DenseTensor<float>(f0, new int[] { f0.Length })
-                .Reshape(new int[] { 1, f0.Length });
+            var f0Tensor = new DenseTensor<float>(acousticF0, new int[] { acousticF0.Length })
+                .Reshape(new int[] { 1, acousticF0.Length });
             if (vocoder.pitch_controllable) {
                 var shiftedF0Tensor = new DenseTensor<float>(shiftedF0, new int[] { shiftedF0.Length })
                     .Reshape(new int[] { 1, shiftedF0.Length });
@@ -474,7 +476,9 @@ namespace OpenUtau.Core.DiffSinger {
             //waveform = session.run(['waveform'], {'mel': mel, 'f0': f0})[0]
             var vocoderInputs = new List<NamedOnnxValue>();
             vocoderInputs.Add(NamedOnnxValue.CreateFromTensor("mel", mel));
-            vocoderInputs.Add(NamedOnnxValue.CreateFromTensor("f0",f0Tensor));
+            vocoderInputs.Add(NamedOnnxValue.CreateFromTensor("f0",
+                new DenseTensor<float>(f0, new int[] { f0.Length })
+                .Reshape(new int[] { 1, f0.Length })));
             var vocoderCache = Preferences.Default.DiffSingerTensorCache
                 ? new DiffSingerCache(vocoder.hash, vocoderInputs)
                 : null;
@@ -587,6 +591,10 @@ namespace OpenUtau.Core.DiffSinger {
                 abbr == Format.Ustx.BREC ||
                 abbr == Format.Ustx.VOIC ||
                 abbr == Format.Ustx.TENC;
+        }
+
+        public static bool TryBuildAcousticF0PatchPreview(RenderPhrase phrase, out float frameMs, out float[] acousticF0Hz) {
+            return DiffSingerUnvoicedConsonantPatch.TryBuildAcousticF0Preview(phrase, out frameMs, out acousticF0Hz);
         }
 
         private List<RenderRealCurveResult> BuildRenderedRealCurves(RenderPhrase phrase, VarianceResult result) {
